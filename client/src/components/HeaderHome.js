@@ -46,7 +46,9 @@ const HeaderHome = ({ user }) => {
                         <li><Link to="/team">Hướng dẫn viên</Link></li>
                       </ul>
                     </li>
+                    
                     <li className={isActive('/destination')}> <Link to="/destination">Điểm đến</Link></li>
+                     <li className={isActive('/service')}> <Link to="/service">Dịch Vụ</Link></li>
                     <li className={isActive('/contact')}> <Link to="/contact">Liên hệ</Link></li>
                   </ul>
                 </div>

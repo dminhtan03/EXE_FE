@@ -134,8 +134,8 @@ export default function FooterHome() {
               <div className="footer-widget footer-contact">
                 <div className="footer-title"><h5>Liên hệ</h5></div>
                 <ul className="list-style-one">
-                  <li><i className="fal fa-map-marked-alt"></i> 470 Tran Dai Nghia, Ngu Hanh Son, Da Nang</li>
-                  <li><i className="fal fa-envelope"></i> <a href="mailto:minhdien.dev@gmail.com">minhdien.dev@gmail.com</a></li>
+                  <li><i className="fal fa-map-marked-alt"></i> FPT, Thach That, Hoa Lac, Ha Noi</li>
+                  <li><i className="fal fa-envelope"></i> <a href="mailto:sonmthe170091@fpt.edu.vn">sonmthe170091@fpt.edu.vn</a></li>
                   <li><i className="fal fa-clock"></i> Thứ 2 - Thứ 6, 08am - 05pm</li>
                   <li><i className="fal fa-phone-volume"></i> <a href="tel:+88012334588">+880 (123) 345 88</a></li>
                 </ul>
@@ -149,7 +149,7 @@ export default function FooterHome() {
         <div className="container">
           <div className="row">
             <div className="col-lg-5 text-center text-lg-start">
-              <p>@Copy 2024 <Link to="/">Campverse</Link>, All rights reserved</p>
+              <p>@Copy 2025 <Link to="/">Campverse</Link>, All rights reserved</p>
             </div>
             <div className="col-lg-7 text-center text-lg-end">
               <ul className="footer-bottom-nav">
