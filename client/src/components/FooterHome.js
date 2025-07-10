@@ -76,7 +76,7 @@ export default function FooterHome() {
                   liền mạch và làm phong phú thêm những viên ngọc ẩn giấu
                 </p>
                 <div className="social-style-one mt-15">
-                  <a href="https://www.facebook.com/dienne.dev"><i className="fab fa-facebook-f"></i></a>
+                  <a href=""><i className="fab fa-facebook-f"></i></a>
                   <a href="/contact"><i className="fab fa-youtube"></i></a>
                   <a href="/contact"><i className="fab fa-pinterest"></i></a>
                   <a href="/contact"><i className="fab fa-twitter"></i></a>

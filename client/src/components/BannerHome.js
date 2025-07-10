@@ -1,6 +1,9 @@
-import React, { useEffect } from 'react';
+// src/components/BannerHome.js
+import React, { useEffect, useRef } from 'react';
 
-export default function BannerHome() {
+export default function BannerHome({ onSearch }) {
+  const formRef = useRef();
+
   useEffect(() => {
     const loadScript = (src) =>
       new Promise((resolve, reject) => {
@@ -12,13 +15,11 @@ export default function BannerHome() {
         document.body.appendChild(script);
       });
 
-    // Load scripts tuần tự
     const loadScripts = async () => {
       try {
         await loadScript('/assets/js/jquery.datetimepicker.full.min.js');
         await loadScript('/assets/js/aos.js');
 
-        // Khởi tạo datetimepicker
         if (window.$) {
           window.$('.datetimepicker').datetimepicker({
             format: 'd/m/Y',
@@ -26,7 +27,6 @@ export default function BannerHome() {
           });
         }
 
-        // Khởi tạo AOS
         if (window.AOS) {
           window.AOS.init();
         }
@@ -38,37 +38,34 @@ export default function BannerHome() {
     loadScripts();
   }, []);
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(formRef.current);
+    const searchData = {
+      destination: formData.get('destination') || '',
+      start_date: formData.get('start_date') || '',
+      end_date: formData.get('end_date') || '',
+    };
+
+    onSearch(searchData);
+  };
+
   return (
     <section className="hero-area bgc-black pt-200 rpt-120 rel z-2">
       <div className="container-fluid">
-        <h1
-          className="hero-title"
-          data-aos="flip-up"
-          data-aos-delay="50"
-          data-aos-duration="1500"
-          data-aos-offset="50"
-        >
+        <h1 className="hero-title" data-aos="flip-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
           Tours Du Lịch
         </h1>
-        <div
-          className="main-hero-image bgs-cover"
-          style={{ backgroundImage: `url(/assets/images/hero/hero.jpg)` }}
-        ></div>
+        <div className="main-hero-image bgs-cover" style={{ backgroundImage: `url(/assets/images/hero/hero.jpg)` }}></div>
       </div>
 
-      <form action="/search" method="GET" id="search_form">
+      <form ref={formRef} onSubmit={handleSubmit} id="search_form">
         <div className="container container-1400">
-          <div
-            className="search-filter-inner"
-            data-aos="zoom-out-down"
-            data-aos-duration="1500"
-            data-aos-offset="50"
-          >
+          <div className="search-filter-inner" data-aos="zoom-out-down" data-aos-duration="1500" data-aos-offset="50">
             {/* Điểm đến */}
             <div className="filter-item clearfix">
-              <div className="icon">
-                <i className="fal fa-map-marker-alt"></i>
-              </div>
+              <div className="icon"><i className="fal fa-map-marker-alt"></i></div>
               <span className="title">Điểm đến</span>
               <select name="destination" id="destination">
                 <option value="">Chọn điểm đến</option>
@@ -87,39 +84,23 @@ export default function BannerHome() {
                 <option value="qn">Quảng Ninh</option>
                 <option value="la">Lào Cai (Sa Pa)</option>
                 <option value="bd">Bình Định (Quy Nhơn)</option>
+                <option value="hg">Hà Giang</option>
+                <option value="ha">Hội An</option>
               </select>
             </div>
 
             {/* Ngày đi */}
             <div className="filter-item clearfix">
-              <div className="icon">
-                <i className="fal fa-calendar-alt"></i>
-              </div>
+              <div className="icon"><i className="fal fa-calendar-alt"></i></div>
               <span className="title">Ngày khởi hành</span>
-              <input
-                type="text"
-                id="start_date"
-                name="start_date"
-                className="datetimepicker datetimepicker-custom"
-                placeholder="Chọn ngày đi"
-                readOnly
-              />
+              <input type="text" name="start_date" className="datetimepicker datetimepicker-custom" placeholder="Chọn ngày đi" readOnly />
             </div>
 
             {/* Ngày về */}
             <div className="filter-item clearfix">
-              <div className="icon">
-                <i className="fal fa-calendar-alt"></i>
-              </div>
+              <div className="icon"><i className="fal fa-calendar-alt"></i></div>
               <span className="title">Ngày kết thúc</span>
-              <input
-                type="text"
-                id="end_date"
-                name="end_date"
-                className="datetimepicker datetimepicker-custom"
-                placeholder="Chọn ngày về"
-                readOnly
-              />
+              <input type="text" name="end_date" className="datetimepicker datetimepicker-custom" placeholder="Chọn ngày về" readOnly />
             </div>
 
             {/* Nút tìm kiếm */}

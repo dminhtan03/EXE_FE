@@ -39,15 +39,15 @@ const HeaderHome = ({ user }) => {
                   <ul className="navigation clearfix">
                     <li className={isActive('/')}> <Link to="/">Trang chủ</Link></li>
                     <li className={isActive('/about')}> <Link to="/about">Giới thiệu</Link></li>
-                    <li className={`dropdown ${['/tours', '/team'].includes(currentPath) ? 'active' : ''}`}>
+                    {/* <li className={`dropdown ${['/tours', '/team'].includes(currentPath) ? 'active' : ''}`}>
                        <a href="#">Tours</a>
                       <ul>
                         <li><Link to="/tours">Tours</Link></li>
                         <li><Link to="/team">Hướng dẫn viên</Link></li>
                       </ul>
-                    </li>
+                    </li> */}
                     
-                    <li className={isActive('/destination')}> <Link to="/destination">Điểm đến</Link></li>
+                    <li className={isActive('/destination')}> <Link to="/tours">Điểm đến</Link></li>
                      <li className={isActive('/service')}> <Link to="/service">Dịch Vụ</Link></li>
                     <li className={isActive('/contact')}> <Link to="/contact">Liên hệ</Link></li>
                   </ul>

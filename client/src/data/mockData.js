@@ -1,8 +1,9 @@
+// src/data/mockData.js
 export const tours = [
   {
     tourId: 1,
     title: 'Tour Hà Giang 3N2Đ',
-    destination: 'Hà Giang',
+    destination: 'hg',
     rating: 5,
     images: ['/assets/images/gallery-tours/bien-dao-3n2d-con-dao-5.jpg'],
     time: '3 ngày 2 đêm',
@@ -12,7 +13,7 @@ export const tours = [
   {
     tourId: 2,
     title: 'Tour Đà Nẵng 4N3Đ',
-    destination: 'Đà Nẵng',
+    destination: 'dn',
     rating: 4,
     images: ['/assets/images/gallery-tours/bien-dao-3n2d-con-dao-4.jpg'],
     time: '4 ngày 3 đêm',
@@ -21,16 +22,16 @@ export const tours = [
   },
   {
     tourId: 3,
-    title: 'Tour Hoi An 5N4Đ',
-    destination: 'Hoi An',
+    title: 'Tour Hội An 5N4Đ',
+    destination: 'ha',
     rating: 3,
     images: ['/assets/images/gallery-tours/mien-trung-4n3d-da-nang-hoi-an-ba-na-hue-2.png'],
     time: '5 ngày 4 đêm',
     quantity: 25,
     priceAdult: 4190000,
   },
-  // Thêm bao nhiêu tùy bạn
 ];
+
 
 export const services = [
   {
