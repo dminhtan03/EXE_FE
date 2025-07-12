@@ -64,7 +64,7 @@ body {
   font-family: var(--base-font);
   --base-font: 'Outfit', sans-serif;
   --heading-font: 'Outfit', sans-serif;
-  --primary-color: #63AB45;
+  --primary-color: #F7921E;
   --secondary-color: #F7921E;
   --heading-color: #1C231F;
   --base-color: #484848;
@@ -3256,7 +3256,8 @@ h6, .h6, blockquote {
     position: relative;
     -webkit-transition: all 500ms ease;
     -o-transition: all 500ms ease;
-    transition: all 500ms ease; }
+    transition: all 500ms ease; 
+  }
   .main-header .logo-outer {
     -webkit-box-flex: 0;
     -ms-flex: none;

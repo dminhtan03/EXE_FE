@@ -14,9 +14,14 @@ const HeaderHome = ({ user }) => {
           <div className="header-inner rel d-flex align-items-center">
             <div className="logo-outer">
               <div className="logo">
-                <Link to="/">
-                  <img src="/assets/images/logos/logo.png" alt="Logo" title="Logo" />
-                </Link>
+              <Link to="/">
+                <img
+                  src="/assets/images/logos/logo3 copy 2.png"
+                  alt="Logo"
+                  title="Logo"
+                  style={{ width: '150px', height: '70px' }}
+                />
+              </Link>
               </div>
             </div>
 
@@ -25,7 +30,7 @@ const HeaderHome = ({ user }) => {
                 <div className="navbar-header">
                   <div className="mobile-logo">
                     <Link to="/">
-                      <img src="/clients/assets/images/logos/logo.png" alt="Logo" title="Logo" />
+                      <img src="/clients/assets/images/logos/logo3 copy 2.png" alt="Logo" title="Logo" />
                     </Link>
                   </div>
                   <button type="button" className="navbar-toggle" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
@@ -39,6 +44,7 @@ const HeaderHome = ({ user }) => {
                   <ul className="navigation clearfix">
                     <li className={isActive('/')}> <Link to="/">Trang chủ</Link></li>
                     <li className={isActive('/about')}> <Link to="/about">Giới thiệu</Link></li>
+                    
                     {/* <li className={`dropdown ${['/tours', '/team'].includes(currentPath) ? 'active' : ''}`}>
                        <a href="#">Tours</a>
                       <ul>
@@ -46,7 +52,7 @@ const HeaderHome = ({ user }) => {
                         <li><Link to="/team">Hướng dẫn viên</Link></li>
                       </ul>
                     </li> */}
-                    
+                    <li className={isActive('/experience')}> <Link to="/experience">Kinh Nghiệm</Link></li>
                     <li className={isActive('/destination')}> <Link to="/tours">Điểm đến</Link></li>
                      <li className={isActive('/service')}> <Link to="/service">Dịch Vụ</Link></li>
                     <li className={isActive('/contact')}> <Link to="/contact">Liên hệ</Link></li>

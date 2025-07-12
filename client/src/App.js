@@ -6,6 +6,8 @@ import Contact from './screens/contact';
 import Service from './screens/service';
 import FooterHome from './components/FooterHome';
 import HeaderHome from './components/HeaderHome';
+import AboutPage from './screens/about';
+import Experience from './screens/experience'
 export default function App() {
   return (
      
@@ -17,6 +19,8 @@ export default function App() {
         <Route path="/tours" element={<Tours />} />
         <Route path="/contact" element={<Contact />} />
          <Route path="/service" element={<Service />} />
+          <Route path="/about" element={<AboutPage />} />
+           <Route path="/experience" element={<Experience />} />
       </Routes>
         <FooterHome />
     </BrowserRouter>
