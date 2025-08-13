@@ -1,0 +1,45 @@
+/* Xóa gạch chân mặc định cho tất cả Link trong header */
+.navigation a {
+  text-decoration: none !important;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+/* Chỉ hiện gạch chân khi hover */
+.navigation a:hover {
+  text-decoration: underline;
+}
+/* Bỏ gạch chân cho toàn bộ thẻ <a> hoặc <Link> */
+a,
+a:link,
+a:visited {
+  text-decoration: none !important;
+}
+
+/* Bỏ gạch chân khi hover nhưng vẫn có hiệu ứng màu nếu cần */
+a:hover {
+  text-decoration: none !important;
+  color: #f1f6f5; /* hoặc màu khác bạn muốn khi hover */
+}
+
+/* Nếu chỉ muốn áp dụng trong footer */
+.footer-widget a,
+.footer-bottom a {
+  text-decoration: none !important;
+  color: inherit; /* hoặc màu bạn muốn */
+}
+
+.footer-widget a:hover,
+.footer-bottom a:hover {
+  text-decoration: none !important;
+  color: #f0f8f6;
+}
+
+.search-button {
+    display: flex; /* Sử dụng Flexbox */
+    justify-content: center; /* Căn giữa các phần tử theo chiều ngang */
+    align-items: center; /* Căn giữa các phần tử theo chiều dọc */
+    margin-bottom: 15px; /* Khoảng cách phía dưới */
+    margin-left: auto; /* Tự động căn trái */
+    margin-right: auto; /* Tự động căn phải */
+}
