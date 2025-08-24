@@ -35,3 +35,38 @@ export const register = async (
     }
   }
 };
+
+export const activeAccount = async (otp) => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/activate-account`, {
+      params: { validOtp: otp }, // gửi OTP qua query param
+    });
+
+    console.log("Active account success:", res.data);
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Active account failed:", error.response.data);
+      throw error.response.data;
+    } else {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  }
+};
+
+export const resendOTP = async (email) => {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/resend-otp`, { email });
+    console.log("Resend OTP success:", res.data);
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Resend OTP failed:", error.response.data);
+      throw error.response.data;
+    } else {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  }
+};

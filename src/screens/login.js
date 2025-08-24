@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import HeaderLogin from "../components/HeaderLogin";
 import FooterLogin from "../components/FooterHome";
 import { login } from "../api/authService";
@@ -33,7 +32,6 @@ const AuthPage = () => {
     try {
       const res = await login(email, password);
       console.log("Login success:", res);
-
       // Điều hướng sau khi login thành công
       navigate("/");
     } catch (err) {
@@ -63,8 +61,8 @@ const AuthPage = () => {
 
       if (res) {
         console.log("Register success:", res);
-
-        navigate("/login"); // hoặc setIsLogin(true) nếu muốn ở lại form login
+        localStorage.setItem("registeredEmail", email); // lưu email đã đăng ký
+        navigate("/verify-otp"); // hoặc setIsLogin(true) nếu muốn ở lại form login
       } else {
         setError("Đăng ký thất bại. Vui lòng thử lại.");
       }
@@ -324,8 +322,8 @@ const AuthPage = () => {
 
                       {/* Gender */}
                       <div className="form-group mb-3">
-                        <label className="form-label me-3">
-                          <i className="zmdi zmdi-male-female me-2"></i>Gender:
+                        <label htmlFor="gender" className="form-label">
+                          <i className="zmdi zmdi-male-female me-2"></i>
                         </label>
                         <select
                           name="gender"
@@ -338,7 +336,6 @@ const AuthPage = () => {
                           <option value="">-- Select Gender --</option>
                           <option value="MALE">Male</option>
                           <option value="FEMALE">Female</option>
-                          <option value="OTHER">Other</option>
                         </select>
                         <div
                           className="invalid-feedback"
