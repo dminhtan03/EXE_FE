@@ -19,3 +19,7 @@ export const login = async (email, password) => {
     throw error.response?.data || { message: "Login failed" };
   }
 };
+
+export const logout = () => {
+  localStorage.removeItem("token");
+};
