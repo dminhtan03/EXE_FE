@@ -23,3 +23,23 @@ export const login = async (email, password) => {
 export const logout = () => {
   localStorage.removeItem("token");
 };
+
+export const getProfile = async (token) => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/profile`, {
+      headers: {
+        Authorization: `Bearer ${token}`, // gửi token trong header
+      },
+    });
+    console.log("Profile data:", res.data);
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Get profile failed:", error.response.data);
+      throw error.response.data;
+    } else {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  }
+};

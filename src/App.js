@@ -13,7 +13,7 @@ import Contact from "./screens/contact";
 import Service from "./screens/service";
 
 import Login from "./screens/login";
-import UserProfile from "./screens/profileUser";
+import ProfileModalDemo from "./screens/profileUser";
 import TourDetailWrapper from "./screens/tourDetailWrapper";
 import PaymentPage from "./screens/PaymentPage";
 import MyBookingsPage from "./screens/MyBookingPage";
@@ -46,7 +46,7 @@ export default function App() {
           <Route path="/tour-detail/:id" element={<TourDetailWrapper />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-otp" element={<OTPInputPage />} />
-          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile" element={<ProfileModalDemo />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
