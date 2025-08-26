@@ -104,6 +104,12 @@ const AuthPage = () => {
                     >
                       Tạo tài khoản
                     </button>
+                    <button
+                      className="signup-image-link btn btn-link"
+                      onClick={() => navigate("/forgotPassword")}
+                    >
+                      Quên mật khẩu
+                    </button>
                   </div>
 
                   <div className="signin-form col-md-6">

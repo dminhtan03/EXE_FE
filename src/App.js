@@ -18,6 +18,7 @@ import TourDetailWrapper from "./screens/tourDetailWrapper";
 import PaymentPage from "./screens/PaymentPage";
 import MyBookingsPage from "./screens/MyBookingPage";
 import OTPInputPage from "./screens/verifyOTP";
+import ForgotPasswordPage from "./screens/forgotPassword";
 
 const PublicLayout = () => (
   <>
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/tour-detail/:id" element={<TourDetailWrapper />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-otp" element={<OTPInputPage />} />
+          <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
           <Route path="/profile" element={<ProfileModalDemo />} />
         </Routes>
       </BrowserRouter>
