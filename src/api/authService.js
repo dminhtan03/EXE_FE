@@ -32,6 +32,7 @@ export const getProfile = async (token) => {
       },
     });
     console.log("Profile data:", res.data);
+    localStorage.setItem("user", JSON.stringify(res.data.data));
     return res.data;
   } catch (error) {
     if (error.response) {

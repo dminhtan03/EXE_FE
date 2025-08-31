@@ -70,3 +70,44 @@ export const resendOTP = async (email) => {
     }
   }
 };
+
+export const updateProfile = async (
+  firstName,
+  lastName,
+  phoneNumber,
+  address,
+  department,
+  gender
+) => {
+  try {
+    const token = localStorage.getItem("token"); // hoặc Redux store nếu bạn đang lưu JWT
+
+    const res = await axios.put(
+      `${API_BASE_URL}/updateProfile`, // gợi ý endpoint đặt RESTful
+      {
+        firstName,
+        lastName,
+        phoneNumber,
+        address,
+        department,
+        gender,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    console.log("Update profile success:", res.data);
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Update profile failed:", error.response.data);
+      throw error.response.data;
+    } else {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  }
+};

@@ -1,22 +1,48 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import { getProfile } from "../api/authService";
+import { updateProfile } from "../api/userSevices";
 const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(userProfile || {});
+  const [profile, setProfile] = useState({});
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (isOpen) {
+      // 1. Lấy profile từ localStorage (hiển thị nhanh)
+      const localUser = JSON.parse(localStorage.getItem("user"));
+      if (localUser) {
+        setProfile(localUser);
+        setEditedProfile(localUser);
+      }
 
-  // Default user data nếu không truyền prop
-  const defaultProfile = {
-    firstName: "Đinh",
-    lastName: "Tân",
-    phoneNumber: "0866458780",
-    address: "0921856516",
-    department: "IT",
-    email: "minhtand318@gmail.com",
-    gender: "MALE",
-  };
+      // 2. Gọi API để lấy profile mới nhất
+      const fetchProfile = async () => {
+        try {
+          setLoading(true);
+          const token = localStorage.getItem("token"); // ✅ lấy token
+          if (!token) {
+            console.error("Không tìm thấy token, vui lòng login lại");
+            return;
+          }
 
-  const profile = userProfile || defaultProfile;
+          const data = await getProfile(token);
+          setProfile(data.data);
+          setEditedProfile(data.data);
 
+          // đồng bộ lại localStorage
+          localStorage.setItem("user", JSON.stringify(data.data));
+
+          console.log("Profile data:", data.data);
+        } catch (err) {
+          console.error("Lỗi khi load profile:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchProfile();
+    }
+  }, [isOpen]);
   const handleInputChange = (field, value) => {
     setEditedProfile((prev) => ({
       ...prev,
@@ -24,11 +50,31 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
     }));
   };
 
-  const handleSave = () => {
-    // Logic save profile ở đây
-    console.log("Saving profile:", editedProfile);
-    setIsEditing(false);
-    // Có thể call API để update profile
+  const handleSave = async () => {
+    try {
+      // Gọi API update
+      const res = await updateProfile(
+        editedProfile.firstName,
+        editedProfile.lastName,
+        editedProfile.phoneNumber,
+        editedProfile.address,
+        editedProfile.department,
+        editedProfile.gender
+      );
+
+      if (res?.data) {
+        setProfile(res.data);
+        setEditedProfile(res.data);
+
+        // Cập nhật localStorage
+        localStorage.setItem("user", JSON.stringify(res.data));
+      }
+
+      console.log("Profile updated:", res);
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Lỗi khi cập nhật profile:", err);
+    }
   };
 
   const handleCancel = () => {
@@ -37,7 +83,7 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
   };
 
   const getGenderDisplay = (gender) => {
-    return gender === "MALE" ? "Nam" : gender === "FEMALE" ? "Nữ" : "Khác";
+    return gender === "Male" ? "Nam" : gender === "Female" ? "Nữ" : "Khác";
   };
 
   const getAvatarInitials = (firstName, lastName) => {
@@ -158,6 +204,7 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
+                      disabled
                     />
                   ) : (
                     <div
@@ -325,39 +372,4 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
   );
 };
 
-// Demo Component để test modal
-const ProfileModalDemo = () => {
-  const [showModal, setShowModal] = useState(false);
-
-  const sampleUser = {
-    firstName: "Đinh",
-    lastName: "Tân",
-    phoneNumber: "0866458780",
-    address: "0921856516",
-    department: "IT",
-    email: "minhtand318@gmail.com",
-    gender: "MALE",
-  };
-
-  return (
-    <div className="container mt-5">
-      <div className="text-center">
-        <h2 className="mb-4">User Profile Modal Demo</h2>
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={() => setShowModal(true)}
-        >
-          Xem Profile 👤
-        </button>
-      </div>
-
-      <UserProfileModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        userProfile={sampleUser}
-      />
-    </div>
-  );
-};
-
-export default ProfileModalDemo;
+export default UserProfileModal;
