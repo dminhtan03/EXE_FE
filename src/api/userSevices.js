@@ -111,3 +111,19 @@ export const updateProfile = async (
     }
   }
 };
+
+export const forgotPassword = async (email) => {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/forgot-password`, { email });
+    console.log("Forgot password success:", res.data);
+    return res.data;
+  } catch (error) {
+    if (error.response) {
+      console.error("Forgot password failed:", error.response.data);
+      throw error.response.data;
+    } else {
+      console.error("Error:", error.message);
+      throw error;
+    }
+  }
+};

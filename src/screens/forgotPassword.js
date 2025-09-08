@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { resendOTP, activeAccount, forgotPassword } from "../api/userSevices";
 
 const ForgotPasswordPage = () => {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailSent, setIsEmailSent] = useState(false);
@@ -35,16 +37,14 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
 
     try {
-      // Simulate API call - replace with actual API
-      // const response = await forgotPasswordAPI(email);
-
-      // Mock API delay
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       // Mock success response
-      setIsEmailSent(true);
-      setSuccess("Email khôi phục mật khẩu đã được gửi thành công!");
-      navigate("/verify-otp");
+      const res = await forgotPassword(email);
+
+      if (res) {
+        setIsEmailSent(true);
+        setSuccess("Email khôi phục mật khẩu đã được gửi thành công!");
+        navigate("/verify-otp"); // truyền email qua để verify OTP
+      }
     } catch (err) {
       setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
