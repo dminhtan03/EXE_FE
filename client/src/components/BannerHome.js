@@ -55,7 +55,7 @@ export default function BannerHome({ onSearch }) {
     <section className="hero-area bgc-black pt-200 rpt-120 rel z-2">
       <div className="container-fluid">
         <h1 className="hero-title" data-aos="flip-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
-          Tours Du Lịch
+          CAMPVERSE
         </h1>
         <div className="main-hero-image bgs-cover" style={{ backgroundImage: `url(/assets/images/hero/hero.jpg)` }}></div>
       </div>

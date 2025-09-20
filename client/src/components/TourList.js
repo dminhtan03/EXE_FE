@@ -47,7 +47,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
                   )}
                 </div>
               </div>
-              <h6><a href={`/tour-detail/${tour.tourId}`}>{tour.title}</a></h6>
+              <h6><a href={`/tours/${tour.tourId}`}>{tour.title}</a></h6>
               <ul className="blog-meta">
                 <li><i className="far fa-clock"></i> {tour.time}</li>
                 <li><i className="far fa-user"></i> {tour.quantity}</li>

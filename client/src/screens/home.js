@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import BannerHome from '../components/BannerHome';
 
 import { Link } from 'react-router-dom';
+import ChatPopup from '../components/ChatPopup';
 
 export default function HomePage({ tours = [], toursPopular = [] }) {
   useEffect(() => {
     window.AOS?.init();
   }, []);
+
+ const [showChat, setShowChat] = useState(false);
 
   return (
     <>
@@ -195,6 +198,29 @@ export default function HomePage({ tours = [], toursPopular = [] }) {
         </div>
       </section>
 
+        <button
+        onClick={() => setShowChat(true)}
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          backgroundColor: '#00d9ffff',
+          color: 'white',
+          border: 'none',
+          borderRadius: '50%',
+          width: '60px',
+          height: '60px',
+          fontSize: '24px',
+          zIndex: 9998,
+          cursor: 'pointer',
+        }}
+        title="Chat AI"
+      >
+        🤖
+      </button>
+
+      {showChat && <ChatPopup onClose={() => setShowChat(false)} />}
+    
     </>
   );
 }

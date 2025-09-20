@@ -221,8 +221,7 @@ const ContactPage= () => {
                   </div>
                 </div>
                 <div className="circle-logo">
-                  <img src="/assets/images/contact/icon.png" alt="Logo" />
-                  <span className="title h2">Travela</span>
+                  <img src="/assets/images/logos/logo3 copy.png" alt="Logo" />
                 </div>
               </div>
             </div>

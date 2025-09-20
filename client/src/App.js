@@ -8,6 +8,8 @@ import FooterHome from './components/FooterHome';
 import HeaderHome from './components/HeaderHome';
 import AboutPage from './screens/about';
 import Experience from './screens/experience'
+import TourDetailScreen from './screens/TourDetailScreen';
+import CreateCamping from './screens/CreateCamping';
 export default function App() {
   return (
      
@@ -21,6 +23,8 @@ export default function App() {
          <Route path="/service" element={<Service />} />
           <Route path="/about" element={<AboutPage />} />
            <Route path="/experience" element={<Experience />} />
+           <Route path="/tours/:id" element={<TourDetailScreen />} />
+           <Route path="/createCamp" element={<CreateCamping />} />
       </Routes>
         <FooterHome />
     </BrowserRouter>

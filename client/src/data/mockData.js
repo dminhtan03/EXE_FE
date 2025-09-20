@@ -2,35 +2,63 @@
 export const tours = [
   {
     tourId: 1,
-    title: 'Tour Hà Giang 3N2Đ',
+    title: 'Hà Giang 3N2Đ',
     destination: 'hg',
     rating: 5,
     images: ['/assets/images/gallery-tours/bien-dao-3n2d-con-dao-5.jpg'],
     time: '3 ngày 2 đêm',
     quantity: 20,
     priceAdult: 2590000,
+    description: 'Khám phá cao nguyên đá Đồng Văn, cột cờ Lũng Cú, và những cung đường đèo hùng vĩ.',
+    schedule: [
+      'Ngày 1: Hà Nội – Hà Giang – Quản Bạ',
+      'Ngày 2: Quản Bạ – Đồng Văn – Mèo Vạc',
+      'Ngày 3: Mèo Vạc – Hà Nội',
+    ],
+    comments: [
+      { id: 1, user: 'Lan', text: 'Hướng dẫn viên rất nhiệt tình, cảnh đẹp lắm!' },
+      { id: 2, user: 'Minh', text: 'Xe đưa đón thoải mái, lịch trình hợp lý.' },
+    ],
   },
   {
     tourId: 2,
-    title: 'Tour Đà Nẵng 4N3Đ',
+    title: 'Đà Nẵng 4N3Đ',
     destination: 'dn',
     rating: 4,
     images: ['/assets/images/gallery-tours/bien-dao-3n2d-con-dao-4.jpg'],
     time: '4 ngày 3 đêm',
     quantity: 15,
     priceAdult: 3190000,
+    description: 'Tham quan Bà Nà Hills, Ngũ Hành Sơn, phố cổ Hội An lung linh về đêm.',
+    schedule: [
+      'Ngày 1: Hà Nội – Đà Nẵng – Bà Nà Hills',
+      'Ngày 2: Ngũ Hành Sơn – Hội An',
+      'Ngày 3: Biển Mỹ Khê – Sơn Trà',
+      'Ngày 4: Tự do mua sắm – Hà Nội',
+    ],
+    comments: [],
   },
   {
     tourId: 3,
-    title: 'Tour Hội An 5N4Đ',
+    title: 'Hội An 5N4Đ',
     destination: 'ha',
     rating: 3,
     images: ['/assets/images/gallery-tours/mien-trung-4n3d-da-nang-hoi-an-ba-na-hue-2.png'],
     time: '5 ngày 4 đêm',
     quantity: 25,
     priceAdult: 4190000,
+    description: 'Khám phá Hội An cổ kính, Huế mộng mơ, và các bãi biển miền Trung.',
+    schedule: [
+      'Ngày 1: Hà Nội – Huế',
+      'Ngày 2: Huế – Hội An',
+      'Ngày 3: Hội An – Cù Lao Chàm',
+      'Ngày 4: Đà Nẵng – Sơn Trà',
+      'Ngày 5: Đà Nẵng – Hà Nội',
+    ],
+    comments: [],
   },
 ];
+
 
 
 export const services = [
