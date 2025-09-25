@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 
 import BannerHome from "../components/BannerHome";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ChatPopup from "../components/ChatPopup";
+
 
 export default function HomePage({ tours = [], toursPopular = [] }) {
   useEffect(() => {
@@ -11,6 +12,7 @@ export default function HomePage({ tours = [], toursPopular = [] }) {
   }, []);
 
   const [showChat, setShowChat] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
@@ -390,6 +392,26 @@ export default function HomePage({ tours = [], toursPopular = [] }) {
         title="Chat AI"
       >
         💬
+      </button>
+       <button
+        onClick={() => navigate("/admin")}
+        style={{
+          position: "fixed",
+          bottom: "100px",   // đặt cao hơn nút chat
+          right: "20px",
+          backgroundColor: "#28a745",
+          color: "white",
+          border: "none",
+          borderRadius: "50%",
+          width: "60px",
+          height: "60px",
+          fontSize: "24px",
+          zIndex: 9998,
+          cursor: "pointer",
+        }}
+        title="Admin Dashboard"
+      >
+        📊
       </button>
 
       {showChat && <ChatPopup onClose={() => setShowChat(false)} />}
