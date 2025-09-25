@@ -44,38 +44,14 @@ const HeaderHome = ({ user }) => {
                   <ul className="navigation clearfix">
                     <li className={isActive('/')}> <Link to="/">Trang chủ</Link></li>
                     <li className={isActive('/about')}> <Link to="/about">Giới thiệu</Link></li>
-                    
-                    {/* <li className={`dropdown ${['/tours', '/team'].includes(currentPath) ? 'active' : ''}`}>
-                       <a href="#">Tours</a>
-                      <ul>
-                        <li><Link to="/tours">Tours</Link></li>
-                        <li><Link to="/team">Hướng dẫn viên</Link></li>
-                      </ul>
-                    </li> */}
-                    <li className={isActive('/experience')}> <Link to="/experience">Kinh Nghiệm</Link></li>
-                    <li className={isActive('/destination')}> <Link to="/tours">Điểm đến</Link></li>
-                     <li className={isActive('/service')}> <Link to="/service">Dịch Vụ</Link></li>
-                    <li className={isActive('/contact')}> <Link to="/contact">Liên hệ</Link></li>
-                    <li className={isActive('/createCamp')}> <Link to="/createCamp">Tạo Camping</Link></li>
+                    <li className={isActive('/managercamping')}> <Link to="/managercamping">Camping Của tôi</Link></li>
+                    <li className={isActive('/createCamp')}> <Link to="/createCamp">Thêm Camping</Link></li>
                   </ul>
                 </div>
               </nav>
             </div>
 
-            <div className="nav-search">
-              <button className="far fa-search"></button>
-              <form action="/search-voice-text" className="hide" method="GET">
-                <input type="text" name="keyword" placeholder="Search" className="searchbox" required />
-                <i className="fa fa-microphone" style={{ margin: '0 16px' }} id="voice-search"></i>
-                <button type="submit" className="searchbutton far fa-search"></button>
-              </form>
-            </div>
-
             <div className="menu-btns py-10">
-              <Link to="/tours" className="theme-btn style-two bgc-secondary">
-                <span data-hover="Đặt Ngay">Book Now</span>
-                <i className="fal fa-arrow-right"></i>
-              </Link>
               <div className="menu-sidebar">
                 <li className="drop-down">
                   <button className="dropdown-toggle bg-transparent" id="userDropdown" style={{ color: 'white' }}>

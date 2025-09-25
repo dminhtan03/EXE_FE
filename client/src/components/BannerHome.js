@@ -1,13 +1,14 @@
-// src/components/BannerHome.js
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function BannerHome({ onSearch }) {
-  const formRef = useRef();
+  const [activeFilter, setActiveFilter] = useState("all");
+  const location = useLocation();
 
   useEffect(() => {
     const loadScript = (src) =>
       new Promise((resolve, reject) => {
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = src;
         script.async = false;
         script.onload = resolve;
@@ -17,102 +18,79 @@ export default function BannerHome({ onSearch }) {
 
     const loadScripts = async () => {
       try {
-        await loadScript('/assets/js/jquery.datetimepicker.full.min.js');
-        await loadScript('/assets/js/aos.js');
-
-        if (window.$) {
-          window.$('.datetimepicker').datetimepicker({
-            format: 'd/m/Y',
-            timepicker: false,
-          });
-        }
-
+        await loadScript("/assets/js/aos.js");
         if (window.AOS) {
           window.AOS.init();
         }
       } catch (error) {
-        console.error('Failed to load script:', error);
+        console.error("Failed to load script:", error);
       }
     };
 
     loadScripts();
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(formRef.current);
-    const searchData = {
-      destination: formData.get('destination') || '',
-      start_date: formData.get('start_date') || '',
-      end_date: formData.get('end_date') || '',
-    };
-
-    onSearch(searchData);
+  const handleFilter = (filterType) => {
+    setActiveFilter(filterType);
+    onSearch({ filter: filterType });
   };
+
+  const getButtonClass = (filterType) =>
+    `theme-btn px-6 py-2 ${activeFilter === filterType ? "active-btn" : ""}`;
 
   return (
     <section className="hero-area bgc-black pt-200 rpt-120 rel z-2">
       <div className="container-fluid">
-        <h1 className="hero-title" data-aos="flip-up" data-aos-delay="50" data-aos-duration="1500" data-aos-offset="50">
+        <h1
+          className="hero-title"
+          data-aos="flip-up"
+          data-aos-delay="50"
+          data-aos-duration="1500"
+          data-aos-offset="50"
+        >
           CAMPVERSE
         </h1>
-        <div className="main-hero-image bgs-cover" style={{ backgroundImage: `url(/assets/images/hero/hero.jpg)` }}></div>
+        <div
+          className="main-hero-image bgs-cover"
+          style={{ backgroundImage: `url(/assets/images/hero/hero.jpg)` }}
+        ></div>
       </div>
 
-      <form ref={formRef} onSubmit={handleSubmit} id="search_form">
+      {/* Chỉ hiển thị filter khi ở trang /managercamping */}
+      {location.pathname === "/managercamping" && (
         <div className="container container-1400">
-          <div className="search-filter-inner" data-aos="zoom-out-down" data-aos-duration="1500" data-aos-offset="50">
-            {/* Điểm đến */}
-            <div className="filter-item clearfix">
-              <div className="icon"><i className="fal fa-map-marker-alt"></i></div>
-              <span className="title">Điểm đến</span>
-              <select name="destination" id="destination">
-                <option value="">Chọn điểm đến</option>
-                <option value="dn">Đà Nẵng</option>
-                <option value="cd">Côn Đảo</option>
-                <option value="hn">Hà Nội</option>
-                <option value="hcm">TP. Hồ Chí Minh</option>
-                <option value="hl">Hạ Long</option>
-                <option value="nb">Ninh Bình</option>
-                <option value="pq">Phú Quốc</option>
-                <option value="dl">Đà Lạt</option>
-                <option value="qt">Quảng Trị</option>
-                <option value="kh">Khánh Hòa (Nha Trang)</option>
-                <option value="ct">Cần Thơ</option>
-                <option value="vt">Vũng Tàu</option>
-                <option value="qn">Quảng Ninh</option>
-                <option value="la">Lào Cai (Sa Pa)</option>
-                <option value="bd">Bình Định (Quy Nhơn)</option>
-                <option value="hg">Hà Giang</option>
-                <option value="ha">Hội An</option>
-              </select>
-            </div>
+          <div
+            className="search-filter-inner flex justify-center gap-4 mt-6"
+            data-aos="zoom-out-down"
+            data-aos-duration="1500"
+            data-aos-offset="50"
+          >
+            <button
+              type="button"
+              className={getButtonClass("all")}
+              onClick={() => handleFilter("all")}
+            >
+              <span>Tất cả Camping</span>
+            </button>
 
-            {/* Ngày đi */}
-            <div className="filter-item clearfix">
-              <div className="icon"><i className="fal fa-calendar-alt"></i></div>
-              <span className="title">Ngày khởi hành</span>
-              <input type="text" name="start_date" className="datetimepicker datetimepicker-custom" placeholder="Chọn ngày đi" readOnly />
-            </div>
+            <button
+              type="button"
+              className={getButtonClass("active")}
+              onClick={() => handleFilter("active")}
+            >
+              <span>Camping đã Active</span>
+            </button>
 
-            {/* Ngày về */}
-            <div className="filter-item clearfix">
-              <div className="icon"><i className="fal fa-calendar-alt"></i></div>
-              <span className="title">Ngày kết thúc</span>
-              <input type="text" name="end_date" className="datetimepicker datetimepicker-custom" placeholder="Chọn ngày về" readOnly />
-            </div>
-
-            {/* Nút tìm kiếm */}
-            <div className="search-button">
-              <button className="theme-btn" type="submit">
-                <span data-hover="Tìm kiếm">Tìm kiếm</span>
-                <i className="far fa-search"></i>
-              </button>
-            </div>
+            <button
+              type="button"
+              className={getButtonClass("in-progress")}
+              onClick={() => handleFilter("in-progress")}
+            >
+              <span>Camping đang xem xét</span>
+            </button>
           </div>
         </div>
-      </form>
+      )}
     </section>
   );
 }
