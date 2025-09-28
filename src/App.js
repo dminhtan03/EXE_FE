@@ -21,10 +21,9 @@ import OTPInputPage from "./screens/verifyOTP";
 import ForgotPasswordPage from "./screens/forgotPassword";
 import ChangePasswordModal from "./components/ChangePasswordModal";
 
-import AdminDashboard from "./components/admin/AdminDashboard"
-import ManagerUser from "./components/admin/ManagerUser"
-import ManagerPartner from "./components/admin/ManagerPanter"
-
+import AdminDashboard from "./components/admin/AdminDashboard";
+import ManagerUser from "./components/admin/ManagerUser";
+import ManagerPartner from "./components/admin/ManagerPanter";
 
 const PublicLayout = () => (
   <>
@@ -37,7 +36,7 @@ const AdminLayout = () => (
   <div className="admin-layout">
     <Outlet />
   </div>
-)
+);
 
 export default function App() {
   return (
@@ -66,9 +65,6 @@ export default function App() {
             <Route path="partners" element={<ManagerPartner />} />
             {/* <Route path="partner-requests" element={<PartnerRequest />} /> */}
           </Route>
-
-
-
         </Routes>
       </BrowserRouter>
     </AuthProvider>
