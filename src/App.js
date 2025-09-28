@@ -19,7 +19,7 @@ import PaymentPage from "./screens/PaymentPage";
 import MyBookingsPage from "./screens/MyBookingPage";
 import OTPInputPage from "./screens/verifyOTP";
 import ForgotPasswordPage from "./screens/forgotPassword";
-
+import ChangePasswordModal from "./components/ChangePasswordModal";
 const PublicLayout = () => (
   <>
     <HeaderHome />
@@ -38,9 +38,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/service" element={<Service />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/experience" element={<Experience />} />
           </Route>
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/payment" element={<PaymentPage />} />
@@ -49,6 +47,7 @@ export default function App() {
           <Route path="/verify-otp" element={<OTPInputPage />} />
           <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
           <Route path="/profile" element={<UserProfileModal />} />
+          <Route path="/change-password" element={<ChangePasswordModal />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -127,3 +127,45 @@ export const forgotPassword = async (email) => {
     }
   }
 };
+
+export const verifyForgotOTP = async (email, otp) => {
+  try {
+    // Gọi API verify-forgot-password
+    const res = await axios.post(`${API_BASE_URL}/verify-forgot-password`, {
+      email,
+      otp,
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Error:", err.message);
+    throw err;
+  }
+};
+
+export const changePassword = async (
+  oldPassword,
+  newPassword,
+  confirmPassword
+) => {
+  try {
+    const token = localStorage.getItem("token"); // hoặc Redux store
+    const res = await axios.post(
+      `${API_BASE_URL}/change-password`,
+      {
+        oldPassword,
+        newPassword,
+        confirmPassword,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    return res.data;
+  } catch (err) {
+    console.error("Error:", err.response?.data || err.message);
+    throw err;
+  }
+};

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getProfile } from "../api/authService";
 import UserProfileModal from "./UserProfileModal"; // ✅ bỏ {} vì export default
-
+import ChangePasswordModal from "./ChangePasswordModal";
 const HeaderHome = () => {
   const location = useLocation();
   const { logout } = useAuth();
@@ -11,6 +11,7 @@ const HeaderHome = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 
   const currentPath = location.pathname;
   const isActive = (path) => (currentPath === path ? "active" : "");
@@ -72,14 +73,8 @@ const HeaderHome = () => {
                       <li className={isActive("/about")}>
                         <Link to="/about">Giới thiệu</Link>
                       </li>
-                      <li className={isActive("/experience")}>
-                        <Link to="/experience">Kinh Nghiệm</Link>
-                      </li>
                       <li className={isActive("/tours")}>
                         <Link to="/tours">Điểm đến</Link>
-                      </li>
-                      <li className={isActive("/service")}>
-                        <Link to="/service">Dịch Vụ</Link>
                       </li>
                       <li className={isActive("/contact")}>
                         <Link to="/contact">Liên hệ</Link>
@@ -137,6 +132,17 @@ const HeaderHome = () => {
                               </button>
                             </li>
                             <li>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => {
+                                  setShowChangePasswordModal(true);
+                                  setShowDropdown(false);
+                                }}
+                              >
+                                Đổi mật khẩu
+                              </button>
+                            </li>
+                            <li>
                               <Link
                                 to="/my-bookings"
                                 onClick={() => setShowDropdown(false)}
@@ -191,6 +197,12 @@ const HeaderHome = () => {
           isOpen={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           userProfile={profile}
+        />
+      )}
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          isOpen={showChangePasswordModal}
+          onClose={() => setShowChangePasswordModal(false)}
         />
       )}
     </>
