@@ -76,30 +76,9 @@ const Header = () => {
                       {" "}
                       <Link to="/about">Giới thiệu</Link>
                     </li>
-                    <li
-                      className={`dropdown ${
-                        ["/tours", "/team"].includes(currentPath)
-                          ? "active"
-                          : ""
-                      }`}
-                    >
-                      <a href="tours">Tours</a>
-                      <ul>
-                        <li>
-                          <Link to="/tours">Tours</Link>
-                        </li>
-                        <li>
-                          <Link to="/team">Hướng dẫn viên</Link>
-                        </li>
-                      </ul>
-                    </li>
                     <li className={isActive("/tours")}>
                       {" "}
                       <Link to="/tours">Điểm đến</Link>
-                    </li>
-                    <li className={isActive("/service")}>
-                      {" "}
-                      <Link to="/service">Dịch Vụ</Link>
                     </li>
                     <li className={isActive("/contact")}>
                       {" "}
