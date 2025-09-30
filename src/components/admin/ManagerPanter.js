@@ -228,59 +228,25 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
       </div>
 
       {/* Pagination */}
-     <div style={{ marginTop: "20px", textAlign: "center" }}>
-  {/* Nút Trước */}
+       <div className="pagination" style={{
+    gap: "12px",
+    marginTop: "30px", // tăng khoảng cách so với bảng
+    fontFamily: "Arial, sans-serif",
+  }} >
   <button
-    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 0))}
     disabled={currentPage === 0}
-    style={{
-      margin: "0 5px",
-      padding: "6px 12px",
-      borderRadius: "6px",
-      border: "1px solid #ccc",
-      background: currentPage === 0 ? "#ddd" : "#f9f9f9",  // màu xám khi disable
-      color: currentPage === 0 ? "#888" : "#333",          // chữ mờ khi disable
-      cursor: currentPage === 0 ? "not-allowed" : "pointer",
-    }}
+    onClick={() => setCurrentPage(prev => prev - 1)}
   >
-    ◀ Trước
+    &lt; Trước
   </button>
-
-  {/* Các số trang */}
-  {Array.from({ length: totalPages }, (_, index) => (
-    <button
-      key={index}
-      onClick={() => setCurrentPage(index)}
-      disabled={index === currentPage}
-      style={{
-        margin: "0 5px",
-        padding: "6px 12px",
-        borderRadius: "6px",
-        border: index === currentPage ? "2px solid #2980b9" : "1px solid #ccc",
-        background: index === currentPage ? "#3498db" : "#f9f9f9",
-        color: index === currentPage ? "#fff" : "#333",
-        cursor: index === currentPage ? "default" : "pointer",
-      }}
-    >
-      {index + 1}
-    </button>
-  ))}
-
-  {/* Nút Sau */}
+  <span>
+    {currentPage + 1} / {totalPages}
+  </span>
   <button
-    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
-    disabled={currentPage === totalPages - 1}
-    style={{
-      margin: "0 5px",
-      padding: "6px 12px",
-      borderRadius: "6px",
-      border: "1px solid #ccc",
-      background: currentPage === totalPages - 1 ? "#ddd" : "#f9f9f9", // màu xám khi disable
-      color: currentPage === totalPages - 1 ? "#888" : "#333",         // chữ mờ khi disable
-      cursor: currentPage === totalPages - 1 ? "not-allowed" : "pointer",
-    }}
+    disabled={currentPage + 1 >= totalPages}
+    onClick={() => setCurrentPage(prev => prev + 1)}
   >
-    Sau ▶
+    Tiếp &gt;
   </button>
 </div>
 

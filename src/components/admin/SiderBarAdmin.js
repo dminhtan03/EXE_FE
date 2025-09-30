@@ -53,6 +53,11 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
       badge: pendingRequestsCount > 0 ? pendingRequestsCount : null,
       isLoading: isLoading,
     },
+    {
+      id: "invoices",
+      label: "Quản Lý Hóa Đơn",
+      icon: "🧾"
+    },
   ]
 
   return (
@@ -90,7 +95,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
       </nav>
 
       <div className="sidebar-footer">
-         <button
+        <button
           className="home-btn"
           title="Về trang chủ"
           onClick={() => (window.location.href = "/")}
