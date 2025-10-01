@@ -19,13 +19,19 @@ const destinationMap = {
 };
 
 const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
+  if (!Array.isArray(tours) || tours.length === 0) {
+    return (
+      <div className="col-12 text-center py-5">Không có tour nào phù hợp.</div>
+    );
+  }
+
   return (
     <>
       {tours.map((tour, index) => (
         <div
           className="col-xl-4 col-md-6"
           style={{ marginBottom: "30px" }}
-          key={index}
+          key={tour.id || index}
         >
           <div className="destination-item tour-grid style-three bgc-lighter">
             <div className="image">
@@ -33,7 +39,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
               <Link to="#" className="heart">
                 <i className="fas fa-heart"></i>
               </Link>
-              <img src={tour.images[0]} alt="Tour" />
+              <img src={tour.image} alt={tour.name} />
             </div>
             <div className="content">
               <div className="destination-header">
@@ -41,31 +47,25 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
                   <i className="fal fa-map-marker-alt"></i>{" "}
                   {destinationMap[tour.destination] || tour.destination}
                 </span>
-                <div className="ratting">
-                  {[1, 2, 3, 4, 5].map((i) =>
-                    i <= tour.rating ? (
-                      <i className="fas fa-star" key={i}></i>
-                    ) : (
-                      <i className="far fa-star" key={i}></i>
-                    )
-                  )}
-                </div>
               </div>
               <h6>
-                <Link to={`/tour-detail/${tour.tourId}`}>{tour.title}</Link>
+                <Link to={`/tour-detail/${tour.id}`}>{tour.name}</Link>
               </h6>
               <ul className="blog-meta">
                 <li>
-                  <i className="far fa-clock"></i> {tour.time}
+                  <i className="far fa-clock"></i> {tour.start_date} -{" "}
+                  {tour.end_date}
                 </li>
                 <li>
-                  <i className="far fa-user"></i> {tour.quantity}
+                  <i className="far fa-user"></i> {tour.capacity || 2} người
                 </li>
               </ul>
               <div className="destination-footer">
-                {/* <span className="price">{tour.priceAdult.toLocaleString('vi-VN')} VND / người</span> */}
+                <span className="price">
+                  {tour.price.toLocaleString("vi-VN")} VND / đêm
+                </span>
                 <Link
-                  to={`/tour-detail/${tour.tourId}`}
+                  to={`/tour-detail/${tour.id}`}
                   className="theme-btn style-two style-three"
                 >
                   <i className="fal fa-arrow-right"></i>
@@ -76,6 +76,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
         </div>
       ))}
 
+      {/* Pagination */}
       <div className="col-lg-12">
         <ul className="pagination justify-content-center pt-15 flex-wrap">
           <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
