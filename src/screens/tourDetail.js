@@ -1,13 +1,12 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
-import Header from "../components/HeaderCamping"
-import TourPreparationItems from "../components/Preparation"
-import TentBookingSection from "./TentBookingSection"
-import Footer from "../components/FooterHome"
-import {tentAvailabilityData} from "../data/mockData";
-
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import Header from "../components/HeaderCamping";
+import TourPreparationItems from "../components/Preparation";
+import TentBookingSection from "./TentBookingSection";
+import Footer from "../components/FooterHome";
+import { tentAvailabilityData } from "../data/mockData";
 
 const TourDetailPage = ({
   tourDetail,
@@ -16,112 +15,115 @@ const TourDetailPage = ({
   checkDisplay = "",
   tourRecommendations = [],
 }) => {
-  const [showPopup, setShowPopup] = useState(false)
-  const [selectedStartDate, setSelectedStartDate] = useState("")
-  const [selectedEndDate, setSelectedEndDate] = useState("")
-  const [tentAvailability, setTentAvailability] = useState({})
-  const [totalDays, setTotalDays] = useState(0)
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedStartDate, setSelectedStartDate] = useState("");
+  const [selectedEndDate, setSelectedEndDate] = useState("");
+  const [tentAvailability, setTentAvailability] = useState({});
+  const [totalDays, setTotalDays] = useState(0);
 
   // Mock data for tent availability - In real app, this would come from API
-  
+
   const tentTypes = [
     { id: 1, name: "Lều 2 người", capacity: "2 người", price: 150000 },
     { id: 2, name: "Lều 4 người", capacity: "4 người", price: 250000 },
     { id: 3, name: "Lều gia đình", capacity: "6-8 người", price: 400000 },
     { id: 4, name: "Lều cao cấp", capacity: "4 người", price: 350000 },
-  ]
+  ];
 
   // Initialize dates with tour default dates
   useEffect(() => {
     if (tourDetail?.startDate && tourDetail?.endDate) {
-      const startDate = new Date(tourDetail.startDate).toISOString().split("T")[0]
-      const endDate = new Date(tourDetail.endDate).toISOString().split("T")[0]
-      setSelectedStartDate(startDate)
-      setSelectedEndDate(endDate)
+      const startDate = new Date(tourDetail.startDate)
+        .toISOString()
+        .split("T")[0];
+      const endDate = new Date(tourDetail.endDate).toISOString().split("T")[0];
+      setSelectedStartDate(startDate);
+      setSelectedEndDate(endDate);
     }
-  }, [tourDetail])
+  }, [tourDetail]);
 
   // Calculate days and check availability when dates change
   useEffect(() => {
     if (selectedStartDate && selectedEndDate) {
-      const start = new Date(selectedStartDate)
-      const end = new Date(selectedEndDate)
-      const diffTime = Math.abs(end - start)
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-      setTotalDays(diffDays)
+      const start = new Date(selectedStartDate);
+      const end = new Date(selectedEndDate);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setTotalDays(diffDays);
 
       // Check availability for selected date range
-      checkTentAvailability(selectedStartDate, selectedEndDate)
+      checkTentAvailability(selectedStartDate, selectedEndDate);
     }
-  }, [selectedStartDate, selectedEndDate])
+  }, [selectedStartDate, selectedEndDate]);
 
   const checkTentAvailability = (startDate, endDate) => {
-    const availability = {}
-    const start = new Date(startDate)
-    const end = new Date(endDate)
+    const availability = {};
+    const start = new Date(startDate);
+    const end = new Date(endDate);
 
     tentTypes.forEach((tent) => {
-      let minAvailable = Number.POSITIVE_INFINITY
-      const currentDate = new Date(start)
+      let minAvailable = Number.POSITIVE_INFINITY;
+      const currentDate = new Date(start);
 
       // Check each day in the range
       while (currentDate <= end) {
-        const dateStr = currentDate.toISOString().split("T")[0]
-        const dayAvailability = tentAvailabilityData[dateStr] || {}
-        const tentKey = `tent${tent.id}`
-        const available = dayAvailability[tentKey] || 0
+        const dateStr = currentDate.toISOString().split("T")[0];
+        const dayAvailability = tentAvailabilityData[dateStr] || {};
+        const tentKey = `tent${tent.id}`;
+        const available = dayAvailability[tentKey] || 0;
 
-        minAvailable = Math.min(minAvailable, available)
-        currentDate.setDate(currentDate.getDate() + 1)
+        minAvailable = Math.min(minAvailable, available);
+        currentDate.setDate(currentDate.getDate() + 1);
       }
 
       // Nếu không có data cho ngày nào, mặc định là có 5 lều
-      availability[tent.id] = minAvailable === Number.POSITIVE_INFINITY ? 5 : minAvailable
-    })
+      availability[tent.id] =
+        minAvailable === Number.POSITIVE_INFINITY ? 5 : minAvailable;
+    });
 
-    setTentAvailability(availability)
-  }
+    setTentAvailability(availability);
+  };
 
   const handleOpenPopup = () => {
     if (!selectedStartDate || !selectedEndDate) {
-      alert("Vui lòng chọn ngày bắt đầu và kết thúc!")
-      return
+      alert("Vui lòng chọn ngày bắt đầu và kết thúc!");
+      return;
     }
 
     if (new Date(selectedStartDate) >= new Date(selectedEndDate)) {
-      alert("Ngày kết thúc phải sau ngày bắt đầu!")
-      return
+      alert("Ngày kết thúc phải sau ngày bắt đầu!");
+      return;
     }
 
-    setShowPopup(true)
-    document.body.style.overflow = "hidden"
-  }
+    setShowPopup(true);
+    document.body.style.overflow = "hidden";
+  };
 
   const handleClosePopup = () => {
-    setShowPopup(false)
-    document.body.style.overflow = "unset"
-  }
+    setShowPopup(false);
+    document.body.style.overflow = "unset";
+  };
 
   // Close popup when pressing ESC key
   useEffect(() => {
     const handleEscKey = (event) => {
       if (event.keyCode === 27 && showPopup) {
-        handleClosePopup()
+        handleClosePopup();
       }
-    }
+    };
 
-    document.addEventListener("keydown", handleEscKey)
+    document.addEventListener("keydown", handleEscKey);
     return () => {
-      document.removeEventListener("keydown", handleEscKey)
-      document.body.style.overflow = "unset"
-    }
-  }, [showPopup])
+      document.removeEventListener("keydown", handleEscKey);
+      document.body.style.overflow = "unset";
+    };
+  }, [showPopup]);
 
   const renderStars = (count) => {
     return Array.from({ length: 5 }).map((_, i) => (
       <i key={i} className={i < count ? "fas fa-star" : "far fa-star"}></i>
-    ))
-  }
+    ));
+  };
 
   const preparationItems = [
     { icon: "/assets/images/icon-para/sacduphong.jpg", label: "Sạc dự phòng" },
@@ -130,25 +132,29 @@ const TourDetailPage = ({
     { icon: "/assets/images/icon-para/mayanh.jpg", label: "Máy ảnh" },
     { icon: "/assets/images/icon-para/giay.jpg", label: "Giày leo núi" },
     { icon: "/assets/images/icon-para/binhnuoc.jpg", label: "Bình nước" },
-    { icon: "/assets/images/icon-para/thuoc.jpg", label: "Thuốc chống côn trùng" },
-  ]
+    {
+      icon: "/assets/images/icon-para/thuoc.jpg",
+      label: "Thuốc chống côn trùng",
+    },
+  ];
 
   const handleNavClick = (e) => {
-    e.preventDefault()
-    const targetId = e.currentTarget.getAttribute("href").substring(1)
-    const targetElement = document.getElementById(targetId)
+    e.preventDefault();
+    const targetId = e.currentTarget.getAttribute("href").substring(1);
+    const targetElement = document.getElementById(targetId);
     if (targetElement) {
-      const offset = 80
-      const topPosition = targetElement.getBoundingClientRect().top + window.scrollY - offset
+      const offset = 80;
+      const topPosition =
+        targetElement.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({
         top: topPosition,
         behavior: "smooth",
-      })
+      });
     }
-  }
+  };
 
   // Get today's date for min date restriction
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <>
@@ -334,26 +340,45 @@ const TourDetailPage = ({
       </style>
 
       <Header tourDetail={tourDetail} />
-      <nav className="tour-nav-tabs sticky-top bg-white shadow-sm z-index-10" style={{ marginBottom: "40px" }}>
+      <nav
+        className="tour-nav-tabs sticky-top bg-white shadow-sm z-index-10"
+        style={{ marginBottom: "40px" }}
+      >
         <div className="container-fluid">
           <ul className="nav nav-pills py-4 gap-4 justify-content-center">
             <li className="nav-item">
-              <a className="nav-link px-4 py-2 rounded-pill fw-semibold" href="#overview" onClick={handleNavClick}>
+              <a
+                className="nav-link px-4 py-2 rounded-pill fw-semibold"
+                href="#overview"
+                onClick={handleNavClick}
+              >
                 Chi tiết khu cắm trại
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link px-4 py-2 rounded-pill fw-semibold" href="#timeline" onClick={handleNavClick}>
+              <a
+                className="nav-link px-4 py-2 rounded-pill fw-semibold"
+                href="#timeline"
+                onClick={handleNavClick}
+              >
                 Lịch trình
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link px-4 py-2 rounded-pill fw-semibold" href="#gallery" onClick={handleNavClick}>
+              <a
+                className="nav-link px-4 py-2 rounded-pill fw-semibold"
+                href="#gallery"
+                onClick={handleNavClick}
+              >
                 Thư viện ảnh
               </a>
             </li>
             <li className="nav-item">
-              <a className="nav-link px-4 py-2 rounded-pill fw-semibold" href="#prepare" onClick={handleNavClick}>
+              <a
+                className="nav-link px-4 py-2 rounded-pill fw-semibold"
+                href="#prepare"
+                onClick={handleNavClick}
+              >
                 Chuẩn bị
               </a>
             </li>
@@ -413,7 +438,10 @@ const TourDetailPage = ({
                 <h3>Lịch trình</h3>
                 <div className="accordion" id="timelineAccordion">
                   {tourDetail?.timeline?.map((item, index) => (
-                    <div className="accordion-item" key={item.timeLineId || index}>
+                    <div
+                      className="accordion-item"
+                      key={item.timeLineId || index}
+                    >
                       <h2 className="accordion-header" id={`heading${index}`}>
                         <button
                           className="accordion-button collapsed"
@@ -433,7 +461,11 @@ const TourDetailPage = ({
                         data-bs-parent="#timelineAccordion"
                       >
                         <div className="accordion-body">
-                          <p dangerouslySetInnerHTML={{ __html: item.description }} />
+                          <p
+                            dangerouslySetInnerHTML={{
+                              __html: item.description,
+                            }}
+                          />
                         </div>
                       </div>
                     </div>
@@ -478,7 +510,7 @@ const TourDetailPage = ({
                   marginBottom: "100px",
                   paddingTop: "120px",
                   marginTop: "20px",
-                  paddingBottom:"100px"
+                  paddingBottom: "100px",
                 }}
               >
                 <TourPreparationItems items={preparationItems} />
@@ -546,34 +578,39 @@ const TourDetailPage = ({
                   </h6>
                   <div className="mb-3">
                     {tentTypes.map((tent) => {
-                      const available = tentAvailability[tent.id] || 0
-                      let badgeClass = "unavailable"
-                      let badgeText = "Hết"
-                      let icon = "fas fa-times-circle"
+                      const available = tentAvailability[tent.id] || 0;
+                      let badgeClass = "unavailable";
+                      let badgeText = "Hết";
+                      let icon = "fas fa-times-circle";
 
                       if (available > 3) {
-                        badgeClass = "available"
-                        badgeText = "Còn"
-                        icon = "fas fa-check-circle"
+                        badgeClass = "available";
+                        badgeText = "Còn";
+                        icon = "fas fa-check-circle";
                       } else if (available > 0) {
-                        badgeClass = "limited"
-                        badgeText = `Còn ${available}`
-                        icon = "fas fa-exclamation-circle"
+                        badgeClass = "limited";
+                        badgeText = `Còn ${available}`;
+                        icon = "fas fa-exclamation-circle";
                       }
 
                       return (
-                        <div key={tent.id} className="d-flex justify-content-between align-items-center mb-2">
+                        <div
+                          key={tent.id}
+                          className="d-flex justify-content-between align-items-center mb-2"
+                        >
                           <div>
                             <small className="text-muted">{tent.name}</small>
                             <br />
-                            <small className="fw-bold">{tent.price.toLocaleString()} VND/đêm</small>
+                            <small className="fw-bold">
+                              {tent.price.toLocaleString()} VND/đêm
+                            </small>
                           </div>
                           <span className={`availability-badge ${badgeClass}`}>
                             <i className={`${icon} me-1`}></i>
                             {badgeText}
                           </span>
                         </div>
-                      )
+                      );
                     })}
                   </div>
 
@@ -587,25 +624,31 @@ const TourDetailPage = ({
                   <ul className="list-unstyled mb-3">
                     <li className="d-flex justify-content-between">
                       <span>Người lớn:</span>
-                      <strong>{tourDetail.priceAdult?.toLocaleString()} VND</strong>
+                      <strong>
+                        {tourDetail.priceAdult?.toLocaleString()} VND
+                      </strong>
                     </li>
                     <li className="d-flex justify-content-between">
                       <span>Trẻ em:</span>
-                      <strong>{tourDetail.priceChild?.toLocaleString()} VND</strong>
+                      <strong>
+                        {tourDetail.priceChild?.toLocaleString()} VND
+                      </strong>
                     </li>
                   </ul>
 
                   <button
                     className="btn btn-primary w-100 mt-3"
                     onClick={handleOpenPopup}
-                    disabled={!selectedStartDate || !selectedEndDate || totalDays <= 0}
+                    disabled={
+                      !selectedStartDate || !selectedEndDate || totalDays <= 0
+                    }
                   >
                     <i className="fas fa-calendar-check me-2"></i>
                     {!selectedStartDate || !selectedEndDate
                       ? "Chọn ngày để đặt"
                       : totalDays <= 0
-                        ? "Ngày không hợp lệ"
-                        : "Đặt ngay"}
+                      ? "Ngày không hợp lệ"
+                      : "Đặt ngay"}
                   </button>
 
                   {(!selectedStartDate || !selectedEndDate) && (
@@ -621,10 +664,12 @@ const TourDetailPage = ({
                 <h5 className="mb-3">Cần trợ giúp?</h5>
                 <ul className="list-unstyled">
                   <li>
-                    <i className="far fa-envelope"></i> <a href="mailto:minhdien.dev@gmail.com">Campaverse</a>
+                    <i className="far fa-envelope"></i>{" "}
+                    <a href="mailto:minhdien.dev@gmail.com">Campaverse</a>
                   </li>
                   <li>
-                    <i className="far fa-phone-volume"></i> <a href="tel:+0968866886">0968866886</a>
+                    <i className="far fa-phone-volume"></i>{" "}
+                    <a href="tel:+0968866886">0968866886</a>
                   </li>
                 </ul>
               </div>
@@ -633,7 +678,10 @@ const TourDetailPage = ({
                 <div className="mt-4">
                   <h6>Tours tương tự</h6>
                   {tourRecommendations.map((tour) => (
-                    <div className="d-flex align-items-center mb-3" key={tour.tourId}>
+                    <div
+                      className="d-flex align-items-center mb-3"
+                      key={tour.tourId}
+                    >
                       <img
                         src={`/admin/assets/images/gallery-tours/${tour.images[0]}`}
                         alt="Tour"
@@ -642,9 +690,13 @@ const TourDetailPage = ({
                       />
                       <div>
                         <p className="mb-1 text-muted">
-                          <i className="fal fa-map-marker-alt"></i> {tour.destination}
+                          <i className="fal fa-map-marker-alt"></i>{" "}
+                          {tour.destination}
                         </p>
-                        <Link to={`/tours/${tour.tourId}`} className="fw-bold text-dark">
+                        <Link
+                          to={`/tours/${tour.tourId}`}
+                          className="fw-bold text-dark"
+                        >
                           {tour.title}
                         </Link>
                       </div>
@@ -660,13 +712,20 @@ const TourDetailPage = ({
       {/* Beautiful Popup Modal */}
       {showPopup && (
         <div className="booking-popup-overlay" onClick={handleClosePopup}>
-          <div className="booking-popup-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="booking-popup-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="booking-popup-header">
               <h4>
                 <i className="fas fa-campground me-2"></i>
                 Đặt Camping & Thuê Lều
               </h4>
-              <button className="booking-popup-close" onClick={handleClosePopup} title="Đóng (ESC)">
+              <button
+                className="booking-popup-close"
+                onClick={handleClosePopup}
+                title="Đóng (ESC)"
+              >
                 <i className="fas fa-times"></i>
               </button>
             </div>
@@ -683,9 +742,9 @@ const TourDetailPage = ({
           </div>
         </div>
       )}
-      <Footer/>
+      <Footer />
     </>
-  )
-}
+  );
+};
 
-export default TourDetailPage
+export default TourDetailPage;

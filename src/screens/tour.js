@@ -29,7 +29,10 @@ const TourScreen = () => {
           start_date: "2025-10-01", // default nếu API chưa có
           end_date: "2025-10-05",
           description: item.description || "Không có mô tả",
-          image: item.imageUrl || "/assets/images/tours/default.jpg", // lấy từ DB
+          image:
+            item.imageUrls && item.imageUrls.length > 0
+              ? item.imageUrls[0]
+              : "/assets/images/tours/default.jpg", // lấy ảnh đầu tiên
           price: item.pricePerNight || 0,
           name: item.roomName || "Tên phòng",
           site: item.siteName || "Chưa xác định",
