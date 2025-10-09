@@ -1,58 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import BannerHome from '../components/BannerHome';
-import TourList from '../components/TourList';
-import { Link } from 'react-router-dom';
-import { tours as allTours } from '../data/mockData';
+import React, { useState, useEffect } from "react";
+import BannerHome from "../components/BannerHome";
+import TourList from "../components/TourList";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 const TourScreen = () => {
   const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredTours, setFilteredTours] = useState([]);
-  const [searchParams, setSearchParams] = useState({
-    destination: '',
-    start_date: '',
-    end_date: '',
-  });
-
-  const handleSearch = (params) => {
-    setSearchParams(params);
-    setCurrentPage(1);
-  };
+  const [tours, setTours] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let filtered = allTours;
+    const fetchTours = async () => {
+      try {
+        const { data } = await axios.get("http://localhost:8080/api/v1/camping");
+        // Nếu muốn chỉ hiển thị active
+        const activeTours = data.filter((tour) => tour.active);
+        setTours(activeTours);
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu camping:", error);
+        setTours([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTours();
+  }, []);
 
-    // Chuẩn hóa giá trị tìm kiếm (viết thường + loại bỏ khoảng trắng 2 đầu)
-    const keyword = searchParams.destination.trim().toLowerCase();
-
-    // Lọc theo địa điểm
-    if (keyword) {
-      filtered = filtered.filter((tour) =>
-        tour.destination.toLowerCase().includes(keyword)
-      );
-    }
-
-    // Lọc theo ngày bắt đầu (nếu được nhập)
-    if (searchParams.start_date) {
-      filtered = filtered.filter((tour) =>
-        new Date(tour.start_date) >= new Date(searchParams.start_date)
-      );
-    }
-
-    // Lọc theo ngày kết thúc (nếu được nhập)
-    if (searchParams.end_date) {
-      filtered = filtered.filter((tour) =>
-        new Date(tour.end_date) <= new Date(searchParams.end_date)
-      );
-    }
-
-    setFilteredTours(filtered);
-  }, [searchParams]);
-
+  // Pagination
   const indexOfLastTour = currentPage * itemsPerPage;
   const indexOfFirstTour = indexOfLastTour - itemsPerPage;
-  const currentTours = filteredTours.slice(indexOfFirstTour, indexOfLastTour);
-  const totalPages = Math.ceil(filteredTours.length / itemsPerPage);
+  const currentTours = tours.slice(indexOfFirstTour, indexOfLastTour);
+  const totalPages = Math.ceil(tours.length / itemsPerPage);
 
   return (
     <>
@@ -60,20 +39,30 @@ const TourScreen = () => {
         <img src="/assets/images/login/chatbot.png" alt="Chatbot" />
       </Link>
 
-      <BannerHome onSearch={handleSearch} />
+      <BannerHome />
 
       <div className="tour-grid-wrap container">
         <div className="row" id="tours-container">
-          {currentTours.length > 0 ? (
+          {loading ? (
+            <div className="col-12 text-center py-5">
+              <h5>Đang tải danh sách camping...</h5>
+            </div>
+          ) : currentTours.length > 0 ? (
             <TourList
-              tours={currentTours}
+              tours={currentTours.map((tour) => ({
+                id: tour.id,
+                name: tour.name,
+                thumbnail: tour.thumbnail || "/assets/images/default.jpg",
+                rate: tour.rate || 0,
+                cityName: tour.cityName || "",
+              }))}
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
           ) : (
             <div className="col-12 text-center py-5">
-              <h5>Không tìm thấy tour nào phù hợp.</h5>
+              <h5>Không tìm thấy camping nào.</h5>
             </div>
           )}
         </div>
