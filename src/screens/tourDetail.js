@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from "react"
 import Header from "../components/HeaderCamping"
@@ -105,8 +105,11 @@ const TourDetailPage = ({ campingId }) => {
     { icon: "/assets/images/icon-para/mayanh.jpg", label: "Máy ảnh" },
     { icon: "/assets/images/icon-para/giay.jpg", label: "Giày leo núi" },
     { icon: "/assets/images/icon-para/binhnuoc.jpg", label: "Bình nước" },
-    { icon: "/assets/images/icon-para/thuoc.jpg", label: "Thuốc chống côn trùng" },
-  ]
+    {
+      icon: "/assets/images/icon-para/thuoc.jpg",
+      label: "Thuốc chống côn trùng",
+    },
+  ];
 
   if (!tourDetail) return <p>Loading...</p>
 
@@ -227,7 +230,7 @@ const TourDetailPage = ({ campingId }) => {
 
       <Footer/>
     </>
-  )
-}
+  );
+};
 
-export default TourDetailPage
+export default TourDetailPage;

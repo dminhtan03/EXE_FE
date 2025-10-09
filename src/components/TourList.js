@@ -2,6 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
+  if (!Array.isArray(tours) || tours.length === 0) {
+    return (
+      <div className="col-12 text-center py-5">Không có tour nào phù hợp.</div>
+    );
+  }
+
   return (
     <>
       {tours.map((tour, index) => (
@@ -41,6 +47,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
         </div>
       ))}
 
+      {/* Pagination */}
       {/* Pagination */}
       <div className="col-lg-12">
         <ul className="pagination justify-content-center pt-15 flex-wrap">

@@ -40,6 +40,7 @@ const TourScreen = () => {
       </Link>
 
       <BannerHome />
+      <BannerHome />
 
       <div className="tour-grid-wrap container">
         <div className="row" id="tours-container">
