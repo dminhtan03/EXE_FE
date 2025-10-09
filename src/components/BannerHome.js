@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { searchCamping } from "../api/searchService";
+import React, { useEffect, useRef } from "react";
 
 export default function BannerHome() {
   const formRef = useRef();
-  const [results, setResults] = useState([]);
 
   useEffect(() => {
     const loadScript = (src) =>
@@ -23,8 +21,8 @@ export default function BannerHome() {
 
         if (window.$) {
           window.$(".datetimepicker").datetimepicker({
-            format: "d/m/Y", // format dd/MM/yyyy cho khớp parseDate
-            timepicker: false, // chỉ chọn ngày, giờ mình gán fix sau
+            format: "d/m/Y", // format dd/MM/yyyy
+            timepicker: false, // chỉ chọn ngày
           });
         }
 
@@ -39,38 +37,20 @@ export default function BannerHome() {
     loadScripts();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     const formData = new FormData(formRef.current);
     const destination = formData.get("destination");
-    const startDateStr = formData.get("start_date"); // dạng dd/MM/yyyy
+    const startDateStr = formData.get("start_date");
     const endDateStr = formData.get("end_date");
 
-    // Convert "dd/MM/yyyy" -> "yyyy-MM-ddTHH:mm:ss"
-    const parseDate = (dateStr, time = "00:00:00") => {
-      if (!dateStr) return null;
-      const [day, month, year] = dateStr.split("/");
-      return `${year}-${month}-${day}T${time}`;
-    };
-
-    const searchData = {
+    // Chỉ log ra để test, không gọi API
+    console.log("Form submitted:", {
       destination,
-      startTime: parseDate(startDateStr, "14:00:00"), // giống test Postman
-      endTime: parseDate(endDateStr, "10:00:00"),
-    };
-
-    try {
-      const res = await searchCamping(searchData);
-      console.log("Search result:", res);
-
-      // Trường hợp API trả object { data: [...] }
-      const data = Array.isArray(res) ? res : res?.data || [];
-      setResults(data);
-    } catch (error) {
-      console.error("Search error:", error);
-      setResults([]);
-    }
+      startDateStr,
+      endDateStr,
+    });
   };
 
   return (
@@ -165,23 +145,6 @@ export default function BannerHome() {
           </div>
         </div>
       </form>
-
-      {/* Hiển thị kết quả */}
-      <div className="container" style={{ marginTop: "20px" }}>
-        {Array.isArray(results) && results.length > 0 ? (
-          <ul>
-            {results.map((item) => (
-              <li key={item.id}>
-                <h4>{item.name}</h4>
-                <p>{item.description}</p>
-                <p>📍 {item.location}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>Không có kết quả.</p>
-        )}
-      </div>
     </section>
   );
 }
