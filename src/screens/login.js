@@ -185,6 +185,7 @@ const AuthPage = () => {
 
       const res = await registerPartner(partnerData);
       console.log("Register partner success:", res);
+      navigate("/login");
     } catch (err) {
       console.error("Register partner failed:", err);
       setError(err.message || "Đăng ký đối tác thất bại, vui lòng thử lại!");

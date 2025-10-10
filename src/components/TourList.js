@@ -1,23 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const destinationMap = {
-  hn: "Hà Nội",
-  ss: "Sóc Sơn (Hà Nội)",
-  bn: "Bắc Ninh",
-  bg: "Bắc Giang",
-  vp: "Vĩnh Phúc (Tam Đảo)",
-  tb: "Thái Bình",
-  nd: "Nam Định",
-  nb: "Ninh Bình",
-  hb: "Hòa Bình",
-  pt: "Phú Thọ",
-  hy: "Hưng Yên",
-  ha: "Hà Nam",
-  qn: "Quảng Ninh (Hạ Long)",
-  lc: "Lạng Sơn",
-};
-
 const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
   if (!Array.isArray(tours) || tours.length === 0) {
     return (
@@ -28,47 +11,35 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
   return (
     <>
       {tours.map((tour, index) => (
-        <div
-          className="col-xl-4 col-md-6"
-          style={{ marginBottom: "30px" }}
-          key={tour.id || index}
-        >
+        <div className="col-xl-4 col-md-6" style={{ marginBottom: "30px" }} key={index}>
           <div className="destination-item tour-grid style-three bgc-lighter">
             <div className="image">
-              <span className="badge bgc-pink">Featured</span>
-              <Link to="#" className="heart">
-                <i className="fas fa-heart"></i>
-              </Link>
-              <img src={tour.image} alt={tour.name} />
+              <img
+                src={tour.thumbnail}
+                alt={tour.name}
+                style={{ width: "100%", height: "200px", objectFit: "cover" }}
+              />
             </div>
             <div className="content">
-              <div className="destination-header">
-                <span className="location">
-                  <i className="fal fa-map-marker-alt"></i>{" "}
-                  {destinationMap[tour.destination] || tour.destination}
-                </span>
-              </div>
               <h6>
-                <Link to={`/tour-detail/${tour.id}`}>{tour.name}</Link>
+                <Link to={`/camping-detail/${tour.id}`}>{tour.name}</Link>
               </h6>
-              <ul className="blog-meta">
-                <li>
-                  <i className="far fa-clock"></i> {tour.start_date} -{" "}
-                  {tour.end_date}
-                </li>
-                <li>
-                  <i className="far fa-user"></i> {tour.capacity || 2} người
-                </li>
-              </ul>
+              <div className="ratting mb-2">
+                {[1, 2, 3, 4, 5].map((i) =>
+                  i <= Math.round(tour.rate) ? (
+                    <i className="fas fa-star" key={i}></i>
+                  ) : (
+                    <i className="far fa-star" key={i}></i>
+                  )
+                )}
+              </div>
               <div className="destination-footer">
-                <span className="price">
-                  {tour.price.toLocaleString("vi-VN")} VND / đêm
-                </span>
+                <span className="text-muted">{tour.cityName}</span>
                 <Link
-                  to={`/tour-detail/${tour.id}`}
-                  className="theme-btn style-two style-three"
+                  to={`/camping-detail/${tour.id}`}
+                  className="theme-btn style-two style-three float-end"
                 >
-                  <i className="fal fa-arrow-right"></i>
+                   <i className="fal fa-arrow-right"></i>
                 </Link>
               </div>
             </div>
@@ -76,6 +47,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
         </div>
       ))}
 
+      {/* Pagination */}
       {/* Pagination */}
       <div className="col-lg-12">
         <ul className="pagination justify-content-center pt-15 flex-wrap">
@@ -88,20 +60,13 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
             </button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <li
-              key={page}
-              className={`page-item ${currentPage === page ? "active" : ""}`}
-            >
+            <li key={page} className={`page-item ${currentPage === page ? "active" : ""}`}>
               <button className="page-link" onClick={() => onPageChange(page)}>
                 {page}
               </button>
             </li>
           ))}
-          <li
-            className={`page-item ${
-              currentPage === totalPages ? "disabled" : ""
-            }`}
-          >
+          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
             <button
               className="page-link"
               onClick={() => onPageChange(currentPage + 1)}

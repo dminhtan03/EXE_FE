@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext";
 
 import HeaderHome from "./components/HeaderHome";
 import FooterHome from "./components/FooterHome";
+import HeaderHomePartner from "./components/partner/HeaderHomePartner";
 
 import AboutPage from "./screens/about";
 import Experience from "./screens/experience";
@@ -25,6 +26,11 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
 
+import HomePartnerPage from "./screens/partner/home_partner";
+import ManagerCamping from "./screens/partner/ManagerCamping";
+import CampingDetailScreen from "./screens/partner/ManagerCampingDetailScreen";
+import CreateCamping from "./screens/partner/CreateCamping";
+
 const PublicLayout = () => (
   <>
     <HeaderHome />
@@ -32,6 +38,15 @@ const PublicLayout = () => (
     <FooterHome />
   </>
 );
+
+const PartnerLayout = () => (
+  <>
+    <HeaderHomePartner />
+    <Outlet />
+    <FooterHome />
+  </>
+);
+
 const AdminLayout = () => (
   <div className="admin-layout">
     <Outlet />
@@ -43,27 +58,37 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public routes layout */}
+          {/* Public routes */}
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
+
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/tour-detail/:id" element={<TourDetailWrapper />} />
+          <Route path="/camping-detail/:campingId" element={<TourDetailWrapper />} />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-otp" element={<OTPInputPage />} />
           <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
           <Route path="/profile" element={<UserProfileModal />} />
           <Route path="/change-password" element={<ChangePasswordModal />} />
 
+          {/* Partner routes */}
+          <Route path="/seller" element={<PartnerLayout />}>
+            <Route index element={<HomePartnerPage />} />
+            <Route path="/seller/managercamping" element={<ManagerCamping />} />
+            <Route path="/seller/createCamp" element={<CreateCamping />} />
+            <Route path="/seller/camping/:id" element={<CampingDetailScreen />} />
+            <Route path="/seller/createCamp/:campingId" element={<CreateCamping />} />
+          </Route>
+
+          {/* Admin routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<ManagerUser />} />
             <Route path="partners" element={<ManagerPartner />} />
-            {/* <Route path="partner-requests" element={<PartnerRequest />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
