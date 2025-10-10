@@ -28,15 +28,27 @@ const getRoleFromToken = (decoded) => {
 
   const authorities = decoded.roles.map((r) => r.authority);
 
-  if (authorities.includes("ROLE_ADMIN")) return "ADMIN";
+  // ✅ Nếu có đầy đủ tất cả các quyền → ADMIN
+  const hasAllPermissions = [
+    "ROLE_ADMIN",
+    "ROLE_MAKE",
+    "ROLE_CHECK",
+    "ROLE_READ",
+    "ROLE_DELETE",
+  ].every((perm) => authorities.includes(perm));
+  if (hasAllPermissions) return "ADMIN";
 
-  // ✅ Partner có các quyền CHECK, MAKE, READ, DELETE
-  const isPartner = authorities.some((auth) =>
-    ["ROLE_CHECK", "ROLE_MAKE", "ROLE_READ", "ROLE_DELETE"].includes(auth)
+  // ✅ Nếu có 3 quyền MAKE, CHECK, READ → PARTNER
+  const hasPartnerPermissions = ["ROLE_MAKE", "ROLE_CHECK", "ROLE_READ"].every(
+    (perm) => authorities.includes(perm)
   );
-  if (isPartner) return "PARTNER";
+  if (hasPartnerPermissions) return "PARTNER";
 
-  if (authorities.includes("ROLE_USER")) return "USER";
+  // ✅ Nếu chỉ có MAKE và READ → USER
+  const hasUserPermissions = ["ROLE_MAKE", "ROLE_READ"].every((perm) =>
+    authorities.includes(perm)
+  );
+  if (hasUserPermissions) return "USER";
 
   return "GUEST";
 };
