@@ -9,9 +9,11 @@ const CreateCamping = () => {
   const [services, setServices] = useState([]);
   const [message, setMessage] = useState("");
 
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : "guest";
   // Dữ liệu chính
   const [formData, setFormData] = useState({
-    userId: "d04c1ced-ef4c-4429-a098-58c3252d6f94",
+    userId: userId,
     campingSiteId: "0a4e84b3-887f-419c-9fc4-d2eef400e553",
     name: "",
     address: "",

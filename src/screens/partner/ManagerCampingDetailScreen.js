@@ -11,13 +11,14 @@ const CampingDetailScreen = () => {
   const [loading, setLoading] = useState(true);
 
   // 👉 OwnerId tạm thời hardcode
-  const ownerId = "u001";
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : "guest";
 
   useEffect(() => {
     const fetchCamping = async () => {
       try {
         const res = await axios.get("http://localhost:8080/api/v1/camping", {
-          params: { ownerId },
+          params: { ownerId: userId },
         });
 
         const found = res.data.find((c) => String(c.id) === id);
@@ -56,12 +57,12 @@ const CampingDetailScreen = () => {
           <Link to="/seller/managercamping" className="btn btn-secondary me-2">
             ← Quay lại danh sách
           </Link>
-           <button
-              onClick={() => navigate(`/seller/createCamp/${id}`)}
-              className="btn btn-warning me-2"
-            >
-              Chỉnh Sửa
-            </button>
+          <button
+            onClick={() => navigate(`/seller/createCamp/${id}`)}
+            className="btn btn-warning me-2"
+          >
+            Chỉnh Sửa
+          </button>
           <button onClick={handleDelete} className="btn btn-danger ">
             Ẩn Camping
           </button>
@@ -92,9 +93,7 @@ const CampingDetailScreen = () => {
               <strong>Giá cơ bản:</strong>{" "}
               {camping.basePrice?.toLocaleString("vi-VN")} VND
             </p>
-            <button className=" ms-2 btn bg-primary ">
-              Danh sách booking
-            </button>
+            <button className=" ms-2 btn bg-primary ">Danh sách booking</button>
             {/* <p>
               <strong>Doanh thu:</strong>{" "}
               {camping.revenue
@@ -123,13 +122,15 @@ const CampingDetailScreen = () => {
                 <p>Không có dịch vụ đi kèm.</p>
               )}
             </div>
-             <div className="mt-5">
+            <div className="mt-5">
               <h4>DisCount</h4>
               <ul className="list-group">
-                <li className="list-group-item d-flex justify-content-between align-items-center" >Discount 10%
+                <li className="list-group-item d-flex justify-content-between align-items-center">
+                  Discount 10%
                   <span className="badge bg-primary rounded-pill">PLam897</span>
                 </li>
-                <li className="list-group-item d-flex justify-content-between align-items-center">Discount 20%
+                <li className="list-group-item d-flex justify-content-between align-items-center">
+                  Discount 20%
                   <span className="badge bg-primary rounded-pill">PLam999</span>
                 </li>
               </ul>

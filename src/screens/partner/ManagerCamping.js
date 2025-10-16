@@ -16,8 +16,8 @@ const ManagerCamping = (props) => {
     filter: "all",
   });
 
-  // Hardcode để test — bạn có thể truyền props.userId hoặc lấy từ AuthContext
-  const userId = props.userId || "d04c1ced-ef4c-4429-a098-58c3252d6f94";
+  const storedUser = localStorage.getItem("user");
+  const userId = storedUser ? JSON.parse(storedUser).id : "guest";
 
   const handleSearch = (params) => {
     setSearchParams(params);
