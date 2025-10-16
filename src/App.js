@@ -41,7 +41,7 @@ const PublicLayout = () => (
 
 const PartnerLayout = () => (
   <>
-    <HeaderHomePartner />
+    <HeaderHome />
     <Outlet />
     <FooterHome />
   </>
@@ -68,7 +68,10 @@ export default function App() {
 
           <Route path="/my-bookings" element={<MyBookingsPage />} />
           <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/camping-detail/:campingId" element={<TourDetailWrapper />} />
+          <Route
+            path="/camping-detail/:campingId"
+            element={<TourDetailWrapper />}
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/verify-otp" element={<OTPInputPage />} />
           <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
@@ -80,8 +83,14 @@ export default function App() {
             <Route index element={<HomePartnerPage />} />
             <Route path="/seller/managercamping" element={<ManagerCamping />} />
             <Route path="/seller/createCamp" element={<CreateCamping />} />
-            <Route path="/seller/camping/:id" element={<CampingDetailScreen />} />
-            <Route path="/seller/createCamp/:campingId" element={<CreateCamping />} />
+            <Route
+              path="/seller/camping/:id"
+              element={<CampingDetailScreen />}
+            />
+            <Route
+              path="/seller/createCamp/:campingId"
+              element={<CreateCamping />}
+            />
           </Route>
 
           {/* Admin routes */}

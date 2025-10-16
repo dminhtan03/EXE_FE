@@ -1,23 +1,37 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, Link } from "react-router-dom";
 import BannerHome from "../components/BannerHome";
 import TourList from "../components/TourList";
-import { Link } from "react-router-dom";
-import axios from "axios";
+import {
+  getCampingRoomsBySiteId,
+  getAllCampingSites,
+} from "../api/campingSiteService";
 
 const TourScreen = () => {
   const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+
+  const queryParams = new URLSearchParams(location.search);
+  const siteId = queryParams.get("siteId"); // ✅ lấy siteId từ URL
 
   useEffect(() => {
     const fetchTours = async () => {
       try {
-        const { data } = await axios.get(
-          "http://localhost:8080/api/v1/camping"
-        );
-        // Nếu muốn chỉ hiển thị active
-        const activeTours = data.filter((tour) => tour.active);
+        setLoading(true);
+        let data = [];
+
+        if (siteId) {
+          console.log("📍 Fetching by siteId:", siteId);
+          data = await getCampingRoomsBySiteId(siteId);
+        } else {
+          console.log("🌍 Fetching all sites");
+          data = await getAllCampingSites();
+        }
+
+        const activeTours = data.filter((tour) => tour.active !== false);
         setTours(activeTours);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu camping:", error);
@@ -26,14 +40,16 @@ const TourScreen = () => {
         setLoading(false);
       }
     };
+
     fetchTours();
-  }, []);
+  }, [siteId]);
 
   // Pagination
-  const indexOfLastTour = currentPage * itemsPerPage;
-  const indexOfFirstTour = indexOfLastTour - itemsPerPage;
+  const itemsPerPageCount = 6;
+  const indexOfLastTour = currentPage * itemsPerPageCount;
+  const indexOfFirstTour = indexOfLastTour - itemsPerPageCount;
   const currentTours = tours.slice(indexOfFirstTour, indexOfLastTour);
-  const totalPages = Math.ceil(tours.length / itemsPerPage);
+  const totalPages = Math.ceil(tours.length / itemsPerPageCount);
 
   return (
     <>
@@ -53,10 +69,10 @@ const TourScreen = () => {
             <TourList
               tours={currentTours.map((tour) => ({
                 id: tour.id,
-                name: tour.name,
+                name: tour.name || tour.location,
                 thumbnail: tour.thumbnail || "/assets/images/default.jpg",
                 rate: tour.rate || 0,
-                cityName: tour.cityName || "",
+                cityName: tour.campingSiteName || "",
               }))}
               currentPage={currentPage}
               totalPages={totalPages}

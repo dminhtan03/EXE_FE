@@ -1,7 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getAllCampingSites } from "../api/campingSiteService";
 
 export default function BannerHome() {
   const formRef = useRef();
+  const navigate = useNavigate();
+  const [campingSites, setCampingSites] = useState([]);
+  const fetched = useRef(false); // ✅ kiểm soát chỉ fetch 1 lần
 
   useEffect(() => {
     const loadScript = (src) =>
@@ -21,36 +26,43 @@ export default function BannerHome() {
 
         if (window.$) {
           window.$(".datetimepicker").datetimepicker({
-            format: "d/m/Y", // format dd/MM/yyyy
-            timepicker: false, // chỉ chọn ngày
+            format: "d/m/Y",
+            timepicker: false,
           });
         }
-
-        if (window.AOS) {
-          window.AOS.init();
-        }
+        if (window.AOS) window.AOS.init();
       } catch (error) {
-        console.error("Failed to load script:", error);
+        console.error("❌ Failed to load script:", error);
       }
     };
 
     loadScripts();
   }, []);
 
+  useEffect(() => {
+    if (fetched.current) return; // ✅ bỏ qua lần thứ 2
+    fetched.current = true;
+
+    const fetchCampingSites = async () => {
+      try {
+        const data = await getAllCampingSites();
+        setCampingSites(data || []);
+      } catch (error) {
+        console.error("❌ Lỗi khi gọi API:", error);
+      }
+    };
+    fetchCampingSites();
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const formData = new FormData(formRef.current);
-    const destination = formData.get("destination");
-    const startDateStr = formData.get("start_date");
-    const endDateStr = formData.get("end_date");
-
-    // Chỉ log ra để test, không gọi API
     console.log("Form submitted:", {
-      destination,
-      startDateStr,
-      endDateStr,
+      destination: formData.get("destination"),
+      startDate: formData.get("start_date"),
+      endDate: formData.get("end_date"),
     });
+    navigate(`/tours?siteId=${formData.get("destination")}`);
   };
 
   return (
@@ -86,22 +98,22 @@ export default function BannerHome() {
                 <i className="fal fa-map-marker-alt"></i>
               </div>
               <span className="title">Điểm đến</span>
-              <select name="destination" id="destination">
+              <select
+                key={campingSites.length} // 👈 thêm dòng này
+                name="destination"
+                id="destination"
+                required
+              >
                 <option value="">Chọn điểm đến</option>
-                <option value="Hà Nội">Hà Nội</option>
-                <option value="Sóc Sơn">Sóc Sơn (Hà Nội)</option>
-                <option value="Bắc Ninh">Bắc Ninh</option>
-                <option value="Bắc Giang">Bắc Giang</option>
-                <option value="Vĩnh Phúc">Vĩnh Phúc</option>
-                <option value="Thái Bình">Thái Bình</option>
-                <option value="Nam Định">Nam Định</option>
-                <option value="Ninh Bình">Ninh Bình</option>
-                <option value="Hòa Bình">Hòa Bình</option>
-                <option value="Phú Thọ">Phú Thọ</option>
-                <option value="Hưng Yên">Hưng Yên</option>
-                <option value="Hà Nam">Hà Nam</option>
-                <option value="Quảng Ninh">Quảng Ninh (Hạ Long)</option>
-                <option value="Lạng Sơn">Lạng Sơn</option>
+                {campingSites.length > 0 ? (
+                  campingSites.map((site) => (
+                    <option key={site.id} value={site.id}>
+                      {site.location}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Đang tải...</option>
+                )}
               </select>
             </div>
 

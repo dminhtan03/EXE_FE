@@ -11,7 +11,11 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
   return (
     <>
       {tours.map((tour, index) => (
-        <div className="col-xl-4 col-md-6" style={{ marginBottom: "30px" }} key={index}>
+        <div
+          className="col-xl-4 col-md-6"
+          style={{ marginBottom: "30px" }}
+          key={index}
+        >
           <div className="destination-item tour-grid style-three bgc-lighter">
             <div className="image">
               <img
@@ -39,7 +43,7 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
                   to={`/camping-detail/${tour.id}`}
                   className="theme-btn style-two style-three float-end"
                 >
-                   <i className="fal fa-arrow-right"></i>
+                  <i className="fal fa-arrow-right"></i>
                 </Link>
               </div>
             </div>
@@ -47,7 +51,6 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
         </div>
       ))}
 
-      {/* Pagination */}
       {/* Pagination */}
       <div className="col-lg-12">
         <ul className="pagination justify-content-center pt-15 flex-wrap">
@@ -60,13 +63,20 @@ const TourList = ({ tours, currentPage, totalPages, onPageChange }) => {
             </button>
           </li>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <li key={page} className={`page-item ${currentPage === page ? "active" : ""}`}>
+            <li
+              key={page}
+              className={`page-item ${currentPage === page ? "active" : ""}`}
+            >
               <button className="page-link" onClick={() => onPageChange(page)}>
                 {page}
               </button>
             </li>
           ))}
-          <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+          <li
+            className={`page-item ${
+              currentPage === totalPages ? "disabled" : ""
+            }`}
+          >
             <button
               className="page-link"
               onClick={() => onPageChange(currentPage + 1)}
