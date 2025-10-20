@@ -20,7 +20,7 @@ import PaymentPage from "./screens/PaymentPage";
 import MyBookingsPage from "./screens/MyBookingPage";
 import OTPInputPage from "./screens/verifyOTP";
 import ForgotPasswordPage from "./screens/forgotPassword";
-import ChangePasswordModal from "./components/ChangePasswordModal";
+// import ChangePasswordModal from "./components/ChangePasswordModal";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
@@ -76,7 +76,7 @@ export default function App() {
           <Route path="/verify-otp" element={<OTPInputPage />} />
           <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
           <Route path="/profile" element={<UserProfileModal />} />
-          <Route path="/change-password" element={<ChangePasswordModal />} />
+          {/* <Route path="/change-password" element={<ChangePasswordModal />} /> */}
 
           {/* Partner routes */}
           <Route path="/seller" element={<PartnerLayout />}>

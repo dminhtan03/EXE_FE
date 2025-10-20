@@ -67,6 +67,22 @@ const HeaderHome = () => {
   const isActive = (path) => (currentPath === path ? "active" : "");
   const toggleDropdown = () => setShowDropdown((prev) => !prev);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Nếu có dropdown mở và click không nằm trong menu
+      if (
+        showDropdown &&
+        !event.target.closest(".menu-sidebar") &&
+        !event.target.closest("#dropdownMenu")
+      ) {
+        setShowDropdown(false);
+      }
+    };
+
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, [showDropdown]);
+
   // ✅ Gọi API lấy profile & decode token
   useEffect(() => {
     const fetchProfile = async () => {
@@ -82,6 +98,10 @@ const HeaderHome = () => {
         const data = await getProfile(token);
         setProfile(data.data);
         localStorage.setItem("user", JSON.stringify(data.data));
+
+        if (data.data?.reset === true) {
+          setShowChangePasswordModal(true);
+        }
       } catch (err) {
         console.error("Lỗi khi lấy profile:", err);
         setProfile(null);
@@ -202,10 +222,10 @@ const HeaderHome = () => {
                       onClick={toggleDropdown}
                       style={{ color: "white" }}
                     >
-                      {profile?.avatar ? (
+                      {profile?.avatarUrl ? (
                         <img
                           className="img-account-profile rounded-circle"
-                          src={profile.avatar}
+                          src={profile.avatarUrl}
                           style={{ width: 36, height: 36 }}
                           alt="avatar"
                         />
@@ -251,6 +271,7 @@ const HeaderHome = () => {
                               <li>
                                 <Link
                                   to="/my-bookings"
+                                  className="dropdown-item"
                                   onClick={() => setShowDropdown(false)}
                                 >
                                   Camping đã đặt
