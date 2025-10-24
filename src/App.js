@@ -30,7 +30,7 @@ import HomePartnerPage from "./screens/partner/home_partner";
 import ManagerCamping from "./screens/partner/ManagerCamping";
 import CampingDetailScreen from "./screens/partner/ManagerCampingDetailScreen";
 import CreateCamping from "./screens/partner/CreateCamping";
-
+// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 const PublicLayout = () => (
   <>
     <HeaderHome />
