@@ -160,7 +160,7 @@ const ManagerUser = () => {
         <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff" }}>
           <thead>
             <tr style={{ background: "#f1f2f6", textAlign: "left" }}>
-              <th style={{ padding: "12px" }}>ID</th>
+              <th style={{ padding: "12px" }}>STT</th>
               <th style={{ padding: "12px" }}>Họ Tên</th>
               <th style={{ padding: "12px" }}>Email</th>
               <th style={{ padding: "12px" }}>SĐT</th>
@@ -170,17 +170,17 @@ const ManagerUser = () => {
           </thead>
           <tbody>
             {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
+              filteredUsers.map((user, index) => (
                 <tr key={user.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "10px" }}>{user.id}</td>
+                  <td style={{ padding: "10px" }}>{index + 1}</td>
                   <td
                     style={{ padding: "10px", color: "#2980b9", fontWeight: "500", cursor: "pointer" }}
                     onClick={async () => {
                       try {
-                        const res = await getUserDetail(user.id)
-                        setSelectedUser(res.data)
+                        const res = await getUserDetail(user.id);
+                        setSelectedUser(res.data);
                       } catch (err) {
-                        console.error("Không tải được chi tiết user:", err)
+                        console.error("Không tải được chi tiết user:", err);
                       }
                     }}
                   >
@@ -228,6 +228,7 @@ const ManagerUser = () => {
           </tbody>
         </table>
       </div>
+
 
       {/* Pagination */}
       <div className="pagination" style={{
