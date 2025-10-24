@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const BookingForm = ({ selectedServices, setSelectedServices }) => {
-  const [serviceInput, setServiceInput] = useState('');
+  const [serviceInput, setServiceInput] = useState("");
 
   const availableServices = [
-    'thuê lều',
-    'thuê bếp',
-    'thuê đèn',
-    'Xe đưa đón',
-    'Tổ chức teambuilding',
+    "thuê lều",
+    "thuê bếp",
+    "thuê đèn",
+    "Xe đưa đón",
+    "Tổ chức teambuilding",
   ];
 
   const addService = () => {
@@ -18,7 +18,7 @@ const BookingForm = ({ selectedServices, setSelectedServices }) => {
       !selectedServices.includes(serviceInput)
     ) {
       setSelectedServices([...selectedServices, serviceInput]);
-      setServiceInput('');
+      setServiceInput("");
     }
   };
 
@@ -28,7 +28,9 @@ const BookingForm = ({ selectedServices, setSelectedServices }) => {
 
   return (
     <div className="form-group">
-      <label>Chọn dịch vụ <span style={{ color: 'red' }}>*</span></label>
+      <label>
+        Chọn dịch vụ <span style={{ color: "red" }}>*</span>
+      </label>
       <div className="d-flex">
         <select
           className="form-control"
@@ -42,7 +44,11 @@ const BookingForm = ({ selectedServices, setSelectedServices }) => {
             </option>
           ))}
         </select>
-        <button type="button" className="btn btn-primary ml-2" onClick={addService}>
+        <button
+          type="button"
+          className="btn btn-primary ml-2"
+          onClick={addService}
+        >
           Thêm
         </button>
       </div>
@@ -53,18 +59,18 @@ const BookingForm = ({ selectedServices, setSelectedServices }) => {
           <span
             key={idx}
             className="badge badge-pill badge-info mr-2"
-            style={{ color:'black', fontSize: '14px' }}
+            style={{ color: "black", fontSize: "14px" }}
           >
-            {service}{' '}
+            {service}{" "}
             <button
               type="button"
               onClick={() => removeService(service)}
               className="ml-1 btn btn-sm btn-light"
               style={{
-                padding: '0 6px',
-                fontSize: '12px',
-                lineHeight: '1',
-                borderRadius: '50%',
+                padding: "0 6px",
+                fontSize: "12px",
+                lineHeight: "1",
+                borderRadius: "50%",
               }}
             >
               ×

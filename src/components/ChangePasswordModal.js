@@ -1,21 +1,20 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, Lock, X } from "lucide-react";
-import { changePassword } from "../api/userSevices"; // Import API thực
-
+import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from "lucide-react";
+import { changePassword } from "../api/userSevices";
 const ChangePasswordModal = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showPasswords, setShowPasswords] = useState({
     old: false,
     new: false,
     confirm: false,
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -23,7 +22,6 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
       ...prev,
       [name]: value,
     }));
-    // Clear error when user starts typing
     if (error) setError("");
     if (success) setSuccess("");
   };
@@ -35,55 +33,48 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Basic validation
+  const validateForm = () => {
     if (
       !formData.oldPassword ||
       !formData.newPassword ||
       !formData.confirmPassword
     ) {
       setError("Vui lòng điền đầy đủ thông tin");
-      return;
+      return false;
     }
-
     if (formData.newPassword !== formData.confirmPassword) {
-      setError("Mật khẩu mới và xác nhận mật khẩu không khớp");
-      return;
+      setError("Mật khẩu mới và xác nhận không khớp");
+      return false;
     }
-
     if (formData.newPassword.length < 6) {
       setError("Mật khẩu mới phải có ít nhất 6 ký tự");
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
     setLoading(true);
     setError("");
     setSuccess("");
 
     try {
-      // Sử dụng API thực từ userServices
-      const result = await changePassword(
+      await changePassword(
         formData.oldPassword,
         formData.newPassword,
         formData.confirmPassword
       );
-
       setSuccess("Đổi mật khẩu thành công!");
-      setFormData({
-        oldPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      setFormData({ oldPassword: "", newPassword: "", confirmPassword: "" });
 
-      // Auto close after success
       setTimeout(() => {
         onClose();
         setSuccess("");
-      }, 2000);
+      }, 1500);
     } catch (err) {
-      // Xử lý lỗi từ API
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -94,171 +85,267 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleClose = () => {
-    setFormData({
-      oldPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
-    setError("");
-    setSuccess("");
-    setShowPasswords({
-      old: false,
-      new: false,
-      confirm: false,
-    });
-    onClose();
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center space-x-2">
-            <Lock className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-semibold text-gray-900">
-              Đổi mật khẩu
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-            disabled={loading}
+    <>
+      <style>
+        {`
+          .modal-backdrop-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 1050;
+          }
+          
+          .modal-header-gradient {
+            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            border-radius: 1rem 1rem 0 0;
+          }
+          
+          .input-password-wrapper {
+            position: relative;
+          }
+          
+          .input-password {
+            border-radius: 0.75rem;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 3rem 0.75rem 1rem;
+            transition: all 0.2s;
+          }
+          
+          .input-password:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+          }
+          
+          .eye-icon-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0.25rem;
+            transition: color 0.2s;
+          }
+          
+          .eye-icon-btn:hover {
+            color: #495057;
+          }
+          
+          .btn-gradient {
+            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            border: none;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+          }
+          
+          .btn-gradient:hover:not(:disabled) {
+            background: linear-gradient(135deg, #0b5ed7 0%, #520dc2 100%);
+            box-shadow: 0 0.5rem 1rem rgba(13, 110, 253, 0.3);
+            transform: translateY(-1px);
+          }
+          
+          .btn-gradient:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+          
+          .btn-cancel {
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+          }
+          
+          .alert-custom {
+            border-radius: 0.75rem;
+            border: 1px solid;
+            display: flex;
+            align-items: start;
+            gap: 0.75rem;
+          }
+          
+          .spinner-border-sm {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-width: 0.2em;
+          }
+        `}
+      </style>
+
+      <div className="modal-backdrop-custom" onClick={onClose}>
+        <div className="modal show d-block" tabIndex="-1">
+          <div
+            className="modal-dialog modal-dialog-centered"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X className="w-5 h-5" />
-          </button>
+            <div className="modal-content" style={{ borderRadius: "1rem" }}>
+              {/* Header */}
+              <div className="modal-header modal-header-gradient border-0 text-white position-relative">
+                <div className="d-flex align-items-center gap-3">
+                  <Lock color="#ffffff" strokeWidth={2.5} size={24} />
+
+                  <h5 className="modal-title fw-bold mb-0">Đổi mật khẩu</h5>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={onClose}
+                  disabled={loading}
+                  aria-label="Close"
+                  style={{
+                    opacity: 0.9,
+                  }}
+                ></button>
+              </div>
+
+              {/* Body */}
+              <div className="modal-body p-4">
+                <div className="mb-3">
+                  <label className="form-label fw-semibold text-secondary small">
+                    Mật khẩu cũ
+                  </label>
+                  <div className="input-password-wrapper">
+                    <input
+                      type={showPasswords.old ? "text" : "password"}
+                      name="oldPassword"
+                      value={formData.oldPassword}
+                      onChange={handleInputChange}
+                      className="form-control input-password"
+                      placeholder="Nhập mật khẩu cũ"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      className="eye-icon-btn"
+                      onClick={() => togglePasswordVisibility("old")}
+                      tabIndex={-1}
+                    >
+                      {showPasswords.old ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-semibold text-secondary small">
+                    Mật khẩu mới
+                  </label>
+                  <div className="input-password-wrapper">
+                    <input
+                      type={showPasswords.new ? "text" : "password"}
+                      name="newPassword"
+                      value={formData.newPassword}
+                      onChange={handleInputChange}
+                      className="form-control input-password"
+                      placeholder="Nhập mật khẩu mới"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      className="eye-icon-btn"
+                      onClick={() => togglePasswordVisibility("new")}
+                      tabIndex={-1}
+                    >
+                      {showPasswords.new ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label className="form-label fw-semibold text-secondary small">
+                    Xác nhận mật khẩu mới
+                  </label>
+                  <div className="input-password-wrapper">
+                    <input
+                      type={showPasswords.confirm ? "text" : "password"}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="form-control input-password"
+                      placeholder="Nhập lại mật khẩu mới"
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      className="eye-icon-btn"
+                      onClick={() => togglePasswordVisibility("confirm")}
+                      tabIndex={-1}
+                    >
+                      {showPasswords.confirm ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="alert alert-danger alert-custom mb-3">
+                    <AlertCircle size={20} className="flex-shrink-0 mt-1" />
+                    <div className="small fw-medium">{error}</div>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="alert alert-success alert-custom mb-3">
+                    <CheckCircle size={20} className="flex-shrink-0 mt-1" />
+                    <div className="small fw-medium">{success}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="modal-footer border-0 px-4 pb-4 pt-0">
+                <button
+                  type="button"
+                  className="btn btn-light btn-cancel flex-fill"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-gradient text-white flex-fill"
+                  onClick={handleSubmit}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="d-flex align-items-center justify-content-center gap-2">
+                      <span
+                        className="spinner-border spinner-border-sm"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
+                      Đang xử lý...
+                    </span>
+                  ) : (
+                    "Đổi mật khẩu"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Old Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu cũ
-            </label>
-            <div className="relative">
-              <input
-                type={showPasswords.old ? "text" : "password"}
-                name="oldPassword"
-                value={formData.oldPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                placeholder="Nhập mật khẩu cũ"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility("old")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                disabled={loading}
-              >
-                {showPasswords.old ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* New Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mật khẩu mới
-            </label>
-            <div className="relative">
-              <input
-                type={showPasswords.new ? "text" : "password"}
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                placeholder="Nhập mật khẩu mới"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility("new")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                disabled={loading}
-              >
-                {showPasswords.new ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Xác nhận mật khẩu mới
-            </label>
-            <div className="relative">
-              <input
-                type={showPasswords.confirm ? "text" : "password"}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                placeholder="Nhập lại mật khẩu mới"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                onClick={() => togglePasswordVisibility("confirm")}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                disabled={loading}
-              >
-                {showPasswords.confirm ? (
-                  <EyeOff className="h-4 w-4 text-gray-400" />
-                ) : (
-                  <Eye className="h-4 w-4 text-gray-400" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
-              {error}
-            </div>
-          )}
-
-          {/* Success Message */}
-          {success && (
-            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md text-sm">
-              {success}
-            </div>
-          )}
-
-          {/* Buttons */}
-          <div className="flex space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-              disabled={loading}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              disabled={loading}
-            >
-              {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </>
   );
 };
 

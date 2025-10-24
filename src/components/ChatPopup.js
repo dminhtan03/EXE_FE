@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { callGptWithImage } from '../utils/gptApi';
+import { getTravelPlan } from '../utils/geminiApi';
 import './ChatPopup.css';
 
 const promptSamples = [
@@ -22,14 +22,23 @@ export default function ChatPopup({ onClose }) {
     try {
       setLoading(true);
       setResponse(null);
-      const reply = await callGptWithImage(promptToSend);
-      setResponse(reply);
+      const result = await getTravelPlan(promptToSend);
+      setResponse(result);
     } catch (err) {
       console.error(err);
-      alert(err.message);
+      alert(err.message || 'Có lỗi xảy ra.');
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper: tách text thành <p>
+  const renderParagraphs = (text) => {
+    if (!text) return <p>Không có dữ liệu.</p>;
+    return text
+      .split('\n')
+      .filter((line) => line.trim() !== '')
+      .map((line, idx) => <p key={idx}>{line}</p>);
   };
 
   return (
@@ -37,6 +46,7 @@ export default function ChatPopup({ onClose }) {
       <div className="chat-popup-box">
         <button className="chat-close-btn" onClick={onClose}>×</button>
         <h4>AI Trợ Lý Du Lịch</h4>
+
         <div className="prompt-list">
           {promptSamples.map((item, index) => (
             <div
@@ -68,8 +78,10 @@ export default function ChatPopup({ onClose }) {
 
         {response && (
           <div className="response-box">
-            <strong>Phản hồi:</strong>
-            <p>{response}</p>
+            <strong>Tư vấn chuyến đi:</strong>
+            <div className="response-text">
+              {renderParagraphs(response.advice)}
+            </div>
           </div>
         )}
       </div>

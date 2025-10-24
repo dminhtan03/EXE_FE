@@ -77,7 +77,8 @@ export const updateProfile = async (
   phoneNumber,
   address,
   department,
-  gender
+  gender,
+  avatarUrl
 ) => {
   try {
     const token = localStorage.getItem("token"); // hoặc Redux store nếu bạn đang lưu JWT
@@ -91,6 +92,7 @@ export const updateProfile = async (
         address,
         department,
         gender,
+        avatarUrl,
       },
       {
         headers: {
@@ -148,11 +150,13 @@ export const changePassword = async (
   confirmPassword
 ) => {
   try {
-    const token = localStorage.getItem("token"); // hoặc Redux store
+    const token = localStorage.getItem("token");
+
     const res = await axios.post(
       `${API_BASE_URL}/change-password`,
       {
-        oldPassword,
+        // ✅ phải dùng đúng tên key theo backend DTO
+        currentPassword: oldPassword,
         newPassword,
         confirmPassword,
       },
@@ -163,6 +167,7 @@ export const changePassword = async (
         },
       }
     );
+
     return res.data;
   } catch (err) {
     console.error("Error:", err.response?.data || err.message);
