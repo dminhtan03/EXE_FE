@@ -7,6 +7,7 @@ import PartnerManagement from "./ManagerPanter"
 import PartnerRequests from "./PartnerRequest"
 import DashAdmin from "./DashAdmin"
 import InvoiceAdmin from "./InvoiceAdmin"
+import PartnerRequest from "./PartnerRequestAdmin"
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("dashboard")
@@ -19,7 +20,7 @@ const AdminDashboard = () => {
       case "partners":
         return <PartnerManagement />
       case "partner-requests":
-        return <PartnerRequests />
+        return <PartnerRequest />
         case "invoices":
         return <InvoiceAdmin />
       default:

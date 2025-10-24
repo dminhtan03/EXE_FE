@@ -1,9 +1,9 @@
-// src/components/admin/ManagerPartner.js
 "use client"
 
 import Swal from "sweetalert2"
 import { useState, useEffect } from "react"
-import { getUsersByRole, getUserDetail, banUser } from "../../api/adminService"
+import { getUsersByRole, banUser } from "../../api/adminService"
+import { getPartnerDetail } from "../../api/partnerRequestService"
 
 const ManagerPartner = () => {
   const [partners, setPartners] = useState([])
@@ -15,12 +15,14 @@ const ManagerPartner = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
   const [pageSize, setPageSize] = useState(6)
+  const [zoomImage, setZoomImage] = useState(null)
 
   useEffect(() => {
     fetchPartners(currentPage)
   }, [currentPage, pageSize])
 
   const fetchPartners = async (page = 0) => {
+    setLoading(true)
     try {
       const response = await getUsersByRole("partner", page, pageSize)
       setPartners(response.data.content || [])
@@ -33,52 +35,48 @@ const ManagerPartner = () => {
     }
   }
 
-  // Ban/Unban partner
-const handleBanToggle = async (partnerId, isBanned, fullName) => {
-  const action = !isBanned ? "khóa" : "mở khóa"
-  const actioned = !isBanned ? "bị khóa" : "được mở khóa"
-  const icon = !isBanned ? "warning" : "question"
-  const confirmButtonText = !isBanned ? "🚫 Khóa" : "✅ Mở khóa"
+  const handleBanToggle = async (partnerId, isBanned, fullName) => {
+    const action = !isBanned ? "khóa" : "mở khóa"
+    const actioned = !isBanned ? "bị khóa" : "được mở khóa"
+    const icon = !isBanned ? "warning" : "question"
+    const confirmButtonText = !isBanned ? "🚫 Khóa" : "✅ Mở khóa"
 
-  const result = await Swal.fire({
-    title: `Xác nhận ${action}`,
-    text: `Bạn có chắc chắn muốn ${action} đối tác "${fullName}" không?`,
-    icon,
-    showCancelButton: true,
-    confirmButtonColor: !isBanned ? "#d33" : "#3085d6",
-    cancelButtonColor: "#6c757d",
-    confirmButtonText,
-    cancelButtonText: "Hủy"
-  })
+    const result = await Swal.fire({
+      title: `Xác nhận ${action}`,
+      text: `Bạn có chắc chắn muốn ${action} đối tác "${fullName}" không?`,
+      icon,
+      showCancelButton: true,
+      confirmButtonColor: !isBanned ? "#d33" : "#3085d6",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText,
+      cancelButtonText: "Hủy",
+    })
 
-  if (!result.isConfirmed) return
+    if (!result.isConfirmed) return
 
-  try {
-    await banUser(partnerId, !isBanned)
-    setPartners((prev) =>
-      prev.map((p) =>
-        p.id === partnerId ? { ...p, locked: !isBanned } : p
+    try {
+      await banUser(partnerId, !isBanned)
+      setPartners((prev) =>
+        prev.map((p) => (p.id === partnerId ? { ...p, locked: !isBanned } : p))
       )
-    )
 
-    Swal.fire({
-      icon: "success",
-      title: "Thành công",
-      text: `Đối tác "${fullName}" đã ${actioned}!`,
-      confirmButtonText: "OK"
-    })
-  } catch (error) {
-    console.error("Lỗi khi ban/unban partner:", error)
-    Swal.fire({
-      icon: "error",
-      title: "Thất bại",
-      text: "❌ Thao tác thất bại, vui lòng thử lại!",
-      confirmButtonText: "Đóng"
-    })
+      Swal.fire({
+        icon: "success",
+        title: "Thành công",
+        text: `Đối tác "${fullName}" đã ${actioned}!`,
+        confirmButtonText: "OK",
+      })
+    } catch (error) {
+      console.error("Lỗi khi ban/unban partner:", error)
+      Swal.fire({
+        icon: "error",
+        title: "Thất bại",
+        text: "❌ Thao tác thất bại, vui lòng thử lại!",
+        confirmButtonText: "Đóng",
+      })
+    }
   }
-}
 
-  // Lọc danh sách
   const filteredPartners = partners.filter((p) => {
     const matchesSearch =
       p.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,12 +119,7 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
             placeholder="🔍 Tìm kiếm đối tác..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #ccc",
-              minWidth: "220px",
-            }}
+            style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ccc", minWidth: "220px" }}
           />
           <select
             value={statusFilter}
@@ -158,7 +151,7 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
         <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff" }}>
           <thead>
             <tr style={{ background: "#f1f2f6", textAlign: "left" }}>
-              <th style={{ padding: "12px" }}>ID</th>
+              <th style={{ padding: "12px" }}>STT</th>
               <th style={{ padding: "12px" }}>Tên đối tác</th>
               <th style={{ padding: "12px" }}>Email</th>
               <th style={{ padding: "12px" }}>SĐT</th>
@@ -168,15 +161,15 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
           </thead>
           <tbody>
             {filteredPartners.length > 0 ? (
-              filteredPartners.map((p) => (
+              filteredPartners.map((p, index) => (
                 <tr key={p.id} style={{ borderBottom: "1px solid #eee" }}>
-                  <td style={{ padding: "10px" }}>{p.id}</td>
+                  <td style={{ padding: "10px" }}>{currentPage * pageSize + index + 1}</td>
                   <td
                     style={{ padding: "10px", color: "#2980b9", fontWeight: "500", cursor: "pointer" }}
                     onClick={async () => {
                       try {
-                        const res = await getUserDetail(p.id)
-                        setSelectedPartner(res.data)
+                        const detail = await getPartnerDetail(p.id)
+                        setSelectedPartner(detail)
                       } catch (err) {
                         console.error("Không tải được chi tiết partner:", err)
                       }
@@ -228,28 +221,28 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
       </div>
 
       {/* Pagination */}
-       <div className="pagination" style={{
-    gap: "12px",
-    marginTop: "30px", // tăng khoảng cách so với bảng
-    fontFamily: "Arial, sans-serif",
-  }} >
-  <button
-    disabled={currentPage === 0}
-    onClick={() => setCurrentPage(prev => prev - 1)}
-  >
-    &lt; Trước
-  </button>
-  <span>
-    {currentPage + 1} / {totalPages}
-  </span>
-  <button
-    disabled={currentPage + 1 >= totalPages}
-    onClick={() => setCurrentPage(prev => prev + 1)}
-  >
-    Tiếp &gt;
-  </button>
-</div>
-
+     {/* Pagination */}
+      <div className="pagination" style={{
+        gap: "12px",
+        marginTop: "30px", // tăng khoảng cách so với bảng
+        fontFamily: "Arial, sans-serif",
+      }} >
+        <button
+          disabled={currentPage === 0}
+          onClick={() => setCurrentPage(prev => prev - 1)}
+        >
+          &lt; Trước
+        </button>
+        <span>
+          {currentPage + 1} / {totalPages}
+        </span>
+        <button
+          disabled={currentPage + 1 >= totalPages}
+          onClick={() => setCurrentPage(prev => prev + 1)}
+        >
+          Tiếp &gt;
+        </button>
+      </div>
 
       {/* Popup chi tiết partner */}
       {selectedPartner && (
@@ -257,11 +250,13 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.6)",
+            backgroundColor: "rgba(0,0,0,0.6)",
             display: "flex",
-            alignItems: "center",
             justifyContent: "center",
+            alignItems: "center",
             zIndex: 9999,
+            padding: "20px",
+            overflowY: "auto"
           }}
           onClick={() => setSelectedPartner(null)}
         >
@@ -269,52 +264,89 @@ const handleBanToggle = async (partnerId, isBanned, fullName) => {
             style={{
               background: "#fff",
               borderRadius: "12px",
-              padding: "24px",
-              width: "420px",
-              maxWidth: "95%",
+              maxWidth: "900px",
+              width: "100%",
+              maxHeight: "90vh",
+              overflowY: "auto",
               position: "relative",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+              boxShadow: "0 0 20px rgba(0,0,0,0.3)"
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              onClick={() => setSelectedPartner(null)}
               style={{
                 position: "absolute",
-                top: "12px",
-                right: "12px",
+                top: "10px",
+                right: "10px",
                 background: "transparent",
                 border: "none",
-                fontSize: "18px",
-                cursor: "pointer",
+                fontSize: "20px",
+                cursor: "pointer"
               }}
+              onClick={() => setSelectedPartner(null)}
             >
               ✖
             </button>
 
-            <h2 style={{ margin: 0, color: "#2c3e50", textAlign: "center" }}>
-              {selectedPartner.fullName}
-            </h2>
+            <div style={{ padding: "20px" }}>
+              {/* Thông tin partner */}
+              <h3 style={{ marginBottom: "10px", color: "#2c3e50" }}>{selectedPartner.fullName}</h3>
+              <p><strong>Email:</strong> {selectedPartner.email}</p>
+              <p><strong>SĐT:</strong> {selectedPartner.phoneNumber}</p>
+              <p><strong>Trạng thái:</strong> {selectedPartner.locked ? "Bị khóa" : "Hoạt động"}</p>
 
-            <div style={{ marginTop: "15px" }}>
-              <p><strong>📧 Email:</strong> {selectedPartner.email || "Chưa cập nhật"}</p>
-              <p><strong>📞 SĐT:</strong> {selectedPartner.phoneNumber}</p>
-              <p><strong>🏠 Địa chỉ:</strong> {selectedPartner.address || "Chưa cập nhật"}</p>
-              <p>
-                <strong>👤 Giới tính:</strong>{" "}
-                {selectedPartner.gender
-                  ? selectedPartner.gender.toUpperCase() === "MALE"
-                    ? "Nam"
-                    : selectedPartner.gender.toUpperCase() === "FEMALE"
-                      ? "Nữ"
-                      : "Khác"
-                  : "Chưa cập nhật"}
-              </p>
-              <p><strong>🔒 Trạng thái:</strong> {selectedPartner.locked ? "Bị khóa" : "Hoạt động"}</p>
+              {/* Camping sites */}
+              <h5 style={{ marginTop: "20px", color: "#27ae60" }}>🏕️ Các điểm cắm trại</h5>
+              {selectedPartner.campingSites?.length > 0 ? (
+                selectedPartner.campingSites.map((site) => (
+                  <div key={site.id} style={{ marginBottom: "15px", border: "1px solid #ddd", borderRadius: "8px", padding: "10px" }}>
+                    <h6 style={{ color: "#2980b9" }}>{site.name}</h6>
+                    <p style={{ margin: "2px 0" }}>📍 {site.location}</p>
+                    <p style={{ margin: "2px 0" }}>📝 {site.description}</p>
+
+                    {site.images?.length > 0 && (
+                      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                        {site.images.map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt={`${site.name}-${i}`}
+                            style={{ width: "80px", height: "80px", objectFit: "cover", cursor: "pointer", borderRadius: "6px" }}
+                            onClick={() => setZoomImage(img)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p>Chưa có điểm cắm trại nào.</p>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Zoom ảnh */}
+      {zoomImage && (
+  <div
+    className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-dark bg-opacity-75"
+    style={{ zIndex: 1055 }} // > Bootstrap modal
+    onClick={() => setZoomImage(null)}
+  >
+    <img
+      src={zoomImage}
+      alt="Zoomed"
+      style={{
+        maxWidth: "90%",
+        maxHeight: "90%",
+        borderRadius: "10px",
+        boxShadow: "0 0 20px rgba(255,255,255,0.4)",
+      }}
+    />
+  </div>
+)}
+
     </div>
   )
 }
