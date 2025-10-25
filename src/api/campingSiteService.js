@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/api/v1/camping-sites";
+const API_BASE_URL = "http://localhost:8080/api/v1/camping";
 
 // 🏕️ Lấy toàn bộ danh sách địa điểm camping
 export const getAllCampingSites = async () => {

@@ -8,7 +8,6 @@ import {
 } from "../api/campingSiteService";
 
 const TourScreen = () => {
-  const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
