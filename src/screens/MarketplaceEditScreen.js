@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import BannerHome from "../components/BannerHome";
 
 const MarketplaceEditScreen = () => {
   const { id } = useParams();
@@ -70,6 +71,8 @@ const MarketplaceEditScreen = () => {
   if (error) return <p className="text-danger">{error}</p>;
 
   return (
+    <>
+    <BannerHome/>
     <div className="container py-4" style={{ maxWidth: "600px" }}>
       <h2 className="mb-4">Chỉnh sửa sản phẩm</h2>
 
@@ -162,6 +165,7 @@ const MarketplaceEditScreen = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };
 
