@@ -320,25 +320,26 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
           </div>
 
           {/* Footer */}
-          <div className="modal-footer border-0 pt-2">
-            {isEditing ? (
-              <div className="d-flex gap-2 w-100">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary flex-fill"
-                  onClick={handleCancel}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-primary flex-fill"
-                  onClick={handleSave}
-                >
-                  Lưu thay đổi
-                </button>
-              </div>
-            ) : (
+        <div className="modal-footer border-0 pt-2 d-flex flex-column gap-2">
+          {isEditing ? (
+            <div className="d-flex gap-2 w-100">
+              <button
+                type="button"
+                className="btn btn-outline-secondary flex-fill"
+                onClick={handleCancel}
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary flex-fill"
+                onClick={handleSave}
+              >
+                Lưu thay đổi
+              </button>
+            </div>
+          ) : (
+            <>
               <div className="d-flex gap-2 w-100">
                 <button
                   type="button"
@@ -358,8 +359,33 @@ const UserProfileModal = ({ isOpen, onClose, userProfile }) => {
                   Đóng
                 </button>
               </div>
-            )}
-          </div>
+
+              {/* ✅ Nút mới: Đăng bán */}
+              <button
+                type="button"
+                className="btn btn-success w-100"
+                onClick={() => {
+                  onClose();
+                  window.location.href = "/marketplace/create"; // chuyển trang tạo sản phẩm
+                }}
+              >
+                🛒 Đăng bán
+              </button>
+
+              {/* ✅ Nút mới: Sản phẩm của tôi */}
+              <button
+                type="button"
+                className="btn btn-info w-100"
+                onClick={() => {
+                  onClose();
+                  window.location.href = "/marketplace/my-products"; // chuyển trang danh sách sản phẩm
+                }}
+              >
+                📦 Sản phẩm của tôi
+              </button>
+            </>
+          )}
+        </div>
         </div>
       </div>
     </div>
