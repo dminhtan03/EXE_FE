@@ -14,7 +14,7 @@ const CreateCamping = () => {
   // Dữ liệu chính
   const [formData, setFormData] = useState({
     userId: userId,
-    campingSiteId: "0a4e84b3-887f-419c-9fc4-d2eef400e553",
+    campingSiteId: "270fb645-ef19-4d4f-9735-6f4c126689a0",
     name: "",
     address: "",
     description: "",
@@ -135,13 +135,13 @@ const CreateCamping = () => {
         ? `http://localhost:8080/api/v1/camping/update/${campingId}`
         : "http://localhost:8080/api/v1/camping";
 
-      const res = await axios.post(api, formData);
+      const res = await axios.put(api, formData);
       if (res.status === 200 || res.status === 201) {
         setMessage(campingId ? "Cập nhật thành công!" : "Tạo mới thành công!");
         if (!campingId)
           setFormData({
-            userId: "u001",
-            campingSiteId: "camp001",
+            userId: userId,
+            campingSiteId: "270fb645-ef19-4d4f-9735-6f4c126689a0",
             name: "",
             address: "",
             description: "",
@@ -306,7 +306,7 @@ const CreateCamping = () => {
             {formData.services.map((s, i) => (
               <div key={i} className="nested-item">
                 <p>
-                  {s.customName || s.serviceId} - {s.price}$
+                  {s.serviceName || s.serviceId} - {s.price}$
                 </p>
                 <button
                   type="button"
@@ -320,9 +320,9 @@ const CreateCamping = () => {
             <div className="add-subform">
               <input
                 placeholder="Tên dịch vụ"
-                value={newService.customName}
+                value={newService.serviceName}
                 onChange={(e) =>
-                  setNewService({ ...newService, customName: e.target.value })
+                  setNewService({ ...newService, serviceName: e.target.value })
                 }
               />
               <input

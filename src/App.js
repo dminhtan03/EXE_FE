@@ -25,6 +25,7 @@ import ForgotPasswordPage from "./screens/forgotPassword";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
+import CampingBookingScreen from "./screens/partner/CampingBookingScreen";
 
 import HomePartnerPage from "./screens/partner/home_partner";
 import ManagerCamping from "./screens/partner/ManagerCamping";
@@ -86,6 +87,10 @@ export default function App() {
             <Route
               path="/seller/camping/:id"
               element={<CampingDetailScreen />}
+            />
+            <Route
+                path="/seller/:campingInforId/bookings"
+                element={<CampingBookingScreen />}
             />
             <Route
               path="/seller/createCamp/:campingId"
