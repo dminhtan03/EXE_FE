@@ -30,6 +30,8 @@ const TentBookingSection = ({ tourDetail }) => {
           quantity: t.quantity,
         }))
       )
+      
+      console.log(tourDetail);
 
       setCampingEquipment(
         (tourDetail.services || []).map((s, index) => ({
@@ -87,6 +89,7 @@ const TentBookingSection = ({ tourDetail }) => {
     const bookingData = {
       tourId: tourDetail.id,
       tourTitle: tourDetail.name,
+      campingSiteId: tourDetail.campingSiteId,
       adultTickets,
       childTickets,
       selectedTents: Object.entries(selectedTents).map(([id, qty]) => {

@@ -30,6 +30,8 @@ const TourDetailPage = ({ campingId }) => {
           setSelectedStartDate(new Date(data.startDate).toISOString().split("T")[0])
           setSelectedEndDate(new Date(data.endDate).toISOString().split("T")[0])
         }
+
+        console.log(data);
       } catch (error) {
         console.error("Fetch camping detail error:", error)
       }
@@ -41,7 +43,7 @@ const TourDetailPage = ({ campingId }) => {
   useEffect(() => {
     const fetchTentAvailability = async () => {
       try {
-        const res = await fetch(`http://localhost:8080/api/tents/${campingId}`)
+        const res = await fetch(`http://localhost:8080/api/tents/byCampingId/${campingId}`)
         const data = await res.json()
         setTentAvailability(data ?? [])
       } catch (error) {
