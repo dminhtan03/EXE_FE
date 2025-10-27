@@ -8,13 +8,30 @@ const CreateCamping = () => {
   const { campingId } = useParams();
   const [services, setServices] = useState([]);
   const [message, setMessage] = useState("");
-
+ const [campingSites ,setCampingSites]= useState([]);
   const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
-  // Dữ liệu chính
+  
+
+// lay campingSite
+useEffect(() => {
+  const fetchCampingSites = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
+      console.log("Camping sites:", res.data);
+      setCampingSites(res.data || []);
+    } catch (err) {
+      console.error("Error fetching camping sites:", err);
+      setCampingSites([]); // đảm bảo không bị undefined
+    }
+  };
+  fetchCampingSites();
+}, []);
+
+// Dữ liệu chính
   const [formData, setFormData] = useState({
     userId: userId,
-    campingSiteId: "270fb645-ef19-4d4f-9735-6f4c126689a0",
+    campingSiteId: "",
     name: "",
     address: "",
     description: "",
@@ -27,7 +44,7 @@ const CreateCamping = () => {
     galleries: [],
   });
 
-  const [newService, setNewService] = useState({ customName: "", price: "" });
+  const [newService, setNewService] = useState({ serviceName: "", price: "" });
   const [newTent, setNewTent] = useState({
     tentName: "",
     capacity: "",
@@ -52,19 +69,36 @@ const CreateCamping = () => {
 
   // Nếu có campingId thì load data cũ
   useEffect(() => {
-    if (!campingId) return;
-    const fetchCamping = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8080/api/v1/camping/${campingId}`
-        );
-        setFormData(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchCamping();
-  }, [campingId]);
+  if (!campingId) return;
+
+  const fetchCamping = async () => {
+    try {
+      const [campingRes, serviceRes] = await Promise.all([
+        axios.get(`http://localhost:8080/api/v1/camping/${campingId}`),
+        axios.get("http://localhost:8080/api/v1/service")
+      ]);
+
+      const serviceList = serviceRes.data;
+      const campingData = campingRes.data;
+
+      // Map lại services để có serviceName
+      const updatedServices = (campingData.services || []).map((s) => {
+        const match = serviceList.find((srv) => srv.id === s.serviceId);
+        return {
+          ...s,
+          serviceName: match ? match.serviceName : s.serviceName || "Unknown",
+        };
+      });
+
+      setFormData({ ...campingData, services: updatedServices });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  fetchCamping();
+}, [campingId]);
+
 
   // Xử lý input
   const handleChange = (e) => {
@@ -76,17 +110,21 @@ const CreateCamping = () => {
   };
 
   // Thêm dịch vụ (từ danh sách hoặc tùy chỉnh)
-  const handleAddService = () => {
-    if (!newService.customName.trim()) return alert("Nhập tên dịch vụ mới!");
-    setFormData((prev) => ({
-      ...prev,
-      services: [
-        ...prev.services,
-        { ...newService, price: parseFloat(newService.price) },
-      ],
-    }));
-    setNewService({ customName: "", price: "" });
-  };
+const handleAddService = () => {
+  if (!newService.serviceName.trim()) return alert("Nhập tên dịch vụ mới!");
+  setFormData((prev) => ({
+    ...prev,
+    services: [
+      ...prev.services,
+      {
+        customName: newService.serviceName, // ✅ Đổi key ở đây
+        price: parseFloat(newService.price),
+      },
+    ],
+  }));
+  setNewService({ serviceName: "", price: "" });
+};
+
 
   const handleAddTent = () => {
     if (!newTent.tentName.trim()) return alert("Nhập tên lều!");
@@ -135,13 +173,16 @@ const CreateCamping = () => {
         ? `http://localhost:8080/api/v1/camping/update/${campingId}`
         : "http://localhost:8080/api/v1/camping";
 
-      const res = await axios.put(api, formData);
+      const method = campingId ? "put" : "post";
+
+      const res = await axios[method](api, formData);
+
       if (res.status === 200 || res.status === 201) {
         setMessage(campingId ? "Cập nhật thành công!" : "Tạo mới thành công!");
         if (!campingId)
           setFormData({
             userId: userId,
-            campingSiteId: "270fb645-ef19-4d4f-9735-6f4c126689a0",
+            campingSiteId: "",
             name: "",
             address: "",
             description: "",
@@ -180,6 +221,28 @@ const CreateCamping = () => {
               required
             />
           </div>
+
+          <div className="form-section">
+              <label>Chọn Camping Site:</label>
+              <select
+                name="campingSiteId"
+                value={formData.campingSiteId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Chọn một site --</option>
+                {Array.isArray(campingSites) && campingSites.length > 0 ? (
+                  campingSites.map((site) => (
+                    <option key={site.id} value={site.id}>
+                      {site.location}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Không có site nào</option>
+                )}
+              </select>
+            </div>
+
 
           <div className="form-section">
             <label>Địa chỉ:</label>

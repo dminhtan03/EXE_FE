@@ -1,4 +1,7 @@
-import React from "react";
+import React,{ useEffect } from "react";
+import { initGA, trackPageView } from "./hooks/useAnalytics";
+import { usePageTracking } from "./hooks/usePageTracking";
+
 import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -61,9 +64,12 @@ const AdminLayout = () => (
 );
 
 export default function App() {
+
+  // usePageTracking();
   return (
     <AuthProvider>
       <BrowserRouter>
+      <PageTrackingWrapper>
         <Routes>
           {/* Public routes */}
           <Route element={<PublicLayout />}>
@@ -115,7 +121,13 @@ export default function App() {
             <Route path="partners" element={<ManagerPartner />} />
           </Route>
         </Routes>
+        </PageTrackingWrapper>
       </BrowserRouter>
     </AuthProvider>
   );
+  
 }
+const PageTrackingWrapper = ({ children }) => {
+  usePageTracking();
+  return children;
+};

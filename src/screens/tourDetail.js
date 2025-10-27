@@ -36,6 +36,8 @@ const TourDetailPage = ({ campingId }) => {
             new Date(data.endDate).toISOString().split("T")[0]
           );
         }
+
+        console.log(data);
       } catch (error) {
         console.error("Fetch camping detail error:", error);
       }

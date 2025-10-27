@@ -114,30 +114,6 @@ export default function FooterHome() {
               data-aos-duration="1500"
               data-aos-offset="50"
             >
-              <div className="section-title counter-text-wrap mb-35">
-                <h2>Đăng ký nhận bản tin</h2>
-                <p>
-                  Website{" "}
-                  <span
-                    className="count-text plus"
-                    data-speed="3000"
-                    data-stop="34500"
-                  >
-                    0
-                  </span>{" "}
-                  trải nghiệm phổ biến nhất mà bạn sẽ nhớ
-                </p>
-              </div>
-              <form className="newsletter-form mb-50">
-                <input type="email" placeholder="Email Address" required />
-                <button
-                  type="submit"
-                  className="theme-btn bgc-secondary style-two"
-                >
-                  <span data-hover="Đăng ký">Đăng ký</span>
-                  <i className="fal fa-arrow-right"></i>
-                </button>
-              </form>
             </div>
           </div>
         </div>
@@ -149,7 +125,6 @@ export default function FooterHome() {
             <FooterColumn
               title="Dịch vụ"
               links={[
-                { to: "/team", label: "Hướng dẫn viên du lịch tốt nhất" },
                 { to: "/tours", label: "Đặt tour" },
                 { to: "/tours", label: "Đặt vé" },
               ]}
@@ -162,26 +137,6 @@ export default function FooterHome() {
                 { to: "/about", label: "Giới thiệu về công ty" },
                 { to: "/contact", label: "Việc làm và nghề nghiệp" },
                 { to: "/contact", label: "Liên hệ với chúng tôi" },
-              ]}
-            />
-
-            <FooterColumn
-              title="Điểm đến"
-              delay="100"
-              links={[
-                { to: "/destination", label: "Miền Bắc" },
-                { to: "/destination", label: "Miền Trung" },
-                { to: "/destination", label: "Miền Nam" },
-              ]}
-            />
-
-            <FooterColumn
-              title="Thể loại"
-              delay="150"
-              links={[
-                { to: "/contact", label: "Phiêu lưu" },
-                { to: "/contact", label: "Tour gia đình" },
-                { to: "/contact", label: "Tour động vật hoang dã" },
               ]}
             />
 
@@ -231,7 +186,7 @@ export default function FooterHome() {
             </div>
             <div className="col-lg-7 text-center text-lg-end">
               <ul className="footer-bottom-nav">
-                <li>
+                {/* <li>
                   <Link to="/about">Điều khoản</Link>
                 </li>
                 <li>
@@ -242,7 +197,7 @@ export default function FooterHome() {
                 </li>
                 <li>
                   <Link to="/about">Khả năng truy cập</Link>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>
