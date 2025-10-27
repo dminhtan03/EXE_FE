@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAllCampingSites } from "../api/campingSiteService";
+import axios from "axios";
+
 
 export default function BannerHome() {
   const formRef = useRef();
@@ -8,6 +10,20 @@ export default function BannerHome() {
   const [campingSites, setCampingSites] = useState([]);
   const fetched = useRef(false); // ✅ kiểm soát chỉ fetch 1 lần
 
+useEffect(() => {
+  const fetchCampingSites = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
+      console.log("Camping sites:", res.data);
+      setCampingSites(res.data || []);
+    } catch (err) {
+      console.error("Error fetching camping sites:", err);
+      setCampingSites([]); // đảm bảo không bị undefined
+    }
+  };
+  fetchCampingSites();
+}, []);
+  
   useEffect(() => {
     const loadScript = (src) =>
       new Promise((resolve, reject) => {

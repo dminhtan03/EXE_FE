@@ -11,9 +11,9 @@ const CreateCamping = () => {
  const [campingSites ,setCampingSites]= useState([]);
   const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
-  // Dữ liệu chính
+  
 
-
+// lay campingSite
 useEffect(() => {
   const fetchCampingSites = async () => {
     try {
@@ -28,7 +28,7 @@ useEffect(() => {
   fetchCampingSites();
 }, []);
 
-
+// Dữ liệu chính
   const [formData, setFormData] = useState({
     userId: userId,
     campingSiteId: "",
