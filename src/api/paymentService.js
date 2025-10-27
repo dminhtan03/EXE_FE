@@ -19,3 +19,14 @@ export const payBooking = async (paymentData) => {
     throw error.response?.data || error;
   }
 };
+
+// export const payBooking = async (paymentReq) => {
+//   console.log("Mock payBooking request:", paymentReq);
+//   return {
+//     id: "PAY_FAKE_001",
+//     amount: 300000,
+//     paymentStatus: "PENDING",
+//     qrCode:
+//       "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=ThanhToanCampverse"
+//   };
+// };

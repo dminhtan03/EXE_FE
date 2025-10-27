@@ -5,32 +5,39 @@ import TourList from "../components/TourList";
 import {
   getCampingRoomsBySiteId,
   getAllCampingSites,
+  getAllCampingInfor,
 } from "../api/campingSiteService";
 
 const TourScreen = () => {
-  const itemsPerPage = 6;
   const [currentPage, setCurrentPage] = useState(1);
   const [tours, setTours] = useState([]);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const siteId = queryParams.get("siteId"); // ✅ lấy siteId từ URL
+  const siteId = queryParams.get("siteId");
 
   useEffect(() => {
     const fetchTours = async () => {
       try {
         setLoading(true);
+
         let data = [];
 
+        // ✅ Luôn gọi danh sách phòng trước
+        console.log("🏕️ Fetching all camping information...");
+        data = await getAllCampingInfor();
+
+        // Nếu có siteId, lọc thêm theo siteId
         if (siteId) {
-          console.log("📍 Fetching by siteId:", siteId);
-          data = await getCampingRoomsBySiteId(siteId);
-        } else {
-          console.log("🌍 Fetching all sites");
-          data = await getAllCampingSites();
+          console.log("📍 Filtering by siteId:", siteId);
+          const siteRooms = await getCampingRoomsBySiteId(siteId);
+
+          // Gộp dữ liệu (hoặc chỉ lấy siteRooms, tùy bạn)
+          data = siteRooms.length > 0 ? siteRooms : data;
         }
 
+        // Chỉ lấy các tour active
         const activeTours = data.filter((tour) => tour.active !== false);
         setTours(activeTours);
       } catch (error) {

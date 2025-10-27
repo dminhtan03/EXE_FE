@@ -21,16 +21,23 @@ import MyBookingsPage from "./screens/MyBookingPage";
 import OTPInputPage from "./screens/verifyOTP";
 import ForgotPasswordPage from "./screens/forgotPassword";
 // import ChangePasswordModal from "./components/ChangePasswordModal";
+import MarketplaceScreen from "./screens/MarketplaceScreen";
+import MarketplaceCreateScreen from "./screens/MarketplaceCreateScreen";
+import MyProductsScreen from "./screens/MyProductsScreen";
+import MarketplaceEditScreen from "./screens/MarketplaceEditScreen";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
 
+
+
+import CampingBookingScreen from "./screens/partner/CampingBookingScreen";
 import HomePartnerPage from "./screens/partner/home_partner";
 import ManagerCamping from "./screens/partner/ManagerCamping";
 import CampingDetailScreen from "./screens/partner/ManagerCampingDetailScreen";
 import CreateCamping from "./screens/partner/CreateCamping";
-
+// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 const PublicLayout = () => (
   <>
     <HeaderHome />
@@ -64,6 +71,10 @@ export default function App() {
             <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/marketplace" element={<MarketplaceScreen />} />
+            <Route path="/marketplace/create" element={<MarketplaceCreateScreen />} />
+            <Route path="/marketplace/my-products" element={<MyProductsScreen />} />
+            <Route path="marketplace/edit/:id" element={<MarketplaceEditScreen />} />
           </Route>
 
           <Route path="/my-bookings" element={<MyBookingsPage />} />
@@ -86,6 +97,10 @@ export default function App() {
             <Route
               path="/seller/camping/:id"
               element={<CampingDetailScreen />}
+            />
+            <Route
+                path="/seller/:campingInforId/bookings"
+                element={<CampingBookingScreen />}
             />
             <Route
               path="/seller/createCamp/:campingId"
