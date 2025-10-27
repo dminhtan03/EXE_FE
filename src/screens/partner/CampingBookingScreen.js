@@ -11,31 +11,42 @@ const CampingBookingScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // pagination
+  const [page, setPage] = useState(0);
+  const [size] = useState(5);
+  const [totalPages, setTotalPages] = useState(0);
+
   useEffect(() => {
     const fetchBookings = async () => {
       setLoading(true);
       setError(null);
       try {
-        // Lấy danh sách booking
+        const token = localStorage.getItem("token");
         const res = await axios.get(
-          `http://localhost:8080/api/v1/camping/booking/${campingInforId}`
+          `http://localhost:8080/api/v1/camping/booking/${campingInforId}?page=${page}&size=${size}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
-        const bookingsData = res.data || [];
+
+        // Dữ liệu Page object
+        const data = res.data;
+        const bookingsData = data.content || [];
         setBookings(bookingsData);
+        setTotalPages(data.totalPages || 0);
 
-        // Lấy tất cả tent theo booking
+        // Lấy tents theo booking
         const tentPromises = bookingsData.map((b) =>
-          axios.get(`http://localhost:8080/api/tents/byTentId/${b.campingTentId}`)
+          axios.get(
+            `http://localhost:8080/api/tents/byTentId/${b.campingTentId}`
+          )
         );
-
         const tentResponses = await Promise.all(tentPromises);
-
-        // Map tentId -> tentData
         const tentMapData = {};
         tentResponses.forEach((r) => {
-          if (r.data && r.data.id) {
-            tentMapData[r.data.id] = r.data;
-          }
+          if (r.data && r.data.id) tentMapData[r.data.id] = r.data;
         });
         setTentsMap(tentMapData);
       } catch (err) {
@@ -46,7 +57,7 @@ const CampingBookingScreen = () => {
       }
     };
     fetchBookings();
-  }, [campingInforId]);
+  }, [campingInforId, page, size]);
 
   const fmtDate = (iso) =>
     iso ? new Date(iso).toLocaleString("vi-VN", { hour12: false }) : "-";
@@ -76,13 +87,15 @@ const CampingBookingScreen = () => {
           <thead>
             <tr>
               <th>Booking ID</th>
-              <th>User ID</th>
-              <th>Camping Tent</th>
+              {/* <th>User ID</th> */}
+              <th>Tên người dùng</th>
+              <th>Lều</th>
               <th>Dịch vụ</th>
-              <th>Start Time</th>
-              <th>End Time</th>
-              <th>Total Price</th>
-              <th>Status</th>
+              <th>Thời gian bắt đầu</th>
+              <th>Thời gian kết thúc</th>
+              <th>Tổng giá</th>
+              <th>Trạng thái</th>
+              <th>Thời gian tạo booking</th>
             </tr>
           </thead>
           <tbody>
@@ -90,17 +103,19 @@ const CampingBookingScreen = () => {
               const tent = tentsMap[b.campingTentId] || {};
               return (
                 <tr key={b.bookingId}>
-                  <td data-label="Booking ID">{b.bookingId}</td>
-                  <td data-label="User ID">{b.userId}</td>
-                  <td data-label="Camping Tent">{tent.tentName || "-"}</td>
-                  <td data-label="Dịch vụ">
-                    {b.serviceNames?.length > 0 ? b.serviceNames.join(", ") : "-"}
+                  <td>{b.bookingId}</td>
+                  {/* <td>{b.userId}</td> */}
+                  <td>{b.userName || "-"}</td>
+                  <td>{tent.tentName || "-"}</td>
+                  <td>
+                    {b.serviceNames?.length > 0
+                      ? b.serviceNames.join(", ")
+                      : "-"}
                   </td>
-                  <td data-label="Start Time">{fmtDate(b.startTime)}</td>
-                  <td data-label="End Time">{fmtDate(b.endTime)}</td>
-                  <td data-label="Total Price">{fmtPrice(b.totalPrice)}</td>
+                  <td>{fmtDate(b.startTime)}</td>
+                  <td>{fmtDate(b.endTime)}</td>
+                  <td>{fmtPrice(b.totalPrice)}</td>
                   <td
-                    data-label="Status"
                     className={
                       b.status === "PENDING"
                         ? "status-pending"
@@ -109,13 +124,39 @@ const CampingBookingScreen = () => {
                         : "status-cancelled"
                     }
                   >
-                    {b.status === "PENDING" ? "⏳ Pending" : b.status === "CONFIRMED" ? "✅ Confirmed" : "❌ Cancelled"}
+                    {b.status === "PENDING"
+                      ? "⏳ Pending"
+                      : b.status === "CONFIRMED"
+                      ? "✅ Confirmed"
+                      : "❌ Cancelled"}
                   </td>
+                  <td>{fmtDate(b.createdAt)}</td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+
+        {/* Pagination Controls */}
+        <div className="d-flex justify-content-center mt-3">
+          <button
+            className="btn btn-outline-primary mx-2"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            ← Trang trước
+          </button>
+          <span>
+            Trang {page + 1} / {totalPages}
+          </span>
+          <button
+            className="btn btn-outline-primary mx-2"
+            disabled={page + 1 >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Trang sau →
+          </button>
+        </div>
       </div>
     </div>
   );
