@@ -10,6 +10,7 @@ const CampingBookingScreen = () => {
   const [tentsMap, setTentsMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refresh, setRefresh] = useState(false);
 
   // pagination
   const [page, setPage] = useState(0);
@@ -25,23 +26,18 @@ const CampingBookingScreen = () => {
         const res = await axios.get(
           `http://localhost:8080/api/v1/camping/booking/${campingInforId}?page=${page}&size=${size}`,
           {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        // Dữ liệu Page object
         const data = res.data;
         const bookingsData = data.content || [];
         setBookings(bookingsData);
         setTotalPages(data.totalPages || 0);
 
-        // Lấy tents theo booking
+        // Lấy thông tin lều
         const tentPromises = bookingsData.map((b) =>
-          axios.get(
-            `http://localhost:8080/api/tents/byTentId/${b.campingTentId}`
-          )
+          axios.get(`http://localhost:8080/api/tents/byTentId/${b.campingTentId}`)
         );
         const tentResponses = await Promise.all(tentPromises);
         const tentMapData = {};
@@ -57,15 +53,34 @@ const CampingBookingScreen = () => {
       }
     };
     fetchBookings();
-  }, [campingInforId, page, size]);
+  }, [campingInforId, page, size, refresh]);
 
+  // Format helper
   const fmtDate = (iso) =>
     iso ? new Date(iso).toLocaleString("vi-VN", { hour12: false }) : "-";
-
   const fmtPrice = (val) =>
     val === null || val === undefined
       ? "-"
       : `${Number(val).toLocaleString("vi-VN")} VND`;
+
+  // ✅ Hàm cập nhật trạng thái booking
+  const handleCompleteBooking = async (bookingId) => {
+    if (!window.confirm("Xác nhận chuyển booking này sang COMPLETED?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/v1/bookings/${bookingId}/completed`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Đã chuyển sang COMPLETED thành công!");
+      setRefresh((r) => !r); // reload danh sách
+    } catch (err) {
+      console.error("Lỗi khi cập nhật trạng thái:", err);
+      alert("Không thể cập nhật trạng thái.");
+    }
+  };
 
   if (loading) return <p>Đang tải danh sách booking...</p>;
   if (error) return <p>{error}</p>;
@@ -76,10 +91,7 @@ const CampingBookingScreen = () => {
       <BannerHome />
       <div className="container py-4">
         <h2>Danh sách booking</h2>
-        <Link
-          to={`/seller/camping/${campingInforId}`}
-          className="btn btn-secondary mb-3"
-        >
+        <Link to={`/seller/camping/${campingInforId}`} className="btn btn-secondary mb-3">
           ← Quay lại camping
         </Link>
 
@@ -87,7 +99,6 @@ const CampingBookingScreen = () => {
           <thead>
             <tr>
               <th>Booking ID</th>
-              {/* <th>User ID</th> */}
               <th>Tên người dùng</th>
               <th>Lều</th>
               <th>Dịch vụ</th>
@@ -95,7 +106,8 @@ const CampingBookingScreen = () => {
               <th>Thời gian kết thúc</th>
               <th>Tổng giá</th>
               <th>Trạng thái</th>
-              <th>Thời gian tạo booking</th>
+              <th>Thời gian tạo</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -104,7 +116,6 @@ const CampingBookingScreen = () => {
               return (
                 <tr key={b.bookingId}>
                   <td>{b.bookingId}</td>
-                  {/* <td>{b.userId}</td> */}
                   <td>{b.userName || "-"}</td>
                   <td>{tent.tentName || "-"}</td>
                   <td>
@@ -119,25 +130,35 @@ const CampingBookingScreen = () => {
                     className={
                       b.status === "PENDING"
                         ? "status-pending"
-                        : b.status === "CONFIRMED"
+                        : b.status === "COMPLETED"
                         ? "status-confirmed"
                         : "status-cancelled"
                     }
                   >
                     {b.status === "PENDING"
-                      ? "⏳ Pending"
-                      : b.status === "CONFIRMED"
-                      ? "✅ Confirmed"
-                      : "❌ Cancelled"}
+                      ? "⏳ Đang xử lý"
+                      : b.status === "COMPLETED"
+                      ? "✅ Hoàn tất"
+                      : "❌ Hủy"}
                   </td>
                   <td>{fmtDate(b.createdAt)}</td>
+                  <td>
+                    {b.status === "PENDING" && (
+                      <button
+                        className="btn btn-success btn-sm"
+                        onClick={() => handleCompleteBooking(b.bookingId)}
+                      >
+                        Hoàn tất ✅
+                      </button>
+                    )}
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
 
-        {/* Pagination Controls */}
+        {/* Pagination */}
         <div className="d-flex justify-content-center mt-3">
           <button
             className="btn btn-outline-primary mx-2"

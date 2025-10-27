@@ -99,7 +99,7 @@ export default function HomePage() {
                   </div>
                   <div className="destination-footer">
                     <span className="price">
-                      <span>{tour.basePrice}</span> VND /
+                      <span>{tour.basePrice.toLocaleString() ?? 0}</span> VND /
                       người
                     </span>
                     <Link to={`/camping-detail/${tour.id}`} className="read-more">
@@ -258,7 +258,7 @@ export default function HomePage() {
   </div>
 
   <Link
-    to={`/camping-detail//${tour.id}`}
+    to={`/camping-detail/${tour.id}`}
     className="theme-btn style-two bgc-secondary explore-btn"
   >
     <span data-hover="Khám phá">Khám phá</span>

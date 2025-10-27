@@ -14,6 +14,7 @@ const TourDetailPage = ({ campingId }) => {
   const [tentAvailability, setTentAvailability] = useState([]);
   const [tourDetail, setTourDetail] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [reviews, setReviews] = useState([]); // 🟩 thêm state review
   const [totalDays, setTotalDays] = useState(0);
 
   const today = new Date().toISOString().split("T")[0];
@@ -36,8 +37,6 @@ const TourDetailPage = ({ campingId }) => {
             new Date(data.endDate).toISOString().split("T")[0]
           );
         }
-
-        console.log(data);
       } catch (error) {
         console.error("Fetch camping detail error:", error);
       }
@@ -53,7 +52,6 @@ const TourDetailPage = ({ campingId }) => {
           `http://localhost:8080/api/tents/byCampingId/${campingId}`
         );
         const data = await res.json();
-        console.log("Tent availability data:", data);
         setTentAvailability(data ?? []);
       } catch (error) {
         console.error("Fetch tents error:", error);
@@ -76,6 +74,22 @@ const TourDetailPage = ({ campingId }) => {
       }
     };
     fetchGallery();
+  }, [campingId]);
+
+  // 🟩 Fetch Reviews
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:8080/api/v1/reviews/camping/${campingId}`
+        );
+        const data = await res.json();
+        setReviews(data ?? []);
+      } catch (error) {
+        console.error("Fetch reviews error:", error);
+      }
+    };
+    fetchReviews();
   }, [campingId]);
 
   // Calculate total days
@@ -116,7 +130,7 @@ const TourDetailPage = ({ campingId }) => {
   const preparationItems = [
     { icon: "/assets/images/icon-para/sacduphong.jpg", label: "Sạc dự phòng" },
     { icon: "/assets/images/icon-para/khantam.jpg", label: "Khăn tắm đa năng" },
-    { icon: "/assets/images/icon-para/kinh.jpg", label: "Kính dâm" },
+    { icon: "/assets/images/icon-para/kinh.jpg", label: "Kính râm" },
     { icon: "/assets/images/icon-para/mayanh.jpg", label: "Máy ảnh" },
     { icon: "/assets/images/icon-para/giay.jpg", label: "Giày leo núi" },
     { icon: "/assets/images/icon-para/binhnuoc.jpg", label: "Bình nước" },
@@ -149,7 +163,7 @@ const TourDetailPage = ({ campingId }) => {
 
             {/* Gallery */}
             {galleryImages.length > 0 && (
-              <div className="gallery">
+              <div className="gallery mb-5">
                 {galleryImages.map((img) => (
                   <img
                     key={img.id}
@@ -161,6 +175,27 @@ const TourDetailPage = ({ campingId }) => {
               </div>
             )}
 
+            {/* 🟩 Reviews Section */}
+            <section className="reviews-section mb-5">
+              <h4 className="mb-3">Đánh giá từ khách hàng</h4>
+              {reviews.length > 0 ? (
+                reviews.map((rev, index) => (
+                  <div key={index} className="review-card p-3 mb-3 shadow-sm rounded">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <strong>{rev.userName}</strong>
+                      <div className="text-warning">
+                        {"★".repeat(rev.rating)}{"☆".repeat(5 - rev.rating)}
+                      </div>
+                    </div>
+                    <p className="mt-2 mb-0">{rev.comment}</p>
+                  </div>
+                ))
+              ) : (
+                <p>Chưa có đánh giá nào cho khu cắm trại này.</p>
+              )}
+            </section>
+
+            {/* Preparation Section */}
             <section id="prepare" className="mb-5">
               <TourPreparationItems items={preparationItems} />
             </section>

@@ -9,6 +9,9 @@ const CampingDetailScreen = () => {
   const navigate = useNavigate();
   const [camping, setCamping] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+const [loadingReviews, setLoadingReviews] = useState(true);
+
  // description expand state
   const [descExpanded, setDescExpanded] = useState(false);
   // 👉 OwnerId tạm thời hardcode
@@ -16,23 +19,38 @@ const CampingDetailScreen = () => {
     const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
 
-  useEffect(() => {
-    const fetchCamping = async () => {
-      try {
-        const res = await axios.get("http://localhost:8080/api/v1/camping", {
-          params: { ownerId: userId },
-        });
+ useEffect(() => {
+  const fetchCamping = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/v1/camping", {
+        params: { ownerId: userId },
+      });
+      const found = res.data.find((c) => String(c.id) === id);
+      setCamping(found || null);
+    } catch (error) {
+      console.error("Lỗi khi load camping:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        const found = res.data.find((c) => String(c.id) === id);
-        setCamping(found || null);
-      } catch (error) {
-        console.error("Lỗi khi load camping:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-       fetchCamping();
-  }, [id, userId]);
+  const fetchReviews = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:8080/api/v1/reviews/camping/${id}`
+      );
+      setReviews(res.data || []);
+    } catch (err) {
+      console.error("Lỗi khi load reviews:", err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  fetchCamping();
+  fetchReviews();
+}, [id, userId]);
+
 
   const handleDelete = async () => {
     if (!window.confirm("Bạn có chắc muốn xóa camping này?")) return;
@@ -417,7 +435,37 @@ const CampingDetailScreen = () => {
             <p>Không có thông tin lều.</p>
           )}
         </div>
+          <div className="mt-5">
+            <h4>Đánh giá từ khách hàng</h4>
 
+            {loadingReviews ? (
+              <p>Đang tải đánh giá...</p>
+            ) : reviews.length === 0 ? (
+              <p>Chưa có đánh giá nào cho camping này.</p>
+            ) : (
+              <div className="list-group">
+                {reviews.map((r, idx) => (
+                  <div key={idx} className="list-group-item">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>{r.userName}</strong>
+                        <div style={{ fontSize: 14, color: "#555" }}>
+                          Đánh giá:{" "}
+                          <span style={{ color: "#f59e0b", fontWeight: "bold" }}>
+                            {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="badge bg-light text-dark">
+                        Booking: {r.bookingId?.slice(0, 6) || "-"}
+                      </span>
+                    </div>
+                    <p className="mt-2 mb-0">{r.comment || "Không có bình luận."}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            </div>  
         {/* Discount samples */}
         {/* <div className="mt-4">
           <h4>DisCount (mẫu)</h4>

@@ -1,185 +1,176 @@
-import { useState, useEffect } from "react"
-import Header from "../components/HeaderHome"
-import Footer from "../components/FooterHome"
+import { useState, useEffect } from "react";
+import axios from "axios";
+import Header from "../components/HeaderHome";
+import Footer from "../components/FooterHome";
+import BannerHome from "../components/BannerHome";
+import "./MyBookingsPage.css";
 
 const MyBookingsPage = () => {
-  const [bookings, setBookings] = useState([])
-  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [reviewBooking, setReviewBooking] = useState(null); // booking đang đánh giá
+  const [rating, setRating] = useState("5");
+  const [comment, setComment] = useState("");
 
   useEffect(() => {
-    // Giả sử chỉ có 1 booking (nếu cần hỗ trợ nhiều booking, bạn có thể lưu danh sách trong localStorage)
-    const stored = JSON.parse(localStorage.getItem("confirmedCampingBooking"))
-    if (stored) {
-      setBookings([stored])
+    const fetchBookings = async () => {
+      try {
+        const storedUser = localStorage.getItem("user");
+        const token = localStorage.getItem("token");
+        const userId = storedUser ? JSON.parse(storedUser).id : null;
+        if (!userId || !token) return;
+
+        const res = await axios.get(
+          `http://localhost:8080/api/v1/bookings/user/${userId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setBookings(res.data);
+      } catch (error) {
+        console.error("Lỗi khi lấy booking:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
+  const openReview = (booking) => {
+    setReviewBooking(booking);
+    setRating("5");
+    setComment("");
+  };
+
+  const closeReview = () => setReviewBooking(null);
+
+  const submitReview = async () => {
+    try {
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      const userId = storedUser ? JSON.parse(storedUser).id : null;
+      if (!userId || !token || !reviewBooking) return;
+
+      const payload = {
+        userId: userId,
+        campingInforId: reviewBooking.campingInforId,
+        bookingId: reviewBooking.bookingId,
+        rating,
+        comment,
+      };
+
+      await axios.post("http://localhost:8080/api/v1/reviews", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      alert("Đánh giá thành công!");
+      closeReview();
+    } catch (error) {
+      console.error("Lỗi khi gửi đánh giá:", error);
+      alert("Gửi đánh giá thất bại.");
     }
-  }, [])
-
-  const handleCancel = () => {
-    if (window.confirm("Bạn có chắc chắn muốn hủy booking này không?")) {
-      localStorage.removeItem("confirmedCampingBooking")
-      setBookings([])
-    }
-  }
-
-  const handleViewDetail = (booking) => {
-    setSelectedBooking(booking)
-  }
-
-  const closePopup = () => {
-    setSelectedBooking(null)
-  }
+  };
 
   return (
     <>
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "30px", paddingTop: "120px", marginTop:"80px" }}>
-    <Header />
-    <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Booking của bạn</h2>
+      <Header />
+      <BannerHome/>
+      <div className="container">
+        <h2>Booking của bạn</h2>
 
-      {bookings.length === 0 ? (
-        <p style={{ textAlign: "center" }}>Bạn chưa có booking nào.</p>
-      ) : (
-        bookings.map((booking, index) => (
-          <div
-            key={index}
+        {loading ? (
+          <p style={{ textAlign: "center" }}>Đang tải...</p>
+        ) : bookings.length === 0 ? (
+          <p style={{ textAlign: "center" }}>Bạn chưa có booking nào.</p>
+        ) : (
+          <table className="table-bookings">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Thời gian</th>
+                <th>Tổng</th>
+                <th>Trạng thái</th>
+                <th>Dịch vụ</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((booking) => (
+                <tr key={booking.bookingId}>
+                  <td>{booking.bookingId}</td>
+                  <td>
+                    {new Date(booking.startTime).toLocaleDateString()} -{" "}
+                    {new Date(booking.endTime).toLocaleDateString()}
+                  </td>
+                  <td style={{ color: "#38a169" }}>
+                    {booking.totalPrice?.toLocaleString()} VND
+                  </td>
+                  <td>{booking.status}</td>
+                  <td>{booking.serviceNames?.join(", ") || "Không có dịch vụ"}</td>
+                  <td>
+                    <button
+                      className="button-detail"
+                      onClick={() => openReview(booking)}
+                    >
+                      Đánh giá
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {reviewBooking && (
+  <div className="popup-overlay">
+    <div className="popup-content">
+      <h3>Đánh giá Booking: {reviewBooking.bookingId}</h3>
+
+      {/* 5 sao */}
+      <div style={{ margin: "15px 0" }}>
+        {[1,2,3,4,5].map((star) => (
+          <span
+            key={star}
             style={{
-              border: "1px solid #ccc",
-              borderRadius: "12px",
-              padding: "20px",
-              marginBottom: "20px",
-              background: "#f9f9f9",
+              fontSize: "30px",
+              cursor: "pointer",
+              color: star <= rating ? "#FFD700" : "#ccc",
+              marginRight: "5px",
             }}
+            onClick={() => setRating(star)}
           >
-            <h3>{booking.tourTitle}</h3>
-            <p>
-              {new Date(booking.startDate).toLocaleDateString()} -{" "}
-              {new Date(booking.endDate).toLocaleDateString()}
-            </p>
-            <p>Thời gian: {booking.time}</p>
-            <p>
-              Tổng:{" "}
-              <strong style={{ color: "#38a169" }}>
-                {booking.totalPrice.toLocaleString()} VND
-              </strong>
-            </p>
+            ★
+          </span>
+        ))}
+      </div>
 
-            <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-              <button
-                onClick={() => handleViewDetail(booking)}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#4299e1",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
-              >
-                Xem chi tiết
-              </button>
-              <button
-                onClick={handleCancel}
-                style={{
-                  padding: "8px 16px",
-                  backgroundColor: "#e53e3e",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                }}
-              >
-                Hủy booking
-              </button>
-            </div>
-          </div>
-        ))
-      )}
+      {/* Nhập nhận xét */}
+      <div style={{ marginTop: "10px" }}>
+        <label>
+          Nhập nhận xét:
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            rows="4"
+            style={{ width: "100%", marginTop: "5px", padding: "5px" }}
+          />
+        </label>
+      </div>
 
-      {/* Popup chi tiết booking */}
-      {selectedBooking && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: "30px",
-              borderRadius: "10px",
-              maxWidth: "600px",
-              width: "100%",
-              maxHeight: "80vh",
-              overflowY: "auto",
-            }}
-          >
-            <h3>{selectedBooking.tourTitle}</h3>
-            <p>
-              {new Date(selectedBooking.startDate).toLocaleDateString()} -{" "}
-              {new Date(selectedBooking.endDate).toLocaleDateString()}
-            </p>
-            <p>Thời gian: {selectedBooking.time}</p>
-
-            <h4>Lều đã chọn:</h4>
-            {selectedBooking.selectedTents?.length > 0 ? (
-              selectedBooking.selectedTents.map((tent) => (
-                <p key={tent.id}>
-                  {tent.name} - {tent.quantity} cái ({tent.subtotal.toLocaleString()} VND)
-                </p>
-              ))
-            ) : (
-              <p>Không thuê lều</p>
-            )}
-
-            <h4>Đồ dùng camping:</h4>
-            {selectedBooking.selectedEquipment?.length > 0 ? (
-              selectedBooking.selectedEquipment.map((item) => (
-                <p key={item.id}>
-                  {item.name} - {item.quantity} cái ({item.subtotal.toLocaleString()} VND)
-                </p>
-              ))
-            ) : (
-              <p>Không thuê thêm đồ</p>
-            )}
-
-            <h4>Thông tin liên hệ:</h4>
-            <p>Họ tên: {selectedBooking.userInfo?.name}</p>
-            <p>SĐT: {selectedBooking.userInfo?.phone}</p>
-            <p>Email: {selectedBooking.userInfo?.email}</p>
-            {selectedBooking.userInfo?.note && <p>Ghi chú: {selectedBooking.userInfo.note}</p>}
-
-            <h4>Phương thức thanh toán:</h4>
-            <p>{selectedBooking.paymentMethod}</p>
-
-            <button
-              onClick={closePopup}
-              style={{
-                marginTop: "20px",
-                padding: "10px 20px",
-                backgroundColor: "#4a5568",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-              }}
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      )}
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "space-between" }}>
+        <button className="button-detail" onClick={submitReview}>
+          Gửi đánh giá
+        </button>
+        <button className="button-close" onClick={closeReview}>
+          Hủy
+        </button>
+      </div>
     </div>
-    <Footer/>
-</>
-  )
-}
+  </div>
+)}
 
-export default MyBookingsPage
+      </div>
+      <Footer />
+    </>
+  );
+};
+
+export default MyBookingsPage;
