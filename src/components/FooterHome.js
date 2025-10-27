@@ -91,7 +91,7 @@ export default function FooterHome() {
                   phong phú thêm những viên ngọc ẩn giấu
                 </p>
                 <div className="social-style-one mt-15">
-                  <a href="">
+                  <a href="https://www.facebook.com/profile.php?id=61571028377385">
                     <i className="fab fa-facebook-f"></i>
                   </a>
                   <a href="/contact">
@@ -113,8 +113,7 @@ export default function FooterHome() {
               data-aos-delay="50"
               data-aos-duration="1500"
               data-aos-offset="50"
-            >
-            </div>
+            ></div>
           </div>
         </div>
       </div>
@@ -167,7 +166,7 @@ export default function FooterHome() {
                   </li>
                   <li>
                     <i className="fal fa-phone-volume"></i>{" "}
-                    <a href="tel:+88012334588">+880 (123) 345 88</a>
+                    <a href="tel:+88012334588">0866458780</a>
                   </li>
                 </ul>
               </div>

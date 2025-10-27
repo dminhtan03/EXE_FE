@@ -1,50 +1,54 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
 const Sidebar = ({ activeSection, setActiveSection }) => {
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const { logout } = useAuth();
   useEffect(() => {
-    fetchPendingRequestsCount()
-  }, [])
+    fetchPendingRequestsCount();
+  }, []);
 
   const fetchPendingRequestsCount = async () => {
     try {
-      setIsLoading(true)
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/partner-requests/count`)
+      setIsLoading(true);
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/partner-requests/count`
+      );
 
       if (!response.ok) {
-        throw new Error("API không khả dụng")
+        throw new Error("API không khả dụng");
       }
 
-      const data = await response.json()
-      setPendingRequestsCount(data.count || 0)
+      const data = await response.json();
+      setPendingRequestsCount(data.count || 0);
     } catch (error) {
-      console.error("Lỗi khi tải số lượng yêu cầu:", error)
+      console.error("Lỗi khi tải số lượng yêu cầu:", error);
       // Mock data for camping website
-      setPendingRequestsCount(5)
+      setPendingRequestsCount(5);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const menuItems = [
     {
       id: "dashboard",
       label: "Tổng Quan",
-      icon: "📊"
+      icon: "📊",
     },
     {
       id: "users",
       label: "Khách Hàng Camping",
-      icon: "🏕️"
+      icon: "🏕️",
     },
     {
       id: "partners",
       label: "Đối Tác Camping",
-      icon: "🤝"
+      icon: "🤝",
     },
     {
       id: "partner-requests",
@@ -56,9 +60,9 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
     {
       id: "invoices",
       label: "Quản Lý Hóa Đơn",
-      icon: "🧾"
+      icon: "🧾",
     },
-  ]
+  ];
 
   return (
     <aside className="admin-sidebar">
@@ -85,7 +89,9 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
               </div>
 
               {item.badge && (
-                <span className={`nav-badge ${item.isLoading ? "loading" : ""}`}>
+                <span
+                  className={`nav-badge ${item.isLoading ? "loading" : ""}`}
+                >
                   {item.isLoading ? "..." : item.badge}
                 </span>
               )}
@@ -104,13 +110,22 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
           <span>Trang chủ</span>
         </button>
 
-        <button className="logout-btn" title="Đăng xuất">
+        <button
+          className="dropdown-item"
+          onClick={() => {
+            logout();
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setProfile(null);
+            setShowDropdown(false);
+          }}
+        >
           <span>🚪</span>
           <span>Đăng xuất</span>
         </button>
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default Sidebar
+export default Sidebar;

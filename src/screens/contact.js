@@ -78,7 +78,7 @@ const ContactPage = () => {
                       <i className="fab fa-facebook-f"></i>
                     </div>
                     <div className="content">
-                      <h5>Fan page</h5>
+                      <h5>Fanpage</h5>
                       <div className="text">
                         <i className="fab fa-facebook"></i>{" "}
                         <a
@@ -124,7 +124,7 @@ const ContactPage = () => {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          0901 234 567
+                          0866458780
                         </a>
                       </div>
                     </div>
@@ -135,9 +135,8 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
-
       {/* Contact Form Area */}
-      <section className="contact-form-area py-70 rel z-1">
+      {/* <section className="contact-form-area py-70 rel z-1">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-lg-7">
@@ -264,7 +263,7 @@ const ContactPage = () => {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Contact Map */}
       <div className="contact-map">

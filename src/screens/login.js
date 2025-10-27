@@ -31,6 +31,41 @@ const AuthPage = () => {
   const [imagePreview, setImagePreview] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const decodeToken = (token) => {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error("Lỗi decode token:", e);
+      return null;
+    }
+  };
+
+  const getRoleFromToken = (decoded) => {
+    if (!decoded || !decoded.roles) return "GUEST";
+
+    const authorities = decoded.roles.map((r) => r.authority);
+
+    const isAdmin = [
+      "ROLE_ADMIN",
+      "ROLE_MAKE",
+      "ROLE_CHECK",
+      "ROLE_READ",
+      "ROLE_DELETE",
+    ].every((perm) => authorities.includes(perm));
+    if (isAdmin) return "ADMIN";
+
+    if (authorities.includes("ROLE_PARTNER")) return "PARTNER";
+    if (authorities.includes("ROLE_USER")) return "USER";
+    return "GUEST";
+  };
   const navigate = useNavigate();
 
   const switchRegisterType = (type) => {
@@ -53,7 +88,14 @@ const AuthPage = () => {
     try {
       const res = await login(email, password);
       console.log("Login success:", res);
-      navigate("/");
+      const token = localStorage.getItem("token");
+      const decoded = decodeToken(token);
+      const role = getRoleFromToken(decoded);
+      if (role === "ADMIN") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {
