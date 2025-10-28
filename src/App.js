@@ -32,6 +32,7 @@ import MarketplaceEditScreen from "./screens/MarketplaceEditScreen";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
+import CommunityFeed from "./components/CommunityFeed";
 
 
 
@@ -76,6 +77,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/tours" element={<Tours />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/community" element={<CommunityFeed />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/marketplace" element={<MarketplaceScreen />} />
             <Route path="/marketplace/create" element={<MarketplaceCreateScreen />} />
