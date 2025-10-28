@@ -175,6 +175,9 @@ const HeaderHome = () => {
               <li className={isActive("/marketplace")}>
                 <Link to="/marketplace">Marketplace</Link>
               </li>
+              <li className={isActive("/community")}>
+                <Link to="/community">Cộng đồng</Link>
+              </li>
               <li className={isActive("/tours")}>
                 <Link to="/tours">Điểm đến</Link>
               </li>
