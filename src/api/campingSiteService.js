@@ -15,6 +15,20 @@ export const getAllCampingSites = async () => {
   }
 };
 
+// 🔎 Tìm kiếm camping info theo tên (query param `name`)
+export const searchCampingInforsByName = async (name) => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/search-infors`, {
+      params: { name },
+    });
+    console.log("Kết quả tìm kiếm camping infors:", res.data);
+    return res.data;
+  } catch (error) {
+    console.error("Lỗi khi gọi API search-infors:", error);
+    throw error;
+  }
+};
+
 // 🏕️ Lấy chi tiết địa điểm camping theo ID
 export const getCampingRoomsBySiteId = async (campingSiteId) => {
   try {

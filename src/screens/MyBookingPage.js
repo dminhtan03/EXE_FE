@@ -103,7 +103,7 @@ const MyBookingsPage = () => {
             <table className="table-bookings">
               <thead>
                 <tr>
-                  <th>Booking ID</th>
+                  <th>Booking No</th>
                   <th>Thời gian</th>
                   <th>Tổng</th>
                   <th>Trạng thái</th>
@@ -112,9 +112,9 @@ const MyBookingsPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.map((booking) => (
+                {bookings.map((booking, index) => (
                   <tr key={booking.bookingId}>
-                    <td>{booking.bookingId}</td>
+                    <td>{index + 1}</td>
                     <td>
                       {new Date(booking.startTime).toLocaleDateString()} -{" "}
                       {new Date(booking.endTime).toLocaleDateString()}

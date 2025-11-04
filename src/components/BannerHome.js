@@ -1,29 +1,33 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllCampingSites } from "../api/campingSiteService";
+import {
+  getAllCampingSites,
+  searchCampingInforsByName,
+} from "../api/campingSiteService";
 import axios from "axios";
-
+import { Input, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 
 export default function BannerHome() {
   const formRef = useRef();
   const navigate = useNavigate();
   const [campingSites, setCampingSites] = useState([]);
+  const [searchLocation, setSearchLocation] = useState("");
+  const [selectedDestination, setSelectedDestination] = useState("");
   const fetched = useRef(false); // ✅ kiểm soát chỉ fetch 1 lần
 
-useEffect(() => {
-  const fetchCampingSites = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
-      console.log("Camping sites:", res.data);
-      setCampingSites(res.data || []);
-    } catch (err) {
-      console.error("Error fetching camping sites:", err);
-      setCampingSites([]); // đảm bảo không bị undefined
-    }
-  };
-  fetchCampingSites();
-}, []);
-  
+  useEffect(() => {
+    const fetchCampingSites = async () => {
+      try {
+        const data = await getAllCampingSites();
+        setCampingSites(data || []);
+      } catch (error) {
+        console.error("❌ Lỗi khi tải danh sách camping:", error);
+      }
+    };
+    fetchCampingSites();
+  }, []);
+
   useEffect(() => {
     const loadScript = (src) =>
       new Promise((resolve, reject) => {
@@ -55,30 +59,44 @@ useEffect(() => {
     loadScripts();
   }, []);
 
-  useEffect(() => {
-    if (fetched.current) return; // ✅ bỏ qua lần thứ 2
-    fetched.current = true;
+  const handleSearchLocation = async (value) => {
+    setSearchLocation(value);
+    setSelectedDestination(""); // reset lựa chọn select
 
-    const fetchCampingSites = async () => {
-      try {
-        const data = await getAllCampingSites();
-        setCampingSites(data || []);
-      } catch (error) {
-        console.error("❌ Lỗi khi gọi API:", error);
+    if (!value.trim()) {
+      message.warning("Vui lòng nhập tên địa điểm để tìm kiếm!");
+      return;
+    }
+
+    try {
+      const data = await searchCampingInforsByName(value);
+      if (data && data.length > 0) {
+        const first = data[0];
+        const siteId = first.campingSiteId ?? first.id ?? first._id ?? null;
+        navigate(`/tours?name=${encodeURIComponent(value)}&siteId=${siteId}`);
+      } else {
+        message.info("Không tìm thấy địa điểm nào phù hợp!");
       }
-    };
-    fetchCampingSites();
-  }, []);
+    } catch (error) {
+      console.error("❌ Lỗi khi tìm kiếm địa điểm:", error);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(formRef.current);
-    console.log("Form submitted:", {
-      destination: formData.get("destination"),
-      startDate: formData.get("start_date"),
-      endDate: formData.get("end_date"),
-    });
-    navigate(`/tours?siteId=${formData.get("destination")}`);
+    const destination = formData.get("destination");
+
+    if (!destination && !searchLocation.trim()) {
+      message.warning("Vui lòng chọn hoặc nhập địa điểm để tìm kiếm!");
+      return;
+    }
+
+    if (destination) {
+      navigate(`/tours?siteId=${destination}`);
+    } else {
+      navigate(`/tours?name=${encodeURIComponent(searchLocation)}`);
+    }
   };
 
   return (
@@ -90,7 +108,6 @@ useEffect(() => {
           data-aos="flip-up"
           data-aos-delay="50"
           data-aos-duration="1500"
-          data-aos-offset="50"
         >
           CAMPVERSE
         </h1>
@@ -106,65 +123,73 @@ useEffect(() => {
             className="search-filter-inner"
             data-aos="zoom-out-down"
             data-aos-duration="1500"
-            data-aos-offset="50"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "15px",
+              justifyContent: "center",
+            }}
           >
-            {/* Điểm đến */}
-            <div className="filter-item clearfix">
+            {/* 🔸 1️⃣ Cách 1: chọn điểm đến */}
+            <div className="filter-item clearfix" style={{ flex: "1 1 250px" }}>
               <div className="icon">
                 <i className="fal fa-map-marker-alt"></i>
               </div>
               <span className="title">Điểm đến</span>
               <select
-                key={campingSites.length} // 👈 thêm dòng này
                 name="destination"
                 id="destination"
-                required
+                value={selectedDestination}
+                onChange={(e) => {
+                  setSelectedDestination(e.target.value);
+                  setSearchLocation("");
+                }}
               >
                 <option value="">Chọn điểm đến</option>
-                {campingSites.length > 0 ? (
-                  campingSites.map((site) => (
-                    <option key={site.id} value={site.id}>
-                      {site.location}
+                {campingSites.map((site) => {
+                  const id = site.campingSiteId ?? site.id ?? site._id;
+                  const label =
+                    site.campingSiteName ??
+                    site.name ??
+                    site.location ??
+                    site.address ??
+                    id;
+                  return (
+                    <option key={id} value={id}>
+                      {label}
                     </option>
-                  ))
-                ) : (
-                  <option disabled>Đang tải...</option>
-                )}
+                  );
+                })}
               </select>
             </div>
 
-            {/* Ngày đi */}
-            <div className="filter-item clearfix">
+            {/* 🔸 2️⃣ Cách 2: tìm kiếm theo tên */}
+            <div className="filter-item clearfix" style={{ flex: "1 1 250px" }}>
               <div className="icon">
-                <i className="fal fa-calendar-alt"></i>
+                <i className="fal fa-search-location"></i>
               </div>
-              <span className="title">Ngày khởi hành</span>
-              <input
-                type="text"
-                name="start_date"
-                className="datetimepicker datetimepicker-custom"
-                placeholder="Chọn ngày đi"
-                readOnly
+              <span className="title">Tìm địa điểm camping</span>
+              <Input.Search
+                placeholder="Nhập tên địa điểm camping..."
+                enterButton={<SearchOutlined />}
+                size="large"
+                allowClear
+                value={searchLocation}
+                onChange={(e) => setSearchLocation(e.target.value)}
+                onSearch={handleSearchLocation}
               />
             </div>
 
-            {/* Ngày về */}
-            <div className="filter-item clearfix">
-              <div className="icon">
-                <i className="fal fa-calendar-alt"></i>
-              </div>
-              <span className="title">Ngày kết thúc</span>
-              <input
-                type="text"
-                name="end_date"
-                className="datetimepicker datetimepicker-custom"
-                placeholder="Chọn ngày về"
-                readOnly
-              />
-            </div>
-
-            {/* Nút tìm kiếm */}
-            <div className="search-button">
+            {/* 🔸 Nút tìm kiếm */}
+            <div
+              className="search-button"
+              style={{
+                flex: "0 1 150px",
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "center",
+              }}
+            >
               <button className="theme-btn" type="submit">
                 <span data-hover="Tìm kiếm">Tìm kiếm</span>
                 <i className="far fa-search"></i>
