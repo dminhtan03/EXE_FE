@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-    getAllInvoices,
+    getAllBookings,
     searchInvoices,
     getInvoiceById,
 } from "../../api/invoiceAdminService";
@@ -57,7 +57,7 @@ export default function InvoiceAdmin() {
                     size: pageSize,
                 });
             } else {
-                data = await getAllInvoices(pageNumber, pageSize);
+                data = await getAllBookings(pageNumber, pageSize);
             }
 
             setInvoices(data.content);

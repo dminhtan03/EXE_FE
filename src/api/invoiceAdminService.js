@@ -3,9 +3,19 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/api/v1/admin/invoices";
 
 // Lấy danh sách hóa đơn phân trang
-export const getAllInvoices = async (page = 0, size = 10) => {
-  const res = await axios.get(`${API_URL}?page=${page}&size=${size}`);
-  return res.data;
+// export const getAllInvoices = async (page = 0, size = 10) => {
+//   const res = await axios.get(`${API_URL}?page=${page}&size=${size}`);
+//   return res.data;
+// };
+
+export const getAllBookings = async (page = 0, size = 10) => {
+  try {
+    const res = await axios.get(`${API_URL}?page=${page}&size=${size}`);
+    return res.data; // trả về Page<BookingByUserIdResponse>
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    throw error;
+  }
 };
 
 // Tìm kiếm hóa đơn (bookingId, start, end, phân trang)
