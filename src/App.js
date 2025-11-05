@@ -1,4 +1,4 @@
-import React,{ useEffect } from "react";
+import React, { useEffect } from "react";
 import { initGA, trackPageView } from "./hooks/useAnalytics";
 import { usePageTracking } from "./hooks/usePageTracking";
 
@@ -33,8 +33,7 @@ import AdminDashboard from "./components/admin/AdminDashboard";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
 import CommunityFeed from "./components/CommunityFeed";
-
-
+import MyPostPage from "./components/MyPostPage";
 
 import CampingBookingScreen from "./screens/partner/CampingBookingScreen";
 import HomePartnerPage from "./screens/partner/home_partner";
@@ -65,69 +64,81 @@ const AdminLayout = () => (
 );
 
 export default function App() {
-
   // usePageTracking();
   return (
     <AuthProvider>
       <BrowserRouter>
-      <PageTrackingWrapper>
-        <Routes>
-          {/* Public routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/tours" element={<Tours />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/community" element={<CommunityFeed />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/marketplace" element={<MarketplaceScreen />} />
-            <Route path="/marketplace/create" element={<MarketplaceCreateScreen />} />
-            <Route path="/marketplace/my-products" element={<MyProductsScreen />} />
-            <Route path="marketplace/edit/:id" element={<MarketplaceEditScreen />} />
-          </Route>
+        <PageTrackingWrapper>
+          <Routes>
+            {/* Public routes */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/tours" element={<Tours />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/community" element={<CommunityFeed />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/marketplace" element={<MarketplaceScreen />} />
+              <Route path="/my-post" element={<MyPostPage />} />
+              <Route
+                path="/marketplace/create"
+                element={<MarketplaceCreateScreen />}
+              />
+              <Route
+                path="/marketplace/my-products"
+                element={<MyProductsScreen />}
+              />
+              <Route
+                path="marketplace/edit/:id"
+                element={<MarketplaceEditScreen />}
+              />
+            </Route>
 
-          <Route path="/my-bookings" element={<MyBookingsPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route
-            path="/camping-detail/:campingId"
-            element={<TourDetailWrapper />}
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/verify-otp" element={<OTPInputPage />} />
-          <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
-          <Route path="/profile" element={<UserProfileModal />} />
-          {/* <Route path="/change-password" element={<ChangePasswordModal />} /> */}
+            <Route path="/my-bookings" element={<MyBookingsPage />} />
+            <Route path="/payment" element={<PaymentPage />} />
 
-          {/* Partner routes */}
-          <Route path="/seller" element={<PartnerLayout />}>
-            <Route index element={<HomePartnerPage />} />
-            <Route path="/seller/managercamping" element={<ManagerCamping />} />
-            <Route path="/seller/createCamp" element={<CreateCamping />} />
             <Route
-              path="/seller/camping/:id"
-              element={<CampingDetailScreen />}
+              path="/camping-detail/:campingId"
+              element={<TourDetailWrapper />}
             />
-            <Route
+            <Route path="/login" element={<Login />} />
+            <Route path="/verify-otp" element={<OTPInputPage />} />
+            <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+            <Route path="/profile" element={<UserProfileModal />} />
+            {/* <Route path="/change-password" element={<ChangePasswordModal />} /> */}
+
+            {/* Partner routes */}
+            <Route path="/seller" element={<PartnerLayout />}>
+              <Route index element={<HomePartnerPage />} />
+              <Route
+                path="/seller/managercamping"
+                element={<ManagerCamping />}
+              />
+              <Route path="/seller/createCamp" element={<CreateCamping />} />
+              <Route
+                path="/seller/camping/:id"
+                element={<CampingDetailScreen />}
+              />
+              <Route
                 path="/seller/:campingInforId/bookings"
                 element={<CampingBookingScreen />}
-            />
-            <Route
-              path="/seller/createCamp/:campingId"
-              element={<CreateCamping />}
-            />
-          </Route>
+              />
+              <Route
+                path="/seller/createCamp/:campingId"
+                element={<CreateCamping />}
+              />
+            </Route>
 
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="users" element={<ManagerUser />} />
-            <Route path="partners" element={<ManagerPartner />} />
-          </Route>
-        </Routes>
+            {/* Admin routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<ManagerUser />} />
+              <Route path="partners" element={<ManagerPartner />} />
+            </Route>
+          </Routes>
         </PageTrackingWrapper>
       </BrowserRouter>
     </AuthProvider>
   );
-  
 }
 const PageTrackingWrapper = ({ children }) => {
   usePageTracking();

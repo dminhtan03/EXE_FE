@@ -273,6 +273,15 @@ const HeaderHome = () => {
                                 Đổi mật khẩu
                               </button>
                             </li>
+                            <li>
+                              <Link
+                                to="/my-post"
+                                className="dropdown-item"
+                                onClick={() => setShowDropdown(false)}
+                              >
+                                Bài đăng của tôi
+                              </Link>
+                            </li>
                             {userRole === "USER" && (
                               <li>
                                 <Link
