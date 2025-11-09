@@ -4,33 +4,34 @@ import axios from "axios";
 import "./CreateCamping.css";
 import BannerHome from "../../components/BannerHome";
 
+// ================== Cấu hình Cloudinary ==================
+const CLOUDINARY_CLOUD_NAME = "dex1n6s6f"; // Cloud name của bạn
+const CLOUDINARY_UPLOAD_PRESET = "uploadCampverse"; // Unsigned preset bạn tạo
+
 const CreateCamping = () => {
   const { campingId } = useParams();
   const [services, setServices] = useState([]);
   const [message, setMessage] = useState("");
- const [campingSites ,setCampingSites]= useState([]);
+  const [campingSites, setCampingSites] = useState([]);
   const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
-  
 
-// lay campingSite
-useEffect(() => {
-  const fetchCampingSites = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
-      console.log("Camping sites:", res.data);
-      setCampingSites(res.data || []);
-    } catch (err) {
-      console.error("Error fetching camping sites:", err);
-      setCampingSites([]); // đảm bảo không bị undefined
-    }
-  };
-  fetchCampingSites();
-}, []);
+  // ================== Load camping sites ==================
+  useEffect(() => {
+    const fetchCampingSites = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
+        setCampingSites(res.data || []);
+      } catch (err) {
+        console.error("Error fetching camping sites:", err);
+      }
+    };
+    fetchCampingSites();
+  }, []);
 
-// Dữ liệu chính
+  // ================== Form state ==================
   const [formData, setFormData] = useState({
-    userId: userId,
+    userId,
     campingSiteId: "",
     name: "",
     address: "",
@@ -52,9 +53,15 @@ useEffect(() => {
     quantity: "",
     thumbnail: "",
   });
-  const [newGallery, setNewGallery] = useState("");
 
-  // Lấy danh sách services có sẵn
+  // ================== Loading states cho upload ==================
+  const [uploading, setUploading] = useState({
+    thumbnail: false,
+    gallery: false,
+    tentThumbnail: false,
+  });
+
+  // ================== Load services ==================
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -67,40 +74,38 @@ useEffect(() => {
     fetchServices();
   }, []);
 
-  // Nếu có campingId thì load data cũ
+  // ================== Load camping khi cập nhật ==================
   useEffect(() => {
-  if (!campingId) return;
+    if (!campingId) return;
 
-  const fetchCamping = async () => {
-    try {
-      const [campingRes, serviceRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/v1/camping/${campingId}`),
-        axios.get("http://localhost:8080/api/v1/service")
-      ]);
+    const fetchCamping = async () => {
+      try {
+        const [campingRes, serviceRes] = await Promise.all([
+          axios.get(`http://localhost:8080/api/v1/camping/${campingId}`),
+          axios.get("http://localhost:8080/api/v1/service"),
+        ]);
 
-      const serviceList = serviceRes.data;
-      const campingData = campingRes.data;
+        const serviceList = serviceRes.data;
+        const campingData = campingRes.data;
 
-      // Map lại services để có serviceName
-      const updatedServices = (campingData.services || []).map((s) => {
-        const match = serviceList.find((srv) => srv.id === s.serviceId);
-        return {
-          ...s,
-          serviceName: match ? match.serviceName : s.serviceName || "Unknown",
-        };
-      });
+        const updatedServices = (campingData.services || []).map((s) => {
+          const match = serviceList.find((srv) => srv.id === s.serviceId);
+          return {
+            ...s,
+            serviceName: match ? match.serviceName : s.serviceName || "Unknown",
+          };
+        });
 
-      setFormData({ ...campingData, services: updatedServices });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        setFormData({ ...campingData, services: updatedServices });
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  fetchCamping();
-}, [campingId]);
+    fetchCamping();
+  }, [campingId]);
 
-
-  // Xử lý input
+  // ================== Xử lý input ==================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -109,23 +114,23 @@ useEffect(() => {
     }));
   };
 
-  // Thêm dịch vụ (từ danh sách hoặc tùy chỉnh)
-const handleAddService = () => {
-  if (!newService.serviceName.trim()) return alert("Nhập tên dịch vụ mới!");
-  setFormData((prev) => ({
-    ...prev,
-    services: [
-      ...prev.services,
-      {
-        customName: newService.serviceName, // ✅ Đổi key ở đây
-        price: parseFloat(newService.price),
-      },
-    ],
-  }));
-  setNewService({ serviceName: "", price: "" });
-};
+  // ================== Thêm/xóa Services ==================
+  const handleAddService = () => {
+    if (!newService.serviceName.trim()) return alert("Nhập tên dịch vụ mới!");
+    setFormData((prev) => ({
+      ...prev,
+      services: [
+        ...prev.services,
+        {
+          customName: newService.serviceName,
+          price: parseFloat(newService.price) || 0,
+        },
+      ],
+    }));
+    setNewService({ serviceName: "", price: "" });
+  };
 
-
+  // ================== Thêm/xóa Tents ==================
   const handleAddTent = () => {
     if (!newTent.tentName.trim()) return alert("Nhập tên lều!");
     setFormData((prev) => ({
@@ -140,22 +145,7 @@ const handleAddService = () => {
         },
       ],
     }));
-    setNewTent({
-      tentName: "",
-      capacity: "",
-      pricePerNight: "",
-      quantity: "",
-      thumbnail: "",
-    });
-  };
-
-  const handleAddGallery = () => {
-    if (!newGallery.trim()) return alert("Nhập URL ảnh!");
-    setFormData((prev) => ({
-      ...prev,
-      galleries: [...prev.galleries, { imageUrl: newGallery }],
-    }));
-    setNewGallery("");
+    setNewTent({ tentName: "", capacity: "", pricePerNight: "", quantity: "", thumbnail: "" });
   };
 
   const handleRemoveItem = (field, index) => {
@@ -165,35 +155,156 @@ const handleAddService = () => {
     }));
   };
 
-  // Gửi dữ liệu
+  // ================== Upload Cloudinary ==================
+  const handleUploadImage = async (file) => {
+    // Validation file
+    if (!file) {
+      alert("Vui lòng chọn file ảnh!");
+      return null;
+    }
+
+    // Kiểm tra loại file
+    if (!file.type.startsWith("image/")) {
+      alert("File phải là ảnh (JPG, PNG, GIF, etc.)!");
+      return null;
+    }
+
+    // Kiểm tra kích thước file (tối đa 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert("Kích thước ảnh không được vượt quá 10MB!");
+      return null;
+    }
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+    try {
+      const res = await axios.post(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      // Lấy secure_url từ Cloudinary response
+      const imageUrl = res.data?.secure_url;
+      if (!imageUrl) {
+        throw new Error("Không nhận được URL từ Cloudinary");
+      }
+
+      return imageUrl;
+    } catch (err) {
+      console.error("Upload failed:", err.response?.data || err.message);
+      alert("Lỗi khi upload ảnh lên Cloudinary. Vui lòng thử lại!");
+      return null;
+    }
+  };
+
+  const handleThumbnailChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading((prev) => ({ ...prev, thumbnail: true }));
+    try {
+      // Upload ảnh lên Cloudinary
+      const imageUrl = await handleUploadImage(file);
+      
+      if (imageUrl) {
+        // Lưu link ảnh từ Cloudinary vào formData
+        // Link này sẽ được lưu vào database khi submit form
+        setFormData((prev) => ({ ...prev, thumbnail: imageUrl }));
+      }
+    } finally {
+      setUploading((prev) => ({ ...prev, thumbnail: false }));
+      // Reset input để có thể chọn lại cùng file
+      e.target.value = "";
+    }
+  };
+
+  const handleGalleryChange = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setUploading((prev) => ({ ...prev, gallery: true }));
+    try {
+      // Upload tất cả ảnh lên Cloudinary
+      const uploadPromises = files.map((file) => handleUploadImage(file));
+      const imageUrls = await Promise.all(uploadPromises);
+      
+      // Lọc các URL hợp lệ và lưu vào formData
+      // Các link này sẽ được lưu vào database khi submit form
+      const validUrls = imageUrls.filter(Boolean);
+      if (validUrls.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          galleries: [
+            ...prev.galleries,
+            ...validUrls.map((url) => ({ imageUrl: url })),
+          ],
+        }));
+      }
+    } finally {
+      setUploading((prev) => ({ ...prev, gallery: false }));
+      // Reset input để có thể chọn lại cùng file
+      e.target.value = "";
+    }
+  };
+
+  const handleTentThumbnailChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploading((prev) => ({ ...prev, tentThumbnail: true }));
+    try {
+      // Upload ảnh lên Cloudinary
+      const imageUrl = await handleUploadImage(file);
+      
+      if (imageUrl) {
+        // Lưu link ảnh từ Cloudinary vào newTent
+        // Link này sẽ được lưu vào database khi thêm tent
+        setNewTent((prev) => ({ ...prev, thumbnail: imageUrl }));
+      }
+    } finally {
+      setUploading((prev) => ({ ...prev, tentThumbnail: false }));
+      // Reset input để có thể chọn lại cùng file
+      e.target.value = "";
+    }
+  };
+
+  // ================== Submit form ==================
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const api = campingId
         ? `http://localhost:8080/api/v1/camping/update/${campingId}`
         : "http://localhost:8080/api/v1/camping";
-
       const method = campingId ? "put" : "post";
 
       const res = await axios[method](api, formData);
 
       if (res.status === 200 || res.status === 201) {
         setMessage(campingId ? "Cập nhật thành công!" : "Tạo mới thành công!");
-        if (!campingId)
+        if (!campingId) {
           setFormData({
-            userId: userId,
+            userId,
             campingSiteId: "",
             name: "",
             address: "",
             description: "",
             basePrice: "",
-            capacity: "",
+            capacity: "1",
             thumbnail: "",
             active: true,
             services: [],
             tents: [],
             galleries: [],
           });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -201,6 +312,7 @@ const handleAddService = () => {
     }
   };
 
+  // ================== Render ==================
   return (
     <>
       <BannerHome />
@@ -212,226 +324,135 @@ const handleAddService = () => {
         {message && <p>{message}</p>}
 
         <form onSubmit={handleSubmit}>
+          {/* Tên Camping */}
           <div className="form-section">
             <label>Tên Camping:</label>
-            <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            <input name="name" value={formData.name} onChange={handleChange} required />
           </div>
 
+          {/* Chọn Camping Site */}
           <div className="form-section">
-              <label>Chọn Camping Site:</label>
-              <select
-                name="campingSiteId"
-                value={formData.campingSiteId}
-                onChange={handleChange}
-                required
-              >
-                <option value="">-- Chọn một site --</option>
-                {Array.isArray(campingSites) && campingSites.length > 0 ? (
-                  campingSites.map((site) => (
-                    <option key={site.id} value={site.id}>
-                      {site.location}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Không có site nào</option>
-                )}
-              </select>
-            </div>
+            <label>Chọn Camping Site:</label>
+            <select name="campingSiteId" value={formData.campingSiteId} onChange={handleChange} required>
+              <option value="">-- Chọn một site --</option>
+              {campingSites.length > 0
+                ? campingSites.map((site) => <option key={site.id} value={site.id}>{site.location}</option>)
+                : <option disabled>Không có site nào</option>}
+            </select>
+          </div>
 
-
+          {/* Địa chỉ */}
           <div className="form-section">
             <label>Địa chỉ:</label>
-            <input
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
+            <input name="address" value={formData.address} onChange={handleChange} required />
           </div>
 
+          {/* Mô tả */}
           <div className="form-section">
             <label>Mô tả:</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-            ></textarea>
+            <textarea name="description" value={formData.description} onChange={handleChange}></textarea>
           </div>
 
+          {/* Giá cơ bản, sức chứa, active */}
           <div className="form-row">
             <div>
               <label>Giá cơ bản:</label>
-              <input
-                type="number"
-                name="basePrice"
-                value={formData.basePrice}
-                onChange={handleChange}
-              />
+              <input type="number" name="basePrice" value={formData.basePrice} onChange={handleChange} />
             </div>
-            <div>
+            {/* <div>
               <label>Sức chứa:</label>
-              <input
-                type="number"
-                name="capacity"
-                value={formData.capacity}
-                onChange={handleChange}
-              />
-            </div>
+              <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
+            </div> */}
             <div>
               <label>Kích hoạt:</label>
-              <input
-                type="checkbox"
-                name="active"
-                checked={formData.active}
-                onChange={handleChange}
-              />
+              <input type="hidden" name="active" checked={formData.active} onChange={handleChange} />
             </div>
           </div>
 
+          {/* Thumbnail */}
           <div className="form-section">
-            <label>Ảnh đại diện (Thumbnail URL):</label>
-            <input
-              name="thumbnail"
-              value={formData.thumbnail}
-              onChange={handleChange}
+            <label>Ảnh đại diện (Thumbnail):</label>
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleThumbnailChange}
+              disabled={uploading.thumbnail}
             />
+            {uploading.thumbnail && <p>Đang upload ảnh vui lòng đợi...</p>}
+            {formData.thumbnail && (
+              <img src={formData.thumbnail} alt="thumbnail" className="preview-img" />
+            )}
           </div>
 
-          {/* 🎪 Quản lý lều */}
+          {/* Tents */}
           <div className="nested-section">
             <h3>Danh sách lều (Tents)</h3>
             {formData.tents.map((t, i) => (
               <div key={i} className="nested-item">
-                <p>
-                  {t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x{" "}
-                  {t.quantity} lều
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItem("tents", i)}
-                >
-                  Xóa
-                </button>
+                <p>{t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x {t.quantity} lều</p>
+                {t.thumbnail && <img src={t.thumbnail} alt={t.tentName} className="preview-img" />}
+                <button type="button" onClick={() => handleRemoveItem("tents", i)}>Xóa</button>
               </div>
             ))}
-
             <div className="add-subform">
-              <input
-                placeholder="Tên lều"
-                value={newTent.tentName}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, tentName: e.target.value })
-                }
+              <input placeholder="Tên lều" value={newTent.tentName} onChange={(e) => setNewTent({ ...newTent, tentName: e.target.value })} />
+              <input placeholder="Sức chứa" value={newTent.capacity} onChange={(e) => setNewTent({ ...newTent, capacity: e.target.value })} />
+              <input placeholder="Giá/đêm" value={newTent.pricePerNight} onChange={(e) => setNewTent({ ...newTent, pricePerNight: e.target.value })} />
+              <input placeholder="Số lượng" value={newTent.quantity} onChange={(e) => setNewTent({ ...newTent, quantity: e.target.value })} />
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleTentThumbnailChange}
+                disabled={uploading.tentThumbnail}
               />
-              <input
-                placeholder="Sức chứa"
-                value={newTent.capacity}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, capacity: e.target.value })
-                }
-              />
-              <input
-                placeholder="Giá/đêm"
-                value={newTent.pricePerNight}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, pricePerNight: e.target.value })
-                }
-              />
-              <input
-                placeholder="Số lượng"
-                value={newTent.quantity}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, quantity: e.target.value })
-                }
-              />
-              <input
-                placeholder="Thumbnail URL"
-                value={newTent.thumbnail}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, thumbnail: e.target.value })
-                }
-              />
-              <p></p>
-              <button type="button" onClick={handleAddTent}>
-                + Thêm lều
-              </button>
+              {uploading.tentThumbnail && <p>Đang upload ảnh lên Cloudinary...</p>}
+              {newTent.thumbnail && (
+                <img src={newTent.thumbnail} alt="Tent Thumbnail" className="preview-img" />
+              )}
+              <button type="button" onClick={handleAddTent}>+ Thêm lều</button>
             </div>
           </div>
 
-          {/* 🧺 Dịch vụ */}
+          {/* Services */}
           <div className="nested-section">
             <h3>Dịch vụ (Services)</h3>
             {formData.services.map((s, i) => (
               <div key={i} className="nested-item">
-                <p>
-                  {s.serviceName || s.serviceId} - {s.price}$
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItem("services", i)}
-                >
-                  Xóa
-                </button>
+                <p>{s.serviceName || s.serviceId} - {s.price}$</p>
+                <button type="button" onClick={() => handleRemoveItem("services", i)}>Xóa</button>
               </div>
             ))}
-
             <div className="add-subform">
-              <input
-                placeholder="Tên dịch vụ"
-                value={newService.serviceName}
-                onChange={(e) =>
-                  setNewService({ ...newService, serviceName: e.target.value })
-                }
-              />
-              <input
-                placeholder="Giá"
-                value={newService.price}
-                onChange={(e) =>
-                  setNewService({ ...newService, price: e.target.value })
-                }
-              />
-              <button type="button" onClick={handleAddService}>
-                + Thêm dịch vụ
-              </button>
+              <input placeholder="Tên dịch vụ" value={newService.serviceName} onChange={(e) => setNewService({ ...newService, serviceName: e.target.value })} />
+              <input placeholder="Giá" value={newService.price} onChange={(e) => setNewService({ ...newService, price: e.target.value })} />
+              <button type="button" onClick={handleAddService}>+ Thêm dịch vụ</button>
             </div>
           </div>
 
-          {/* 🖼 Bộ sưu tập */}
+          {/* Gallery */}
           <div className="nested-section">
             <h3>Bộ sưu tập ảnh (Gallery)</h3>
             <div className="gallery-preview">
               {formData.galleries.map((g, i) => (
                 <div key={i} className="gallery-item">
                   <img src={g.imageUrl} alt={`gallery-${i}`} />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveItem("galleries", i)}
-                  >
-                    ×
-                  </button>
+                  <button type="button" onClick={() => handleRemoveItem("galleries", i)}>×</button>
                 </div>
               ))}
             </div>
             <div className="add-subform">
-              <input
-                placeholder="URL ảnh mới"
-                value={newGallery}
-                onChange={(e) => setNewGallery(e.target.value)}
+              <input 
+                type="file" 
+                accept="image/*" 
+                multiple 
+                onChange={handleGalleryChange}
+                disabled={uploading.gallery}
               />
-              <button type="button" onClick={handleAddGallery}>
-                + Thêm ảnh
-              </button>
+              {uploading.gallery && <p>Đang upload ảnh lên Cloudinary...</p>}
             </div>
           </div>
 
-          <button type="submit" className="btn-submit">
-            {campingId ? "Cập nhật" : "Tạo mới"}
-          </button>
+          <button type="submit" className="btn-submit">{campingId ? "Cập nhật" : "Tạo mới"}</button>
         </form>
       </div>
     </>
