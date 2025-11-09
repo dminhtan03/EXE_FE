@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getErrorMessage } from "../utils/apiError";
 
 const API_BASE_URL = "http://localhost:8080/api/v1/user";
 export const register = async (
@@ -28,11 +29,14 @@ export const register = async (
     console.log("Register success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Register failed:", error.response.data);
-    } else {
-      console.error("Error:", error.message);
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "Register failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    // throw Error so UI can show message
+    throw new Error(msg);
   }
 };
 
@@ -45,13 +49,13 @@ export const activeAccount = async (otp) => {
     console.log("Active account success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Active account failed:", error.response.data);
-      throw error.response.data;
-    } else {
-      console.error("Error:", error.message);
-      throw error;
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "Active account failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    throw new Error(msg);
   }
 };
 
@@ -61,13 +65,13 @@ export const resendOTP = async (email) => {
     console.log("Resend OTP success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Resend OTP failed:", error.response.data);
-      throw error.response.data;
-    } else {
-      console.error("Error:", error.message);
-      throw error;
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "Resend OTP failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    throw new Error(msg);
   }
 };
 
@@ -104,13 +108,13 @@ export const updateProfile = async (
     console.log("Update profile success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Update profile failed:", error.response.data);
-      throw error.response.data;
-    } else {
-      console.error("Error:", error.message);
-      throw error;
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "Update profile failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    throw new Error(msg);
   }
 };
 
@@ -120,13 +124,13 @@ export const forgotPassword = async (email) => {
     console.log("Forgot password success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("Forgot password failed:", error.response.data);
-      throw error.response.data;
-    } else {
-      console.error("Error:", error.message);
-      throw error;
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "Forgot password failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    throw new Error(msg);
   }
 };
 
@@ -139,8 +143,9 @@ export const verifyForgotOTP = async (email, otp) => {
     });
     return res.data;
   } catch (err) {
-    console.error("Error:", err.message);
-    throw err;
+    const msg = getErrorMessage(err);
+    console.error("Error:", msg, err.response?.data ?? err.message);
+    throw new Error(msg);
   }
 };
 
@@ -170,7 +175,8 @@ export const changePassword = async (
 
     return res.data;
   } catch (err) {
-    console.error("Error:", err.response?.data || err.message);
-    throw err;
+    const msg = getErrorMessage(err);
+    console.error("Error:", msg, err.response?.data ?? err.message);
+    throw new Error(msg);
   }
 };

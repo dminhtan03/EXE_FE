@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getErrorMessage } from "../utils/apiError";
 
 const API_BASE_URL = "http://localhost:8080/api/v1/partner";
 
@@ -13,12 +14,12 @@ export const registerPartner = async (partnerData) => {
     console.log("✅ Register partner success:", res.data);
     return res.data;
   } catch (error) {
-    if (error.response) {
-      console.error("❌ Register partner failed:", error.response.data);
-      throw error.response.data;
-    } else {
-      console.error("❌ Error:", error.message);
-      throw error;
-    }
+    const msg = getErrorMessage(error);
+    console.error(
+      "❌ Register partner failed:",
+      msg,
+      error.response?.data ?? error.message
+    );
+    throw new Error(msg);
   }
 };
