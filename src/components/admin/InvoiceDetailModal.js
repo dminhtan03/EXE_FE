@@ -7,7 +7,7 @@ export default function InvoiceDetailModal({ invoice, onClose }) {
         <button className="modal-close" onClick={onClose}>
           ✖
         </button>
-        <h2 className="modal-title">Chi tiết hóa đơn {invoice.invoiceId}</h2>
+        <h2 className="modal-title">Chi tiết hóa đơn {invoice.id}</h2>
 
         <div className="modal-body">
           {/* Thông tin khách hàng */}
@@ -16,8 +16,11 @@ export default function InvoiceDetailModal({ invoice, onClose }) {
           <p><strong>Email:</strong> {invoice.customerEmail}</p>
           <p><strong>SĐT:</strong> {invoice.customerPhone}</p>
           <p><strong>Trạng thái:</strong> {invoice.status}</p>
-          <p><strong>Tổng tiền:</strong> {invoice.totalPrice}K</p>
-          <p><strong>Ngày tạo:</strong> {invoice.createdAt}</p>
+          <p><strong>Tổng tiền:</strong> {Number(invoice.totalPrice || 0).toLocaleString('vi-VN')} ₫</p>
+          <p><strong>Ngày tạo:</strong> {new Date(invoice.createdAt).toLocaleString('vi-VN')}</p>
+          {invoice.startTime && invoice.endTime && (
+            <p><strong>Thời gian đặt:</strong> {new Date(invoice.startTime).toLocaleString('vi-VN')} → {new Date(invoice.endTime).toLocaleString('vi-VN')}</p>
+          )}
 
           {/* Thông tin camping site */}
           {invoice.campingSite && (
@@ -39,7 +42,7 @@ export default function InvoiceDetailModal({ invoice, onClose }) {
             {invoice.details && invoice.details.length > 0 ? (
               invoice.details.map((d, index) => (
                 <li key={index}>
-                  <strong>{d.roomName}</strong> | Từ {d.checkInDate} → {d.checkOutDate} | 💵 {d.price}$
+                  <strong>{d.itemName}</strong> | Từ {d.checkIn ? new Date(d.checkIn).toLocaleDateString('vi-VN') : 'N/A'} → {d.checkOut ? new Date(d.checkOut).toLocaleDateString('vi-VN') : 'N/A'} | 💵 {Number(d.price || 0).toLocaleString('vi-VN')} ₫
                 </li>
               ))
             ) : (

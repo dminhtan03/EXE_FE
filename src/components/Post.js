@@ -1,91 +1,135 @@
-import React, { useState, useEffect } from 'react';
-import PostFooter from './PostFooter';
-import CommentList from './CommentList';
-import communityApi from '../api/communityService';
-import '../components/css/Post.css';
+import React, { useState, useEffect } from "react";
+import PostFooter from "./PostFooter";
+import CommentList from "./CommentList";
+import communityApi from "../api/communityService";
+import "../components/css/Post.css";
+
+// Toast notification component
+const ToastNotification = ({
+  message,
+  type = "info",
+  onClose,
+  duration = 3000,
+}) => {
+  useEffect(() => {
+    const timer = setTimeout(onClose, duration);
+    return () => clearTimeout(timer);
+  }, [onClose, duration]);
+
+  return <div className={`toast-notification ${type}`}>{message}</div>;
+};
 
 const Post = ({ post, currentUserId }) => {
-    const [likesCount, setLikesCount] = useState(0);
-    const [showComments, setShowComments] = useState(false);
-    const [comments, setComments] = useState([]);
-    
-    // ... (useEffect cho Likes và handleToggleLike giữ nguyên) ...
+  const isLoggedIn = !!currentUserId;
 
-    useEffect(() => {
-        const fetchLikes = async () => {
-            try {
-                const response = await communityApi.countLikes(post.id);
-                setLikesCount(response.data);
-            } catch (error) {
-                console.error('Lỗi đếm like:', error);
-            }
-        };
-        fetchLikes();
-    }, [post.id]);
+  const [likesCount, setLikesCount] = useState(0);
+  const [commentsCount, setCommentsCount] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [showComments, setShowComments] = useState(false);
+  const [toast, setToast] = useState(null);
 
-    const handleToggleLike = async () => {
-        try {
-            await communityApi.toggleLike(post.id, currentUserId);
-            const response = await communityApi.countLikes(post.id);
-            setLikesCount(response.data);
-        } catch (error) {
-            console.error('Lỗi toggle like:', error);
-        }
-    };
+  const showToast = (message, type = "info") => setToast({ message, type });
 
-    const handleToggleComments = async () => {
-        if (!showComments) {
-            try {
-                const response = await communityApi.getCommentsByPost(post.id);
-                setComments(response.data);
-            } catch (error) {
-                console.error('Lỗi tải bình luận:', error);
-            }
-        }
-        setShowComments(!showComments);
-    };
+  const fetchPostStats = async () => {
+    try {
+      const likesResponse = await communityApi.countLikes(post.id);
+      setLikesCount(likesResponse.data);
 
-    // SỬA LỖI Ở ĐÂY: latestComments là MẢNG bình luận mới nhất
-    const handleCommentAdded = (latestComments) => {
-        // Cập nhật state comments bằng danh sách mới nhất từ CommentList
-        setComments(latestComments); 
-    };
+      const commentsResponse = await communityApi.getCommentsByPost(post.id);
+      setCommentsCount(commentsResponse.data.length);
+      if (showComments) setComments(commentsResponse.data);
+    } catch (error) {
+      console.error("Lỗi tải thống kê bài viết:", error);
+    }
+  };
 
-    return (
-        <div className="post-container">
-            {/* ... (post-header, post-content, post-stats, PostFooter giữ nguyên) ... */}
-            <div className="post-header">
-                <img src={post.userAvatar} alt="Avatar" className="post-avatar" />
-                <div className="post-info">
-                    <span className="post-user-name">{post.userName}</span>
-                    <span className="post-time">{new Date(post.createdAt).toLocaleString()}</span>
-                </div>
-            </div>
-            <div className="post-content">
-                <p>{post.content}</p>
-                {post.imageUrl && <img src={post.imageUrl} alt="Post media" className="post-image" />}
-            </div>
-            
-            <div className="post-stats">
-                <span>❤️ {likesCount} Likes</span>
-            </div>
+  useEffect(() => {
+    fetchPostStats();
+  }, [post.id]);
 
-            <PostFooter 
-                onLike={handleToggleLike}
-                onCommentClick={handleToggleComments}
-                isLiked={false} 
-            />
+  const handleToggleLike = async () => {
+    if (!isLoggedIn) {
+      showToast("⚠️ Bạn cần đăng nhập để thích bài viết!", "error");
+      return;
+    }
+    try {
+      await communityApi.toggleLike(post.id, currentUserId);
+      const response = await communityApi.countLikes(post.id);
+      setLikesCount(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-            {showComments && (
-                <CommentList 
-                    postId={post.id} 
-                    comments={comments} 
-                    currentUserId={currentUserId}
-                    onCommentAdded={handleCommentAdded}
-                />
-            )}
+  const handleToggleComments = async () => {
+    if (!showComments) {
+      try {
+        const res = await communityApi.getCommentsByPost(post.id);
+        setComments(res.data);
+        setCommentsCount(res.data.length);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    setShowComments(!showComments);
+  };
+
+  const handleCommentAdded = (latestComments) => {
+    setComments(latestComments);
+    setCommentsCount(latestComments.length);
+  };
+
+  return (
+    <div className="post-container">
+      {/* Toast */}
+      {toast && (
+        <ToastNotification
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+
+      <div className="post-header">
+        <img src={post.userAvatar} alt="Avatar" className="post-avatar" />
+        <div className="post-info">
+          <span className="post-user-name">{post.userName}</span>
+          <span className="post-time">
+            {new Date(post.createdAt).toLocaleString()}
+          </span>
         </div>
-    );
+      </div>
+
+      <div className="post-content">
+        <p>{post.content}</p>
+        {post.imageUrl && (
+          <img src={post.imageUrl} alt="Post media" className="post-image" />
+        )}
+      </div>
+
+      <div className="post-stats">
+        <span>❤️ {likesCount} Thích</span>
+        <span>💬 {commentsCount} Bình luận</span>
+      </div>
+
+      <PostFooter
+        onLike={handleToggleLike}
+        onCommentClick={handleToggleComments}
+        isLiked={false}
+      />
+
+      {showComments && (
+        <CommentList
+          postId={post.id}
+          comments={comments}
+          currentUserId={currentUserId}
+          isLoggedIn={isLoggedIn} // 🔹 Truyền thông tin đăng nhập để CommentList cũng hiển thị toast
+          onCommentAdded={handleCommentAdded}
+          showToast={showToast} // 🔹 Truyền hàm showToast xuống CommentList
+        />
+      )}
+    </div>
+  );
 };
 
 export default Post;

@@ -1,47 +1,69 @@
+/* --- Khu vực bình luận chính (CommentList container) --- */
 .comment-section {
-  margin-top: 15px;
+  width: 100%;
+  max-width: 700px; /* Giới hạn chiều rộng tối đa cho dễ đọc */
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+/* --- Khu vực nhập bình luận mới --- */
+.comment-input {
+  margin-bottom: 25px;
+  border-bottom: 1px solid #eee; /* Đường phân cách */
+  padding-bottom: 15px;
 }
 
 .comment-input form {
   display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 10px;
 }
 
-.comment-input input {
-  flex: 1;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 8px 12px;
+.comment-input input[type="text"] {
+  flex-grow: 1; /* Input chiếm hết không gian có thể */
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 20px; /* Bo tròn góc input */
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.comment-input button {
-  border: none;
+.comment-input input[type="text"]:focus {
+  border-color: #007bff;
+}
+
+.comment-input button[type="submit"] {
   background-color: #007bff;
   color: white;
+  border: none;
+  padding: 10px 20px;
   border-radius: 20px;
-  padding: 8px 14px;
+  font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  flex-shrink: 0; /* Ngăn button bị co lại */
 }
 
-.comment-input button:disabled {
-  opacity: 0.6;
+.comment-input button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.comment-input button[type="submit"]:disabled {
+  background-color: #a0c9f8;
   cursor: not-allowed;
 }
 
-.load-more-comments {
-  text-align: center;
-  margin-top: 8px;
+/* --- Danh sách bình luận --- */
+.comment-list {
+  /* Bạn có thể thêm bất kỳ style nào để phân cách các comment-item tại đây */
+  padding-top: 10px;
 }
 
-.load-more-comments button {
-  background: none;
-  border: none;
-  color: #007bff;
-  cursor: pointer;
-  font-weight: 500;
-}
+/* Lưu ý: Các style chi tiết cho từng bình luận (CommentItem) sẽ nằm trong các class như 
+   .comment-item, .comment-avatar, .comment-main-content, v.v., như đã cung cấp ở các lần sửa trước. */
 
-.load-more-comments button:hover {
-  text-decoration: underline;
+   .comment-replies {
+  margin-left: 48px;
+  border-left: 2px solid #eee;
+  padding-left: 10px;
 }
