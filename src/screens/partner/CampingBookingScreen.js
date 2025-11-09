@@ -37,7 +37,9 @@ const CampingBookingScreen = () => {
 
         // Lấy thông tin lều
         const tentPromises = bookingsData.map((b) =>
-          axios.get(`http://localhost:8080/api/tents/byTentId/${b.campingTentId}`)
+          axios.get(
+            `http://localhost:8080/api/tents/byTentId/${b.campingTentId}`
+          )
         );
         const tentResponses = await Promise.all(tentPromises);
         const tentMapData = {};
@@ -91,14 +93,17 @@ const CampingBookingScreen = () => {
       <BannerHome />
       <div className="container py-4">
         <h2>Danh sách booking</h2>
-        <Link to={`/seller/camping/${campingInforId}`} className="btn btn-secondary mb-3">
+        <Link
+          to={`/seller/camping/${campingInforId}`}
+          className="btn btn-secondary mb-3"
+        >
           ← Quay lại camping
         </Link>
 
         <table className="table table-bordered table-striped">
           <thead>
             <tr>
-              <th>Booking ID</th>
+              <th>Booking No</th>
               <th>Tên người dùng</th>
               <th>Lều</th>
               <th>Dịch vụ</th>
@@ -111,11 +116,11 @@ const CampingBookingScreen = () => {
             </tr>
           </thead>
           <tbody>
-            {bookings.map((b) => {
+            {bookings.map((b, index) => {
               const tent = tentsMap[b.campingTentId] || {};
               return (
                 <tr key={b.bookingId}>
-                  <td>{b.bookingId}</td>
+                  <td>{index + 1}</td>
                   <td>{b.userName || "-"}</td>
                   <td>{tent.tentName || "-"}</td>
                   <td>

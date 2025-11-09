@@ -19,25 +19,17 @@ const TourScreen = () => {
 
   useEffect(() => {
     const fetchTours = async () => {
+      setTours([]); // 👈 xóa dữ liệu cũ trước
+      setLoading(true);
       try {
-        setLoading(true);
-
         let data = [];
-
-        // ✅ Luôn gọi danh sách phòng trước
-        console.log("🏕️ Fetching all camping information...");
         data = await getAllCampingInfor();
 
-        // Nếu có siteId, lọc thêm theo siteId
         if (siteId) {
-          console.log("📍 Filtering by siteId:", siteId);
           const siteRooms = await getCampingRoomsBySiteId(siteId);
-
-          // Gộp dữ liệu (hoặc chỉ lấy siteRooms, tùy bạn)
-          data = siteRooms.length > 0 ? siteRooms : data;
+          data = siteRooms.length > 0 ? siteRooms : [];
         }
 
-        // Chỉ lấy các tour active
         const activeTours = data.filter((tour) => tour.active !== false);
         setTours(activeTours);
       } catch (error) {
