@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getErrorMessage } from "../utils/apiError";
 
 const API_BASE_URL = "http://localhost:8080/api/v1/auth";
 
@@ -16,7 +17,9 @@ export const login = async (email, password) => {
 
     return res.data;
   } catch (error) {
-    throw error.response?.data || { message: "Login failed" };
+    // Normalize error: throw Error with backend message so callers can display it
+    const msg = getErrorMessage(error) || "Login failed";
+    throw new Error(msg);
   }
 };
 
