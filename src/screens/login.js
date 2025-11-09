@@ -93,6 +93,8 @@ const AuthPage = () => {
       const role = getRoleFromToken(decoded);
       if (role === "ADMIN") {
         navigate("/admin");
+      } else if (role === "PARTNER") {
+        navigate("/seller");
       } else {
         navigate("/");
       }

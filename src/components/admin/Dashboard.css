@@ -1,6 +1,7 @@
 .dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 cột ngang */
+  /* Show 5 stat cards in a single row on wide screens */
+  grid-template-columns: repeat(5, 1fr);
   gap: 20px; /* khoảng cách giữa các card */
   margin-top: 20px;
 }
@@ -48,4 +49,26 @@
 }
 .stat-icon.purple {
   background: #8b5cf6;
+}
+.stat-icon.teal {
+  background: #14b8a6;
+}
+
+/* Responsive: fall back to fewer columns on narrower screens */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }
