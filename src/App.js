@@ -30,6 +30,7 @@ import MyProductsScreen from "./screens/MyProductsScreen";
 import MarketplaceEditScreen from "./screens/MarketplaceEditScreen";
 
 import AdminDashboard from "./components/admin/AdminDashboard";
+import InvoiceAdmin from "./components/admin/InvoiceAdmin";
 import ManagerUser from "./components/admin/ManagerUser";
 import ManagerPartner from "./components/admin/ManagerPanter";
 import CommunityFeed from "./components/CommunityFeed";
@@ -133,6 +134,7 @@ export default function App() {
               <Route index element={<AdminDashboard />} />
               <Route path="users" element={<ManagerUser />} />
               <Route path="partners" element={<ManagerPartner />} />
+              <Route path="invoices" element={<InvoiceAdmin />} />
             </Route>
           </Routes>
         </PageTrackingWrapper>

@@ -36,3 +36,9 @@ export const updateInvoiceStatus = async (id, status) => {
   const res = await axios.patch(`${API_URL}/${id}/status?status=${status}`);
   return res.data;
 };
+
+// Xóa hóa đơn theo ID
+export const deleteInvoice = async (id) => {
+  const res = await axios.delete(`${API_URL}/${id}`);
+  return res.data;
+};

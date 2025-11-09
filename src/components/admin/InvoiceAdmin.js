@@ -3,6 +3,8 @@ import {
     getAllBookings,
     searchInvoices,
     getInvoiceById,
+    updateInvoiceStatus,
+    deleteInvoice,
 } from "../../api/invoiceAdminService";
 import InvoiceDetailModal from "./InvoiceDetailModal";
 import "./InvoiceAdmin.css";
@@ -33,7 +35,11 @@ export default function InvoiceAdmin() {
 
     // Search
     const [searchId, setSearchId] = useState("");
+    const [startDate, setStartDate] = useState(""); // datetime-local string
+    const [endDate, setEndDate] = useState(""); // datetime-local string
     const debouncedSearchId = useDebounce(searchId, 500); // 500ms debounce
+    const debouncedStart = useDebounce(startDate, 500);
+    const debouncedEnd = useDebounce(endDate, 500);
 
     // Map trạng thái sang tiếng Việt
     const statusLabels = {
@@ -45,17 +51,25 @@ export default function InvoiceAdmin() {
 
     useEffect(() => {
         fetchInvoices(page, size);
-    }, [page, size, debouncedSearchId]);
+    }, [page, size, debouncedSearchId, debouncedStart, debouncedEnd]);
 
     const fetchInvoices = async (pageNumber = 0, pageSize = size) => {
         try {
             let data;
-            if (debouncedSearchId) {
-                data = await searchInvoices({
-                    bookingId: debouncedSearchId,
+            const hasId = debouncedSearchId && debouncedSearchId.trim().length > 0;
+            const hasRange = debouncedStart && debouncedEnd;
+            if (hasId || hasRange) {
+                const params = {
                     page: pageNumber,
                     size: pageSize,
-                });
+                };
+                if (hasId) params.bookingId = debouncedSearchId.trim();
+                if (hasRange) {
+                    // Backend expects ISO DATE_TIME
+                    params.start = new Date(debouncedStart).toISOString();
+                    params.end = new Date(debouncedEnd).toISOString();
+                }
+                data = await searchInvoices(params);
             } else {
                 data = await getAllBookings(pageNumber, pageSize);
             }
@@ -75,6 +89,25 @@ export default function InvoiceAdmin() {
             setShowModal(true);
         } catch (err) {
             console.error("Error fetching invoice detail:", err);
+        }
+    };
+
+    const handleUpdateStatus = async (invoiceId, status) => {
+        try {
+            await updateInvoiceStatus(invoiceId, status);
+            await fetchInvoices(page, size);
+        } catch (err) {
+            console.error("Error updating status:", err);
+        }
+    };
+
+    const handleDelete = async (invoiceId) => {
+        try {
+            await deleteInvoice(invoiceId);
+            // after delete, refresh current page or move back a page if empty
+            await fetchInvoices(page, size);
+        } catch (err) {
+            console.error("Error deleting invoice:", err);
         }
     };
 
@@ -114,6 +147,20 @@ export default function InvoiceAdmin() {
                             border: "1px solid #ccc",
                             minWidth: "220px",
                         }}
+                    />
+
+                    <input
+                        type="datetime-local"
+                        value={startDate}
+                        onChange={(e) => { setStartDate(e.target.value); setPage(0); }}
+                        style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ccc" }}
+                    />
+                    <span>→</span>
+                    <input
+                        type="datetime-local"
+                        value={endDate}
+                        onChange={(e) => { setEndDate(e.target.value); setPage(0); }}
+                        style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ccc" }}
                     />
 
                     <select
@@ -169,12 +216,12 @@ export default function InvoiceAdmin() {
                 <tbody>
                     {filteredInvoices.length > 0 ? (
                         filteredInvoices.map((invoice) => (
-                            <tr key={invoice.invoiceId}>
+                            <tr key={invoice.id}>
                                 <td
                                     className="invoice-id clickable"
-                                    onClick={() => handleShowDetail(invoice.invoiceId)}
+                                    onClick={() => handleShowDetail(invoice.id)}
                                 >
-                                    {invoice.invoiceId}
+                                    {invoice.id}
                                 </td>
                                 <td>{invoice.customerName}</td>
                                 <td>{invoice.customerEmail}</td>
@@ -199,13 +246,41 @@ export default function InvoiceAdmin() {
                                         {statusLabels[invoice.status] || invoice.status}
                                     </span>
                                 </td>
-                                <td>{invoice.totalPrice}K</td>
+                                <td>{Number(invoice.totalPrice || 0).toLocaleString('vi-VN')} ₫</td>
                                 <td className="action-buttons">
                                     <button
-                                        onClick={() => handleShowDetail(invoice.invoiceId)}
+                                        onClick={() => handleShowDetail(invoice.id)}
                                         className="btn view"
                                     >
                                         Xem
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdateStatus(invoice.id, 'CONFIRMED')}
+                                        className="btn confirmed"
+                                        title="Xác nhận"
+                                    >
+                                        Xác nhận
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdateStatus(invoice.id, 'COMPLETED')}
+                                        className="btn complete"
+                                        title="Hoàn thành"
+                                    >
+                                        Hoàn thành
+                                    </button>
+                                    <button
+                                        onClick={() => handleUpdateStatus(invoice.id, 'CANCELLED')}
+                                        className="btn cancel"
+                                        title="Hủy"
+                                    >
+                                        Hủy
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(invoice.id)}
+                                        className="btn cancel"
+                                        title="Xóa hóa đơn"
+                                    >
+                                        Xóa
                                     </button>
                                 </td>
                             </tr>
