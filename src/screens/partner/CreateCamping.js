@@ -297,7 +297,7 @@ const CreateCamping = () => {
             address: "",
             description: "",
             basePrice: "",
-            capacity: "",
+            capacity: "1",
             thumbnail: "",
             active: true,
             services: [],
@@ -359,13 +359,13 @@ const CreateCamping = () => {
               <label>Giá cơ bản:</label>
               <input type="number" name="basePrice" value={formData.basePrice} onChange={handleChange} />
             </div>
-            <div>
+            {/* <div>
               <label>Sức chứa:</label>
               <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
-            </div>
+            </div> */}
             <div>
               <label>Kích hoạt:</label>
-              <input type="checkbox" name="active" checked={formData.active} onChange={handleChange} />
+              <input type="hidden" name="active" checked={formData.active} onChange={handleChange} />
             </div>
           </div>
 
