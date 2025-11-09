@@ -89,7 +89,7 @@ const PaymentPage = () => {
           bookingData.selectedEquipment?.map((t) => t.id) || [],
         startTime: formatDateTime(bookingData.startDate),
         endTime: formatDateTime(bookingData.endDate),
-        totalPrice: bookingData.totalPrice,
+        totalPrice: finalTotal,
       };
 
       console.log("📦 Gửi bookingRequest:", bookingRequest);
@@ -140,6 +140,17 @@ const PaymentPage = () => {
   };
 
   if (!bookingData) return null;
+  // 🧮 Tính số ngày
+  const start = new Date(bookingData.startDate);
+  const end = new Date(bookingData.endDate);
+  const diffNights = Math.max(
+    1,
+    Math.ceil((end - start) / (1000 * 60 * 60 * 24)) - 1
+  );
+
+  // 🧮 Tổng tiền = giá/đêm × số đêm
+  const pricePerNight = bookingData.totalPrice; // từ TentBookingSection truyền sang
+  const finalTotal = pricePerNight * diffNights;
 
   return (
     <div
@@ -172,11 +183,13 @@ const PaymentPage = () => {
         <p>Thời gian: {bookingData.time}</p>
 
         <h3 style={{ marginTop: "20px", color: "#38a169" }}>
-          Tổng cộng: {bookingData.totalPrice.toLocaleString()} VND
+          Tổng cộng ({diffNights} đêm): {finalTotal.toLocaleString()} VND
         </h3>
-
         <hr />
-
+        <p style={{ color: "#555" }}>
+          ({pricePerNight.toLocaleString()} VND/đêm × {diffNights} đêm)
+        </p>
+        <hr />
         <h4>Thông tin liên hệ:</h4>
         <div
           style={{

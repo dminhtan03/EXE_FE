@@ -20,7 +20,9 @@ const CreateCamping = () => {
   useEffect(() => {
     const fetchCampingSites = async () => {
       try {
-        const res = await axios.get("http://localhost:8080/api/v1/camping-sites");
+        const res = await axios.get(
+          "http://localhost:8080/api/v1/camping-sites"
+        );
         setCampingSites(res.data || []);
       } catch (err) {
         console.error("Error fetching camping sites:", err);
@@ -145,7 +147,13 @@ const CreateCamping = () => {
         },
       ],
     }));
-    setNewTent({ tentName: "", capacity: "", pricePerNight: "", quantity: "", thumbnail: "" });
+    setNewTent({
+      tentName: "",
+      capacity: "",
+      pricePerNight: "",
+      quantity: "",
+      thumbnail: "",
+    });
   };
 
   const handleRemoveItem = (field, index) => {
@@ -213,7 +221,7 @@ const CreateCamping = () => {
     try {
       // Upload ảnh lên Cloudinary
       const imageUrl = await handleUploadImage(file);
-      
+
       if (imageUrl) {
         // Lưu link ảnh từ Cloudinary vào formData
         // Link này sẽ được lưu vào database khi submit form
@@ -235,7 +243,7 @@ const CreateCamping = () => {
       // Upload tất cả ảnh lên Cloudinary
       const uploadPromises = files.map((file) => handleUploadImage(file));
       const imageUrls = await Promise.all(uploadPromises);
-      
+
       // Lọc các URL hợp lệ và lưu vào formData
       // Các link này sẽ được lưu vào database khi submit form
       const validUrls = imageUrls.filter(Boolean);
@@ -263,7 +271,7 @@ const CreateCamping = () => {
     try {
       // Upload ảnh lên Cloudinary
       const imageUrl = await handleUploadImage(file);
-      
+
       if (imageUrl) {
         // Lưu link ảnh từ Cloudinary vào newTent
         // Link này sẽ được lưu vào database khi thêm tent
@@ -317,7 +325,7 @@ const CreateCamping = () => {
     <>
       <BannerHome />
       <div className="create-camping-container">
-        <Link to="/managercamping" className="btn btn-secondary">
+        <Link to="/seller/managercamping" className="btn btn-secondary">
           ← Quay lại
         </Link>
         <h2>{campingId ? "Cập nhật Camping" : "Tạo mới Camping"}</h2>
@@ -327,37 +335,67 @@ const CreateCamping = () => {
           {/* Tên Camping */}
           <div className="form-section">
             <label>Tên Camping:</label>
-            <input name="name" value={formData.name} onChange={handleChange} required />
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           {/* Chọn Camping Site */}
           <div className="form-section">
             <label>Chọn Camping Site:</label>
-            <select name="campingSiteId" value={formData.campingSiteId} onChange={handleChange} required>
+            <select
+              name="campingSiteId"
+              value={formData.campingSiteId}
+              onChange={handleChange}
+              required
+            >
               <option value="">-- Chọn một site --</option>
-              {campingSites.length > 0
-                ? campingSites.map((site) => <option key={site.id} value={site.id}>{site.location}</option>)
-                : <option disabled>Không có site nào</option>}
+              {campingSites.length > 0 ? (
+                campingSites.map((site) => (
+                  <option key={site.id} value={site.id}>
+                    {site.location}
+                  </option>
+                ))
+              ) : (
+                <option disabled>Không có site nào</option>
+              )}
             </select>
           </div>
 
           {/* Địa chỉ */}
           <div className="form-section">
             <label>Địa chỉ:</label>
-            <input name="address" value={formData.address} onChange={handleChange} required />
+            <input
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              required
+            />
           </div>
 
           {/* Mô tả */}
           <div className="form-section">
             <label>Mô tả:</label>
-            <textarea name="description" value={formData.description} onChange={handleChange}></textarea>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+            ></textarea>
           </div>
 
           {/* Giá cơ bản, sức chứa, active */}
           <div className="form-row">
             <div>
               <label>Giá cơ bản:</label>
-              <input type="number" name="basePrice" value={formData.basePrice} onChange={handleChange} />
+              <input
+                type="number"
+                name="basePrice"
+                value={formData.basePrice}
+                onChange={handleChange}
+              />
             </div>
             {/* <div>
               <label>Sức chứa:</label>
@@ -365,22 +403,31 @@ const CreateCamping = () => {
             </div> */}
             <div>
               <label>Kích hoạt:</label>
-              <input type="hidden" name="active" checked={formData.active} onChange={handleChange} />
+              <input
+                type="hidden"
+                name="active"
+                checked={formData.active}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
           {/* Thumbnail */}
           <div className="form-section">
             <label>Ảnh đại diện (Thumbnail):</label>
-            <input 
-              type="file" 
-              accept="image/*" 
+            <input
+              type="file"
+              accept="image/*"
               onChange={handleThumbnailChange}
               disabled={uploading.thumbnail}
             />
             {uploading.thumbnail && <p>Đang upload ảnh vui lòng đợi...</p>}
             {formData.thumbnail && (
-              <img src={formData.thumbnail} alt="thumbnail" className="preview-img" />
+              <img
+                src={formData.thumbnail}
+                alt="thumbnail"
+                className="preview-img"
+              />
             )}
           </div>
 
@@ -389,27 +436,73 @@ const CreateCamping = () => {
             <h3>Danh sách lều (Tents)</h3>
             {formData.tents.map((t, i) => (
               <div key={i} className="nested-item">
-                <p>{t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x {t.quantity} lều</p>
-                {t.thumbnail && <img src={t.thumbnail} alt={t.tentName} className="preview-img" />}
-                <button type="button" onClick={() => handleRemoveItem("tents", i)}>Xóa</button>
+                <p>
+                  {t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x{" "}
+                  {t.quantity} lều
+                </p>
+                {t.thumbnail && (
+                  <img
+                    src={t.thumbnail}
+                    alt={t.tentName}
+                    className="preview-img"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem("tents", i)}
+                >
+                  Xóa
+                </button>
               </div>
             ))}
             <div className="add-subform">
-              <input placeholder="Tên lều" value={newTent.tentName} onChange={(e) => setNewTent({ ...newTent, tentName: e.target.value })} />
-              <input placeholder="Sức chứa" value={newTent.capacity} onChange={(e) => setNewTent({ ...newTent, capacity: e.target.value })} />
-              <input placeholder="Giá/đêm" value={newTent.pricePerNight} onChange={(e) => setNewTent({ ...newTent, pricePerNight: e.target.value })} />
-              <input placeholder="Số lượng" value={newTent.quantity} onChange={(e) => setNewTent({ ...newTent, quantity: e.target.value })} />
-              <input 
-                type="file" 
-                accept="image/*" 
+              <input
+                placeholder="Tên lều"
+                value={newTent.tentName}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, tentName: e.target.value })
+                }
+              />
+              <input
+                placeholder="Sức chứa"
+                value={newTent.capacity}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, capacity: e.target.value })
+                }
+              />
+              <input
+                placeholder="Giá/đêm"
+                value={newTent.pricePerNight}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, pricePerNight: e.target.value })
+                }
+              />
+              <input
+                placeholder="Số lượng"
+                value={newTent.quantity}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, quantity: e.target.value })
+                }
+              />
+              <input
+                type="file"
+                accept="image/*"
                 onChange={handleTentThumbnailChange}
                 disabled={uploading.tentThumbnail}
               />
-              {uploading.tentThumbnail && <p>Đang upload ảnh lên Cloudinary...</p>}
-              {newTent.thumbnail && (
-                <img src={newTent.thumbnail} alt="Tent Thumbnail" className="preview-img" />
+              {uploading.tentThumbnail && (
+                <p>Đang upload ảnh lên Cloudinary...</p>
               )}
-              <button type="button" onClick={handleAddTent}>+ Thêm lều</button>
+              {newTent.thumbnail && (
+                <img
+                  src={newTent.thumbnail}
+                  alt="Tent Thumbnail"
+                  className="preview-img"
+                />
+              )}
+              <button type="button" onClick={handleAddTent}>
+                + Thêm lều
+              </button>
             </div>
           </div>
 
@@ -418,14 +511,35 @@ const CreateCamping = () => {
             <h3>Dịch vụ (Services)</h3>
             {formData.services.map((s, i) => (
               <div key={i} className="nested-item">
-                <p>{s.serviceName || s.serviceId} - {s.price}$</p>
-                <button type="button" onClick={() => handleRemoveItem("services", i)}>Xóa</button>
+                <p>
+                  {s.serviceName || s.serviceId} - {s.price}$
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem("services", i)}
+                >
+                  Xóa
+                </button>
               </div>
             ))}
             <div className="add-subform">
-              <input placeholder="Tên dịch vụ" value={newService.serviceName} onChange={(e) => setNewService({ ...newService, serviceName: e.target.value })} />
-              <input placeholder="Giá" value={newService.price} onChange={(e) => setNewService({ ...newService, price: e.target.value })} />
-              <button type="button" onClick={handleAddService}>+ Thêm dịch vụ</button>
+              <input
+                placeholder="Tên dịch vụ"
+                value={newService.serviceName}
+                onChange={(e) =>
+                  setNewService({ ...newService, serviceName: e.target.value })
+                }
+              />
+              <input
+                placeholder="Giá"
+                value={newService.price}
+                onChange={(e) =>
+                  setNewService({ ...newService, price: e.target.value })
+                }
+              />
+              <button type="button" onClick={handleAddService}>
+                + Thêm dịch vụ
+              </button>
             </div>
           </div>
 
@@ -436,15 +550,20 @@ const CreateCamping = () => {
               {formData.galleries.map((g, i) => (
                 <div key={i} className="gallery-item">
                   <img src={g.imageUrl} alt={`gallery-${i}`} />
-                  <button type="button" onClick={() => handleRemoveItem("galleries", i)}>×</button>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem("galleries", i)}
+                  >
+                    ×
+                  </button>
                 </div>
               ))}
             </div>
             <div className="add-subform">
-              <input 
-                type="file" 
-                accept="image/*" 
-                multiple 
+              <input
+                type="file"
+                accept="image/*"
+                multiple
                 onChange={handleGalleryChange}
                 disabled={uploading.gallery}
               />
@@ -452,7 +571,9 @@ const CreateCamping = () => {
             </div>
           </div>
 
-          <button type="submit" className="btn-submit">{campingId ? "Cập nhật" : "Tạo mới"}</button>
+          <button type="submit" className="btn-submit">
+            {campingId ? "Cập nhật" : "Tạo mới"}
+          </button>
         </form>
       </div>
     </>

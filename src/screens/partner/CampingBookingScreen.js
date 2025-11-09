@@ -86,7 +86,6 @@ const CampingBookingScreen = () => {
 
   if (loading) return <p>Đang tải danh sách booking...</p>;
   if (error) return <p>{error}</p>;
-  if (!bookings.length) return <p>Chưa có booking nào.</p>;
 
   return (
     <div>
@@ -100,89 +99,97 @@ const CampingBookingScreen = () => {
           ← Quay lại camping
         </Link>
 
-        <table className="table table-bordered table-striped">
-          <thead>
-            <tr>
-              <th>Booking No</th>
-              <th>Tên người dùng</th>
-              <th>Lều</th>
-              <th>Dịch vụ</th>
-              <th>Thời gian bắt đầu</th>
-              <th>Thời gian kết thúc</th>
-              <th>Tổng giá</th>
-              <th>Trạng thái</th>
-              <th>Thời gian tạo</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((b, index) => {
-              const tent = tentsMap[b.campingTentId] || {};
-              return (
-                <tr key={b.bookingId}>
-                  <td>{index + 1}</td>
-                  <td>{b.userName || "-"}</td>
-                  <td>{tent.tentName || "-"}</td>
-                  <td>
-                    {b.serviceNames?.length > 0
-                      ? b.serviceNames.join(", ")
-                      : "-"}
-                  </td>
-                  <td>{fmtDate(b.startTime)}</td>
-                  <td>{fmtDate(b.endTime)}</td>
-                  <td>{fmtPrice(b.totalPrice)}</td>
-                  <td
-                    className={
-                      b.status === "PENDING"
-                        ? "status-pending"
-                        : b.status === "COMPLETED"
-                        ? "status-confirmed"
-                        : "status-cancelled"
-                    }
-                  >
-                    {b.status === "PENDING"
-                      ? "⏳ Đang xử lý"
-                      : b.status === "COMPLETED"
-                      ? "✅ Hoàn tất"
-                      : "❌ Hủy"}
-                  </td>
-                  <td>{fmtDate(b.createdAt)}</td>
-                  <td>
-                    {b.status === "PENDING" && (
-                      <button
-                        className="btn btn-success btn-sm"
-                        onClick={() => handleCompleteBooking(b.bookingId)}
-                      >
-                        Hoàn tất ✅
-                      </button>
-                    )}
-                  </td>
+        {bookings.length === 0 ? (
+          <p style={{ textAlign: "center", color: "gray" }}>
+            Chưa có booking nào.
+          </p>
+        ) : (
+          <>
+            <table className="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Booking No</th>
+                  <th>Tên người dùng</th>
+                  <th>Lều</th>
+                  <th>Dịch vụ</th>
+                  <th>Thời gian bắt đầu</th>
+                  <th>Thời gian kết thúc</th>
+                  <th>Tổng giá</th>
+                  <th>Trạng thái</th>
+                  <th>Thời gian tạo</th>
+                  <th>Hành động</th>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                {bookings.map((b, index) => {
+                  const tent = tentsMap[b.campingTentId] || {};
+                  return (
+                    <tr key={b.bookingId}>
+                      <td>{index + 1}</td>
+                      <td>{b.userName || "-"}</td>
+                      <td>{tent.tentName || "-"}</td>
+                      <td>
+                        {b.serviceNames?.length > 0
+                          ? b.serviceNames.join(", ")
+                          : "-"}
+                      </td>
+                      <td>{fmtDate(b.startTime)}</td>
+                      <td>{fmtDate(b.endTime)}</td>
+                      <td>{fmtPrice(b.totalPrice)}</td>
+                      <td
+                        className={
+                          b.status === "PENDING"
+                            ? "status-pending"
+                            : b.status === "COMPLETED"
+                            ? "status-confirmed"
+                            : "status-cancelled"
+                        }
+                      >
+                        {b.status === "PENDING"
+                          ? "⏳ Đang xử lý"
+                          : b.status === "COMPLETED"
+                          ? "✅ Hoàn tất"
+                          : "❌ Hủy"}
+                      </td>
+                      <td>{fmtDate(b.createdAt)}</td>
+                      <td>
+                        {b.status === "PENDING" && (
+                          <button
+                            className="btn btn-success btn-sm"
+                            onClick={() => handleCompleteBooking(b.bookingId)}
+                          >
+                            Hoàn tất ✅
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
 
-        {/* Pagination */}
-        <div className="d-flex justify-content-center mt-3">
-          <button
-            className="btn btn-outline-primary mx-2"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
-          >
-            ← Trang trước
-          </button>
-          <span>
-            Trang {page + 1} / {totalPages}
-          </span>
-          <button
-            className="btn btn-outline-primary mx-2"
-            disabled={page + 1 >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Trang sau →
-          </button>
-        </div>
+            {/* Pagination */}
+            <div className="d-flex justify-content-center mt-3">
+              <button
+                className="btn btn-outline-primary mx-2"
+                disabled={page === 0}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                ← Trang trước
+              </button>
+              <span>
+                Trang {page + 1} / {totalPages}
+              </span>
+              <button
+                className="btn btn-outline-primary mx-2"
+                disabled={page + 1 >= totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Trang sau →
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

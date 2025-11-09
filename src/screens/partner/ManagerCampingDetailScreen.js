@@ -10,47 +10,46 @@ const CampingDetailScreen = () => {
   const [camping, setCamping] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
-const [loadingReviews, setLoadingReviews] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
 
- // description expand state
+  // description expand state
   const [descExpanded, setDescExpanded] = useState(false);
   // 👉 OwnerId tạm thời hardcode
 
-    const storedUser = localStorage.getItem("user");
+  const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
 
- useEffect(() => {
-  const fetchCamping = async () => {
-    try {
-      const res = await axios.get("http://localhost:8080/api/v1/camping", {
-        params: { ownerId: userId },
-      });
-      const found = res.data.find((c) => String(c.id) === id);
-      setCamping(found || null);
-    } catch (error) {
-      console.error("Lỗi khi load camping:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchCamping = async () => {
+      try {
+        const res = await axios.get("http://localhost:8080/api/v1/camping", {
+          params: { ownerId: userId },
+        });
+        const found = res.data.find((c) => String(c.id) === id);
+        setCamping(found || null);
+      } catch (error) {
+        console.error("Lỗi khi load camping:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchReviews = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:8080/api/v1/reviews/camping/${id}`
-      );
-      setReviews(res.data || []);
-    } catch (err) {
-      console.error("Lỗi khi load reviews:", err);
-    } finally {
-      setLoadingReviews(false);
-    }
-  };
+    const fetchReviews = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/v1/reviews/camping/${id}`
+        );
+        setReviews(res.data || []);
+      } catch (err) {
+        console.error("Lỗi khi load reviews:", err);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
 
-  fetchCamping();
-  fetchReviews();
-}, [id, userId]);
-
+    fetchCamping();
+    fetchReviews();
+  }, [id, userId]);
 
   const handleDelete = async () => {
     if (!window.confirm("Bạn có chắc muốn xóa camping này?")) return;
@@ -70,7 +69,9 @@ const [loadingReviews, setLoadingReviews] = useState(true);
 
   // helper format
   const fmtPrice = (val) =>
-    val === null || val === undefined ? "-" : `${Number(val).toLocaleString("vi-VN")} VND`;
+    val === null || val === undefined
+      ? "-"
+      : `${Number(val).toLocaleString("vi-VN")} VND`;
 
   const fmtDate = (iso) =>
     iso ? new Date(iso).toLocaleString("vi-VN", { hour12: false }) : "-";
@@ -81,25 +82,39 @@ const [loadingReviews, setLoadingReviews] = useState(true);
     : 0;
 
   // Rate percent (0..100)
-  const ratePercent = Math.max(0, Math.min(100, (Number(camping.rate || 0) / 5) * 100));
+  const ratePercent = Math.max(
+    0,
+    Math.min(100, (Number(camping.rate || 0) / 5) * 100)
+  );
 
   // Booked percent relative to total tent quantity (if totalTentQuantity === 0 treat as 0)
   const bookedCount = Number(camping.bookedCount || 0);
   const bookedPercent =
-    totalTentQuantity > 0 ? Math.max(0, Math.min(100, (bookedCount / totalTentQuantity) * 100)) : 0;
+    totalTentQuantity > 0
+      ? Math.max(0, Math.min(100, (bookedCount / totalTentQuantity) * 100))
+      : 0;
 
   // Revenue percent: create a simple 'max' baseline to compare against so bar is meaningful
   const basePrice = Number(camping.basePrice || 0);
   const revenue = Number(camping.revenue || 0);
   // estimateMax: basePrice * totalTentQuantity * 5 (5 nights) or fallback to revenue or 1
-  const estimateMax = Math.max(basePrice * Math.max(1, totalTentQuantity) * 5, revenue, 1);
-  const revenuePercent = Math.max(0, Math.min(100, (revenue / estimateMax) * 100));
+  const estimateMax = Math.max(
+    basePrice * Math.max(1, totalTentQuantity) * 5,
+    revenue,
+    1
+  );
+  const revenuePercent = Math.max(
+    0,
+    Math.min(100, (revenue / estimateMax) * 100)
+  );
 
   // description handling
   const RAW_DESC = camping.description || "";
   const CHAR_LIMIT = 420; // fallback limit if line-clamp not supported
   const needsTruncate = RAW_DESC.length > CHAR_LIMIT;
-  const previewText = RAW_DESC.slice(0, CHAR_LIMIT).trim().replace(/\s+\S*$/, (m) => m); // avoid cutting mid-word
+  const previewText = RAW_DESC.slice(0, CHAR_LIMIT)
+    .trim()
+    .replace(/\s+\S*$/, (m) => m); // avoid cutting mid-word
 
   return (
     <>
@@ -136,7 +151,10 @@ const [loadingReviews, setLoadingReviews] = useState(true);
 
       <div className="container py-5">
         <div className="d-flex mb-3 flex-wrap">
-          <Link to="/seller/managercamping" className="btn btn-secondary me-2 mb-2">
+          <Link
+            to="/seller/managercamping"
+            className="btn btn-secondary me-2 mb-2"
+          >
             ← Quay lại danh sách
           </Link>
 
@@ -151,8 +169,7 @@ const [loadingReviews, setLoadingReviews] = useState(true);
             Xóa / Ẩn Camping
           </button>
 
-
-         <button
+          <button
             onClick={() => navigate(`/seller/${id}/bookings`)}
             className="btn btn btn-primary me-2 mb-2"
           >
@@ -173,7 +190,14 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                     <stop offset="100%" stopColor="#00f2fe" />
                   </linearGradient>
                 </defs>
-                <circle cx="18" cy="18" r="15" fill="none" stroke="#eee" strokeWidth="3" />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15"
+                  fill="none"
+                  stroke="#eee"
+                  strokeWidth="3"
+                />
                 <circle
                   cx="18"
                   cy="18"
@@ -185,19 +209,26 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                   strokeLinecap="round"
                   transform="rotate(-90 18 18)"
                 />
-                <text x="18" y="20.5" textAnchor="middle" fontSize="6" fontWeight="700" fill="#222">
+                <text
+                  x="18"
+                  y="20.5"
+                  textAnchor="middle"
+                  fontSize="6"
+                  fontWeight="700"
+                  fill="#222"
+                >
                   {Number(camping.rate ?? 0).toFixed(1)}
                 </text>
               </svg>
               <div style={{ flex: 1 }}>
-                <div className="metric-value">{(ratePercent).toFixed(0)}%</div>
+                <div className="metric-value">{ratePercent.toFixed(0)}%</div>
                 <div className="small-muted">Trên thang 5</div>
               </div>
             </div>
           </div>
 
           {/* Booked count (bar) */}
-          <div className="metric-card" role="region" aria-label="Booked count">
+          {/* <div className="metric-card" role="region" aria-label="Booked count">
             <div className="metric-title">Booked count</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 22, fontWeight: 700 }}>{bookedCount}</div>
@@ -218,10 +249,10 @@ const [loadingReviews, setLoadingReviews] = useState(true);
               </div>
               <div className="small-muted">{bookedPercent.toFixed(0)}% đã được đặt</div>
             </div>
-          </div>
+          </div> */}
 
           {/* Revenue (bar) */}
-          <div className="metric-card" role="region" aria-label="Revenue">
+          {/* <div className="metric-card" role="region" aria-label="Revenue">
             <div className="metric-title">Doanh thu</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>{fmtPrice(revenue)}</div>
@@ -242,7 +273,7 @@ const [loadingReviews, setLoadingReviews] = useState(true);
               </div>
               <div className="small-muted">{revenuePercent.toFixed(0)}% so với ngưỡng ước tính</div>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* rest of page: images + info + services + tents + discounts */}
@@ -257,7 +288,9 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                 style={{ width: "100%", maxHeight: 420, objectFit: "cover" }}
               />
             ) : (
-              <div className="border rounded p-4 mb-3">Không có ảnh đại diện</div>
+              <div className="border rounded p-4 mb-3">
+                Không có ảnh đại diện
+              </div>
             )}
 
             <h5>Gallery</h5>
@@ -269,9 +302,15 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                     src={g.imageUrl}
                     alt={`gallery-${g.id}`}
                     className="rounded"
-                    style={{ width: 200, height: 150, objectFit: "cover", border: "1px solid #eee" }}
+                    style={{
+                      width: 200,
+                      height: 150,
+                      objectFit: "cover",
+                      border: "1px solid #eee",
+                    }}
                     onError={(e) => {
-                      e.target.src = "https://via.placeholder.com/120x80?text=No+Image";
+                      e.target.src =
+                        "https://via.placeholder.com/120x80?text=No+Image";
                     }}
                   />
                 ))}
@@ -291,7 +330,8 @@ const [loadingReviews, setLoadingReviews] = useState(true);
             </p>
 
             <p className="mb-1">
-              <strong>Camping site:</strong> {camping.campingSiteName || camping.campingSiteId || "-"}
+              <strong>Camping site:</strong>{" "}
+              {camping.campingSiteName || camping.campingSiteId || "-"}
             </p>
             <p className="mb-3">
               <strong>Giá cơ bản:</strong> {fmtPrice(camping.basePrice)}
@@ -306,9 +346,7 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                   <>
                     <div className="desc-clamp">
                       {/* Use pre-line in case description has newlines */}
-                      <div style={{ whiteSpace: "pre-line" }}>
-                        {RAW_DESC}
-                      </div>
+                      <div style={{ whiteSpace: "pre-line" }}>{RAW_DESC}</div>
                     </div>
 
                     {/* Fallback preview when RAW_DESC length is long (so clamp might be insufficient) */}
@@ -326,7 +364,10 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                   </>
                 ) : (
                   <>
-                    <div className="desc-full" style={{ whiteSpace: "pre-line" }}>
+                    <div
+                      className="desc-full"
+                      style={{ whiteSpace: "pre-line" }}
+                    >
                       {RAW_DESC}
                     </div>
                     {needsTruncate && (
@@ -386,7 +427,12 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                       <img
                         src={service.imageUrl}
                         alt={service.serviceName}
-                        style={{ width: 60, height: 40, objectFit: "cover", marginTop: 6 }}
+                        style={{
+                          width: 60,
+                          height: 40,
+                          objectFit: "cover",
+                          marginTop: 6,
+                        }}
                       />
                     ) : null}
                   </div>
@@ -412,7 +458,10 @@ const [loadingReviews, setLoadingReviews] = useState(true);
                         className="card-img-top"
                         alt={t.tentName}
                         style={{ height: 160, objectFit: "cover" }}
-                        onError={(e) => (e.target.src = "https://via.placeholder.com/300x160?text=No+Image")}
+                        onError={(e) =>
+                          (e.target.src =
+                            "https://via.placeholder.com/300x160?text=No+Image")
+                        }
                       />
                     ) : null}
                     <div className="card-body">
@@ -435,37 +484,40 @@ const [loadingReviews, setLoadingReviews] = useState(true);
             <p>Không có thông tin lều.</p>
           )}
         </div>
-          <div className="mt-5">
-            <h4>Đánh giá từ khách hàng</h4>
+        <div className="mt-5">
+          <h4>Đánh giá từ khách hàng</h4>
 
-            {loadingReviews ? (
-              <p>Đang tải đánh giá...</p>
-            ) : reviews.length === 0 ? (
-              <p>Chưa có đánh giá nào cho camping này.</p>
-            ) : (
-              <div className="list-group">
-                {reviews.map((r, idx) => (
-                  <div key={idx} className="list-group-item">
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong>{r.userName}</strong>
-                        <div style={{ fontSize: 14, color: "#555" }}>
-                          Đánh giá:{" "}
-                          <span style={{ color: "#f59e0b", fontWeight: "bold" }}>
-                            {"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}
-                          </span>
-                        </div>
+          {loadingReviews ? (
+            <p>Đang tải đánh giá...</p>
+          ) : reviews.length === 0 ? (
+            <p>Chưa có đánh giá nào cho camping này.</p>
+          ) : (
+            <div className="list-group">
+              {reviews.map((r, idx) => (
+                <div key={idx} className="list-group-item">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{r.userName}</strong>
+                      <div style={{ fontSize: 14, color: "#555" }}>
+                        Đánh giá:{" "}
+                        <span style={{ color: "#f59e0b", fontWeight: "bold" }}>
+                          {"★".repeat(r.rating)}
+                          {"☆".repeat(5 - r.rating)}
+                        </span>
                       </div>
-                      <span className="badge bg-light text-dark">
-                        Booking: {r.bookingId?.slice(0, 6) || "-"}
-                      </span>
                     </div>
-                    <p className="mt-2 mb-0">{r.comment || "Không có bình luận."}</p>
+                    <span className="badge bg-light text-dark">
+                      Booking: {r.bookingId?.slice(0, 6) || "-"}
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-            </div>  
+                  <p className="mt-2 mb-0">
+                    {r.comment || "Không có bình luận."}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {/* Discount samples */}
         {/* <div className="mt-4">
           <h4>DisCount (mẫu)</h4>

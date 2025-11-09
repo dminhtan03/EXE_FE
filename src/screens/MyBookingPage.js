@@ -78,10 +78,45 @@ const MyBookingsPage = () => {
       });
 
       alert("Đánh giá thành công!");
+      setBookings((prevBookings) =>
+        prevBookings.map((b) =>
+          b.bookingId === reviewBooking.bookingId
+            ? { ...b, isReviewed: true } // thêm flag
+            : b
+        )
+      );
+
       closeReview();
     } catch (error) {
       console.error("Lỗi khi gửi đánh giá:", error);
       alert("Gửi đánh giá thất bại.");
+    }
+  };
+
+  const handleCancelBooking = async (bookingId) => {
+    if (!window.confirm("Bạn có chắc muốn hủy booking này không?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      await axios.put(
+        `http://localhost:8080/api/v1/bookings/${bookingId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      alert("Đã hủy booking thành công!");
+
+      // ✅ Cập nhật trạng thái trong state
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.bookingId === bookingId ? { ...b, status: "CANCELLED" } : b
+        )
+      );
+    } catch (error) {
+      console.error("Lỗi khi hủy booking:", error);
+      alert("Không thể hủy booking. Vui lòng thử lại sau.");
     }
   };
 
@@ -126,14 +161,58 @@ const MyBookingsPage = () => {
                     <td>
                       {booking.serviceNames?.join(", ") || "Không có dịch vụ"}
                     </td>
-                    <td>
+                    <td
+                      style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}
+                    >
                       {booking.status === "COMPLETED" ? (
-                        <button
-                          className="button-detail"
-                          onClick={() => openReview(booking)}
+                        booking.isReviewed ? (
+                          <span
+                            style={{
+                              color: "#38a169",
+                              fontStyle: "italic",
+                              fontSize: "14px",
+                            }}
+                          >
+                            Đã đánh giá
+                          </span>
+                        ) : (
+                          <button
+                            className="button-detail"
+                            onClick={() => openReview(booking)}
+                          >
+                            Đánh giá
+                          </button>
+                        )
+                      ) : booking.status === "PENDING" ||
+                        booking.status === "CONFIRMED" ? (
+                        <>
+                          <button
+                            className="button-cancel"
+                            style={{
+                              backgroundColor: "#e53e3e",
+                              color: "white",
+                              border: "none",
+                              padding: "6px 12px",
+                              borderRadius: "5px",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              handleCancelBooking(booking.bookingId)
+                            }
+                          >
+                            Hủy booking
+                          </button>
+                        </>
+                      ) : booking.status === "CANCELLED" ? (
+                        <span
+                          style={{
+                            color: "gray",
+                            fontStyle: "italic",
+                            fontSize: "14px",
+                          }}
                         >
-                          Đánh giá
-                        </button>
+                          Đã hủy
+                        </span>
                       ) : (
                         <span
                           style={{
