@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import HeaderLogin from "../components/HeaderLogin";
 import FooterLogin from "../components/FooterHome";
 import { login } from "../api/authService";
 import { register } from "../api/userSevices";
 import { registerPartner } from "../api/partnerService";
+import { getAllCampingSites } from "../api/campingSiteService";
 import "material-design-iconic-font/dist/css/material-design-iconic-font.min.css";
 import "./AuthPage.css";
 
@@ -25,6 +26,8 @@ const AuthPage = () => {
   const [registerType, setRegisterType] = useState("user"); // 'user' hoặc 'partner'
   const [nameCamping, setNameCamping] = useState("");
   const [addressCamping, setAddressCamping] = useState("");
+  const [campingSites, setCampingSites] = useState([]); // list fetched from API for partner select
+  const [selectedCampingSiteId, setSelectedCampingSiteId] = useState("");
   const [addressPartner, setAddressPartner] = useState("");
   const [descriptionCamping, setDescriptionCamping] = useState("");
   const [campingImage, setCampingImage] = useState([]);
@@ -53,6 +56,7 @@ const AuthPage = () => {
 
     const authorities = decoded.roles.map((r) => r.authority);
 
+    // ✅ ADMIN có toàn bộ quyền (ADMIN, MAKE, CHECK, READ, DELETE)
     const isAdmin = [
       "ROLE_ADMIN",
       "ROLE_MAKE",
@@ -79,6 +83,27 @@ const AuthPage = () => {
       setRole("USER");
     }
   };
+
+  // Fetch camping sites when the user switches to partner registration
+  useEffect(() => {
+    let mounted = true;
+    const loadCampingSites = async () => {
+      try {
+        if (registerType !== "partner") return;
+        const res = await getAllCampingSites();
+        // res may be an array or an object containing data; normalize to array
+        const sites = Array.isArray(res) ? res : res?.data ?? res?.items ?? [];
+        if (mounted) setCampingSites(sites);
+      } catch (err) {
+        console.error("Không thể tải danh sách khu camping:", err);
+      }
+    };
+
+    loadCampingSites();
+    return () => {
+      mounted = false;
+    };
+  }, [registerType]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -219,6 +244,8 @@ const AuthPage = () => {
         lastName,
         phoneNumber,
         address_partner: addressPartner,
+        // send selected camping site id so backend links to existing site instead of creating a new one
+        campingSiteId: selectedCampingSiteId,
         address_camping: addressCamping,
         email,
         name_camping: nameCamping,
@@ -649,17 +676,59 @@ const AuthPage = () => {
                             </label>
                             <div className="input-with-icon">
                               <i className="zmdi zmdi-pin"></i>
-                              <input
-                                type="text"
+                              <select
                                 id="address_camping"
-                                placeholder="Nhập địa chỉ khu camping"
-                                value={addressCamping}
-                                onChange={(e) =>
-                                  setAddressCamping(e.target.value)
-                                }
+                                value={selectedCampingSiteId}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setSelectedCampingSiteId(val);
+                                  const selected = campingSites.find(
+                                    (s) =>
+                                      String(
+                                        s.id ?? s._id ?? s.code ?? s.name
+                                      ) === String(val)
+                                  );
+                                  setAddressCamping(
+                                    selected?.location ?? selected?.name ?? ""
+                                  );
+                                }}
                                 required
                                 className="form-control"
-                              />
+                              >
+                                <option value="">
+                                  Chọn địa điểm khu camping
+                                </option>
+                                {campingSites.length === 0 ? (
+                                  <option disabled>
+                                    Đang tải hoặc không có địa điểm
+                                  </option>
+                                ) : (
+                                  campingSites.map((site) => (
+                                    <option
+                                      key={
+                                        site.id ??
+                                        site._id ??
+                                        site.code ??
+                                        site.name
+                                      }
+                                      value={
+                                        site.id ??
+                                        site._id ??
+                                        site.code ??
+                                        site.name
+                                      }
+                                    >
+                                      {site.name
+                                        ? `${site.name}${
+                                            site.location
+                                              ? " - " + site.location
+                                              : ""
+                                          }`
+                                        : site.location || site.id}
+                                    </option>
+                                  ))
+                                )}
+                              </select>
                             </div>
                           </div>
 
