@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getProfile } from "../api/authService";
 import UserProfileModal from "./UserProfileModal";
@@ -66,6 +66,8 @@ const HeaderHome = () => {
   const currentPath = location.pathname;
   const isActive = (path) => (currentPath === path ? "active" : "");
   const toggleDropdown = () => setShowDropdown((prev) => !prev);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -301,7 +303,9 @@ const HeaderHome = () => {
                                   localStorage.removeItem("token");
                                   localStorage.removeItem("user");
                                   setProfile(null);
+                                  setUserRole("GUEST"); // 👈 reset lại role
                                   setShowDropdown(false);
+                                  navigate("/"); // 👈 quay về trang chủ
                                 }}
                               >
                                 Đăng xuất

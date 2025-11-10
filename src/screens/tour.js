@@ -5,6 +5,7 @@ import TourList from "../components/TourList";
 import {
   getCampingRoomsBySiteId,
   getAllCampingSites,
+  searchCampingInforsByName,
   getAllCampingInfor,
 } from "../api/campingSiteService";
 
@@ -19,15 +20,24 @@ const TourScreen = () => {
 
   useEffect(() => {
     const fetchTours = async () => {
-      setTours([]); // 👈 xóa dữ liệu cũ trước
+      setTours([]);
       setLoading(true);
       try {
         let data = [];
-        data = await getAllCampingInfor();
 
-        if (siteId) {
+        // Ưu tiên tìm theo tên nếu có
+        if (queryParams.get("name")) {
+          const name = queryParams.get("name");
+          data = await searchCampingInforsByName(name);
+        }
+        // Nếu không có name mà chỉ có siteId
+        else if (siteId) {
           const siteRooms = await getCampingRoomsBySiteId(siteId);
           data = siteRooms.length > 0 ? siteRooms : [];
+        }
+        // Không có gì thì lấy tất cả
+        else {
+          data = await getAllCampingInfor();
         }
 
         const activeTours = data.filter((tour) => tour.active !== false);
@@ -41,7 +51,7 @@ const TourScreen = () => {
     };
 
     fetchTours();
-  }, [siteId]);
+  }, [siteId, location.search]);
 
   // Pagination
   const itemsPerPageCount = 6;

@@ -16,7 +16,9 @@ export default function HomePage() {
 
     const fetchTours = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/v1/camping");
+        const response = await axios.get(
+          "http://localhost:8080/api/v1/camping"
+        );
         const jsonData = response.data;
 
         // chỉ lấy tour đang active
@@ -74,18 +76,17 @@ export default function HomePage() {
                   data-aos-offset="50"
                 >
                   <div className="image">
-                   <div className="ratting">
+                    <div className="ratting">
                       <i className="fas fa-star"></i>{" "}
-                      {typeof tour.rating === "number" ? tour.rating.toFixed(1) : "Chưa có"}
+                      {typeof tour.rating === "number"
+                        ? tour.rating.toFixed(1)
+                        : "Chưa có"}
                     </div>
 
                     <a href="#" className="heart">
                       <i className="fas fa-heart"></i>
                     </a>
-                    <img
-                      src={tour.thumbnail}
-                      alt="Destination"
-                    />
+                    <img src={tour.thumbnail} alt="Destination" />
                   </div>
                   <div className="content">
                     <span className="location">
@@ -95,14 +96,16 @@ export default function HomePage() {
                     <h5>
                       <Link to={`/camping-detail/${tour.id}`}>{tour.name}</Link>
                     </h5>
-                    
                   </div>
                   <div className="destination-footer">
                     <span className="price">
                       <span>{tour.basePrice.toLocaleString() ?? 0}</span> VND /
                       người
                     </span>
-                    <Link to={`/camping-detail/${tour.id}`} className="read-more">
+                    <Link
+                      to={`/camping-detail/${tour.id}`}
+                      className="read-more"
+                    >
                       Đặt ngay <i className="fal fa-angle-right"></i>
                     </Link>
                   </div>
@@ -221,7 +224,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-            
           </div>
         </div>
       </section>
@@ -230,48 +232,48 @@ export default function HomePage() {
 
       {/* CTA Area */}
       <section className="cta-area pt-100 rel z-1">
-  <div className="container-fluid">
-    <div className="row">
-      {tours.slice(0, 3).map((tour, index) => (
-        <div
-          className="col-xl-4 col-md-6"
-          data-aos="zoom-in-down"
-          data-aos-delay={index * 100}
-          data-aos-duration="1500"
-          data-aos-offset="50"
-          key={index}
-        >
-          <div
-  className="cta-item"
-  style={{
-    backgroundImage: `url(${tour.thumbnail || "/assets/images/cta/default.jpg"})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    borderRadius: "10px",
-    position: "relative",
-    height: "300px", // có thể tùy chỉnh chiều cao
-    overflow: "hidden",
-  }}
->
-  <div className="cta-title">
-    <span className="theme-btn tour-name">{tour.name}</span>
-  </div>
+        <div className="container-fluid">
+          <div className="row">
+            {tours.slice(0, 3).map((tour, index) => (
+              <div
+                className="col-xl-4 col-md-6"
+                data-aos="zoom-in-down"
+                data-aos-delay={index * 100}
+                data-aos-duration="1500"
+                data-aos-offset="50"
+                key={index}
+              >
+                <div
+                  className="cta-item"
+                  style={{
+                    backgroundImage: `url(${
+                      tour.thumbnail || "/assets/images/cta/default.jpg"
+                    })`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    borderRadius: "10px",
+                    position: "relative",
+                    height: "300px", // có thể tùy chỉnh chiều cao
+                    overflow: "hidden",
+                  }}
+                >
+                  <div className="cta-title">
+                    <span className="theme-btn tour-name">{tour.name}</span>
+                  </div>
 
-  <Link
-    to={`/camping-detail/${tour.id}`}
-    className="theme-btn style-two bgc-secondary explore-btn"
-  >
-    <span data-hover="Khám phá">Khám phá</span>
-    <i className="fal fa-arrow-right"></i>
-  </Link>
-</div>
-
+                  <Link
+                    to={`/camping-detail/${tour.id}`}
+                    className="theme-btn style-two bgc-secondary explore-btn"
+                  >
+                    <span data-hover="Khám phá">Khám phá</span>
+                    <i className="fal fa-arrow-right"></i>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
-  </div>
-</section>
-
+      </section>
 
       <button
         onClick={() => setShowChat(true)}
@@ -293,7 +295,7 @@ export default function HomePage() {
       >
         💬
       </button>
-       <button
+      {/* <button
         onClick={() => navigate("/admin")}
         style={{
           position: "fixed",
@@ -312,7 +314,7 @@ export default function HomePage() {
         title="Admin Dashboard"
       >
         📊
-      </button>
+      </button> */}
 
       {showChat && <ChatPopup onClose={() => setShowChat(false)} />}
     </>
