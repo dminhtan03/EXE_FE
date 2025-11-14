@@ -110,6 +110,16 @@ const CreateCamping = () => {
   // ================== Xử lý input ==================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Validation cho các trường số
+    if (type === "number" && value !== "") {
+      const numValue = Number(value);
+      if (isNaN(numValue) || numValue < 0) {
+        alert(`${name === "basePrice" ? "Giá cơ bản" : "Sức chứa"} phải là số dương!`);
+        return;
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -118,14 +128,25 @@ const CreateCamping = () => {
 
   // ================== Thêm/xóa Services ==================
   const handleAddService = () => {
-    if (!newService.serviceName.trim()) return alert("Nhập tên dịch vụ mới!");
+    // Validation
+    if (!newService.serviceName.trim()) {
+      alert("Vui lòng nhập tên dịch vụ!");
+      return;
+    }
+    
+    const price = parseFloat(newService.price);
+    if (isNaN(price) || price <= 0) {
+      alert("Giá dịch vụ phải là số dương lớn hơn 0!");
+      return;
+    }
+    
     setFormData((prev) => ({
       ...prev,
       services: [
         ...prev.services,
         {
-          customName: newService.serviceName,
-          price: parseFloat(newService.price) || 0,
+          customName: newService.serviceName.trim(),
+          price: price,
         },
       ],
     }));
@@ -134,16 +155,41 @@ const CreateCamping = () => {
 
   // ================== Thêm/xóa Tents ==================
   const handleAddTent = () => {
-    if (!newTent.tentName.trim()) return alert("Nhập tên lều!");
+    // Validation
+    if (!newTent.tentName.trim()) {
+      alert("Vui lòng nhập tên lều!");
+      return;
+    }
+    
+    const capacity = Number(newTent.capacity);
+    const pricePerNight = Number(newTent.pricePerNight);
+    const quantity = Number(newTent.quantity);
+    
+    if (isNaN(capacity) || capacity <= 0) {
+      alert("Sức chứa phải là số dương lớn hơn 0!");
+      return;
+    }
+    
+    if (isNaN(pricePerNight) || pricePerNight <= 0) {
+      alert("Giá mỗi đêm phải là số dương lớn hơn 0!");
+      return;
+    }
+    
+    if (isNaN(quantity) || quantity <= 0) {
+      alert("Số lượng lều phải là số dương lớn hơn 0!");
+      return;
+    }
+    
     setFormData((prev) => ({
       ...prev,
       tents: [
         ...prev.tents,
         {
           ...newTent,
-          capacity: +newTent.capacity,
-          pricePerNight: +newTent.pricePerNight,
-          quantity: +newTent.quantity,
+          tentName: newTent.tentName.trim(),
+          capacity: capacity,
+          pricePerNight: pricePerNight,
+          quantity: quantity,
         },
       ],
     }));
@@ -287,6 +333,33 @@ const CreateCamping = () => {
   // ================== Submit form ==================
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validation trước khi submit
+    if (!formData.name.trim()) {
+      alert("Vui lòng nhập tên camping!");
+      return;
+    }
+    
+    if (!formData.campingSiteId) {
+      alert("Vui lòng chọn camping site!");
+      return;
+    }
+    
+    if (!formData.address.trim()) {
+      alert("Vui lòng nhập địa chỉ!");
+      return;
+    }
+    
+    if (formData.basePrice && (isNaN(Number(formData.basePrice)) || Number(formData.basePrice) < 0)) {
+      alert("Giá cơ bản phải là số dương!");
+      return;
+    }
+    
+    if (!formData.thumbnail) {
+      alert("Vui lòng upload ảnh đại diện!");
+      return;
+    }
+    
     try {
       const api = campingId
         ? `http://localhost:8080/api/v1/camping/update/${campingId}`
@@ -297,6 +370,7 @@ const CreateCamping = () => {
 
       if (res.status === 200 || res.status === 201) {
         setMessage(campingId ? "Cập nhật thành công!" : "Tạo mới thành công!");
+        window.scrollTo({ top: 0, behavior: "smooth" });
         if (!campingId) {
           setFormData({
             userId,
@@ -317,6 +391,7 @@ const CreateCamping = () => {
     } catch (err) {
       console.error(err);
       setMessage("Lỗi khi lưu camping.");
+      alert(err.response?.data?.message || "Lỗi khi lưu camping. Vui lòng thử lại!");
     }
   };
 
@@ -389,12 +464,20 @@ const CreateCamping = () => {
           {/* Giá cơ bản, sức chứa, active */}
           <div className="form-row">
             <div>
-              <label>Giá cơ bản:</label>
+              <label>Giá cơ bản (VND):</label>
               <input
                 type="number"
                 name="basePrice"
+                min="0"
+                step="1000"
                 value={formData.basePrice}
-                onChange={handleChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (Number(value) >= 0)) {
+                    handleChange(e);
+                  }
+                }}
+                placeholder="Nhập giá cơ bản"
               />
             </div>
             {/* <div>
@@ -437,7 +520,7 @@ const CreateCamping = () => {
             {formData.tents.map((t, i) => (
               <div key={i} className="nested-item">
                 <p>
-                  {t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x{" "}
+                  <strong>{t.tentName}</strong> - {t.capacity} người - {Number(t.pricePerNight).toLocaleString("vi-VN")} VND / đêm x{" "}
                   {t.quantity} lều
                 </p>
                 {t.thumbnail && (
@@ -464,25 +547,41 @@ const CreateCamping = () => {
                 }
               />
               <input
-                placeholder="Sức chứa"
+                type="number"
+                min="1"
+                placeholder="Sức chứa (người)"
                 value={newTent.capacity}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, capacity: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (Number(value) > 0 && Number.isInteger(Number(value)))) {
+                    setNewTent({ ...newTent, capacity: value });
+                  }
+                }}
               />
               <input
-                placeholder="Giá/đêm"
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="Giá/đêm (VND)"
                 value={newTent.pricePerNight}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, pricePerNight: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (Number(value) >= 0)) {
+                    setNewTent({ ...newTent, pricePerNight: value });
+                  }
+                }}
               />
               <input
-                placeholder="Số lượng"
+                type="number"
+                min="1"
+                placeholder="Số lượng lều"
                 value={newTent.quantity}
-                onChange={(e) =>
-                  setNewTent({ ...newTent, quantity: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (Number(value) > 0 && Number.isInteger(Number(value)))) {
+                    setNewTent({ ...newTent, quantity: value });
+                  }
+                }}
               />
               <input
                 type="file"
@@ -512,7 +611,7 @@ const CreateCamping = () => {
             {formData.services.map((s, i) => (
               <div key={i} className="nested-item">
                 <p>
-                  {s.serviceName || s.serviceId} - {s.price}$
+                  <strong>{s.serviceName || s.serviceId}</strong> - {Number(s.price).toLocaleString("vi-VN")} VND
                 </p>
                 <button
                   type="button"
@@ -523,19 +622,47 @@ const CreateCamping = () => {
               </div>
             ))}
             <div className="add-subform">
+              <select
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const selectedService = services.find(s => s.serviceName === e.target.value);
+                    if (selectedService) {
+                      setNewService({ 
+                        serviceName: selectedService.serviceName, 
+                        price: selectedService.price || "" 
+                      });
+                    }
+                  }
+                }}
+                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
+              >
+                <option value="">-- Chọn dịch vụ có sẵn --</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.serviceName}>
+                    {service.serviceName} - {Number(service.price || 0).toLocaleString("vi-VN")} VND
+                  </option>
+                ))}
+              </select>
               <input
-                placeholder="Tên dịch vụ"
+                placeholder="Tên dịch vụ (hoặc chọn từ danh sách trên)"
                 value={newService.serviceName}
                 onChange={(e) =>
                   setNewService({ ...newService, serviceName: e.target.value })
                 }
               />
               <input
-                placeholder="Giá"
+                type="number"
+                min="0"
+                step="1000"
+                placeholder="Giá (VND)"
                 value={newService.price}
-                onChange={(e) =>
-                  setNewService({ ...newService, price: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || (Number(value) >= 0)) {
+                    setNewService({ ...newService, price: value });
+                  }
+                }}
               />
               <button type="button" onClick={handleAddService}>
                 + Thêm dịch vụ

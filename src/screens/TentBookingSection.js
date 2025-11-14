@@ -208,7 +208,7 @@ const TentBookingSection = ({ tourDetail }) => {
             {showEquipment ? "Ẩn đồ dùng camping" : "Thuê thêm đồ dùng camping"}
           </button>
 
-          {showEquipment &&
+           {showEquipment &&
             Object.entries(groupedEquipment).map(([category, items]) => (
               <div key={category} className="equipment-section">
                 <div className="equipment-grid">
