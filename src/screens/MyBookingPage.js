@@ -120,6 +120,36 @@ const MyBookingsPage = () => {
     }
   };
 
+  const translateStatus = (status) => {
+    switch (status) {
+      case "PENDING":
+        return "Đang chờ";
+      case "COMPLETED":
+        return "Hoàn thành";
+      case "CANCELLED":
+        return "Đã hủy";
+      case "CONFIRMED":
+        return "Đã xác nhận";
+      default:
+        return status;
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "COMPLETED":
+        return "#38a169";
+      case "CANCELLED":
+        return "#e53e3e";
+      case "PENDING":
+        return "#dd6b20";
+      case "CONFIRMED":
+        return "#3182ce";
+      default:
+        return "gray";
+    }
+  };
+
   return (
     <>
       <Header />
@@ -157,7 +187,14 @@ const MyBookingsPage = () => {
                     <td style={{ color: "#38a169" }}>
                       {booking.totalPrice?.toLocaleString()} VND
                     </td>
-                    <td>{booking.status}</td>
+                    <td
+                      style={{
+                        color: getStatusColor(booking.status),
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {translateStatus(booking.status)}
+                    </td>
                     <td>
                       {booking.serviceNames?.join(", ") || "Không có dịch vụ"}
                     </td>

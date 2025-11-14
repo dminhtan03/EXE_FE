@@ -245,7 +245,7 @@ const PaymentPage = () => {
             Thanh toán khi đến nơi
           </label>
           <br />
-          <label>
+          {/* <label>
             <input
               type="radio"
               name="payment"
@@ -265,7 +265,7 @@ const PaymentPage = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             />{" "}
             Ví điện tử (Momo, ZaloPay)
-          </label>
+          </label> */}
         </div>
 
         <button

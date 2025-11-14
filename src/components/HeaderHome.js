@@ -175,12 +175,12 @@ const HeaderHome = () => {
               <li className={isActive("/about")}>
                 <Link to="/about">Giới thiệu</Link>
               </li>
-              <li className={isActive("/marketplace")}>
+              {/* <li className={isActive("/marketplace")}>
                 <Link to="/marketplace">Marketplace</Link>
               </li>
               <li className={isActive("/community")}>
                 <Link to="/community">Cộng đồng</Link>
-              </li>
+              </li> */}
               <li className={isActive("/tours")}>
                 <Link to="/tours">Điểm đến</Link>
               </li>
@@ -276,7 +276,7 @@ const HeaderHome = () => {
                                 Đổi mật khẩu
                               </button>
                             </li>
-                            <li>
+                            {/* <li>
                               <Link
                                 to="/my-post"
                                 className="dropdown-item"
@@ -284,7 +284,7 @@ const HeaderHome = () => {
                               >
                                 Bài đăng của tôi
                               </Link>
-                            </li>
+                            </li> */}
                             {userRole === "USER" && (
                               <li>
                                 <Link
