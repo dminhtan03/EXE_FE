@@ -100,6 +100,17 @@ tbody td {
   text-align: center;
 }
 
+.status-completed {
+  display: inline-block;
+  padding: 5px 12px;
+  color: #0c5460;
+  background-color: #bee5eb;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 .status-cancelled {
   display: inline-block;
   padding: 5px 12px;

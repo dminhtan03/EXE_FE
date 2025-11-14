@@ -11,6 +11,8 @@ const CampingDetailScreen = () => {
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [revenue, setRevenue] = useState(0);
+  const [bookingCount, setBookingCount] = useState(0);
 
   // description expand state
   const [descExpanded, setDescExpanded] = useState(false);
@@ -51,6 +53,46 @@ const CampingDetailScreen = () => {
     fetchReviews();
   }, [id, userId]);
 
+  // ================== Load doanh thu và số lượng booking ==================
+  useEffect(() => {
+    const fetchBookingStats = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        // Lấy tất cả booking của camping này
+        const res = await axios.get(
+          `http://localhost:8080/api/v1/camping/booking/${id}?page=0&size=1000`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const bookings = res.data?.content || [];
+        
+        // Tính doanh thu từ các booking có trạng thái COMPLETED
+        const completedBookings = bookings.filter(
+          (b) => b.status === "COMPLETED"
+        );
+        const totalRevenue = completedBookings.reduce(
+          (sum, b) => sum + (Number(b.totalPrice) || 0),
+          0
+        );
+        setRevenue(totalRevenue);
+
+        // Đếm số lượng booking không phải CANCELLED
+        const nonCancelledBookings = bookings.filter(
+          (b) => b.status !== "CANCELLED"
+        );
+        setBookingCount(nonCancelledBookings.length);
+      } catch (err) {
+        console.error("Lỗi khi load thống kê booking:", err);
+      }
+    };
+
+    if (id) {
+      fetchBookingStats();
+    }
+  }, [id]);
+
   const handleDelete = async () => {
     if (!window.confirm("Bạn có chắc muốn xóa camping này?")) return;
 
@@ -88,15 +130,13 @@ const CampingDetailScreen = () => {
   );
 
   // Booked percent relative to total tent quantity (if totalTentQuantity === 0 treat as 0)
-  const bookedCount = Number(camping.bookedCount || 0);
   const bookedPercent =
     totalTentQuantity > 0
-      ? Math.max(0, Math.min(100, (bookedCount / totalTentQuantity) * 100))
+      ? Math.max(0, Math.min(100, (bookingCount / totalTentQuantity) * 100))
       : 0;
 
   // Revenue percent: create a simple 'max' baseline to compare against so bar is meaningful
   const basePrice = Number(camping.basePrice || 0);
-  const revenue = Number(camping.revenue || 0);
   // estimateMax: basePrice * totalTentQuantity * 5 (5 nights) or fallback to revenue or 1
   const estimateMax = Math.max(
     basePrice * Math.max(1, totalTentQuantity) * 5,
@@ -228,12 +268,12 @@ const CampingDetailScreen = () => {
           </div>
 
           {/* Booked count (bar) */}
-          {/* <div className="metric-card" role="region" aria-label="Booked count">
-            <div className="metric-title">Booked count</div>
+          <div className="metric-card" role="region" aria-label="Booked count">
+            <div className="metric-title">Số lượng đặt</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 22, fontWeight: 700 }}>{bookedCount}</div>
+              <div style={{ fontSize: 22, fontWeight: 700 }}>{bookingCount}</div>
               <div style={{ fontSize: 12, color: "#666" }}>
-                of {totalTentQuantity || "—"} spots
+                của {totalTentQuantity || "—"} chỗ
               </div>
             </div>
 
@@ -249,10 +289,10 @@ const CampingDetailScreen = () => {
               </div>
               <div className="small-muted">{bookedPercent.toFixed(0)}% đã được đặt</div>
             </div>
-          </div> */}
+          </div>
 
           {/* Revenue (bar) */}
-          {/* <div className="metric-card" role="region" aria-label="Revenue">
+          <div className="metric-card" role="region" aria-label="Revenue">
             <div className="metric-title">Doanh thu</div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ fontSize: 18, fontWeight: 700 }}>{fmtPrice(revenue)}</div>
@@ -273,7 +313,7 @@ const CampingDetailScreen = () => {
               </div>
               <div className="small-muted">{revenuePercent.toFixed(0)}% so với ngưỡng ước tính</div>
             </div>
-          </div> */}
+          </div>
         </div>
 
         {/* rest of page: images + info + services + tents + discounts */}
