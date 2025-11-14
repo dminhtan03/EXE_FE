@@ -6,6 +6,13 @@ import { login } from "../api/authService";
 import { register } from "../api/userSevices";
 import { registerPartner } from "../api/partnerService";
 import { getAllCampingSites } from "../api/campingSiteService";
+import {
+  isNotEmpty,
+  isValidEmail,
+  isValidPhoneVN,
+  isValidPassword,
+} from "../utils/validation";
+import { message } from "antd";
 import "material-design-iconic-font/dist/css/material-design-iconic-font.min.css";
 import "./AuthPage.css";
 
@@ -20,6 +27,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("USER");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
@@ -108,11 +116,27 @@ const AuthPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
+    // Validation: not null + email format + password not empty
+    if (!isNotEmpty(email)) {
+      setError("Vui lòng nhập email");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Email không hợp lệ");
+      return;
+    }
+    if (!isNotEmpty(password)) {
+      setError("Vui lòng nhập mật khẩu");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await login(email, password);
       console.log("Login success:", res);
+      message.success("Đăng nhập thành công");
       const token = localStorage.getItem("token");
       const decoded = decodeToken(token);
       const role = getRoleFromToken(decoded);
@@ -124,7 +148,9 @@ const AuthPage = () => {
         navigate("/");
       }
     } catch (err) {
-      setError(err.message || "Something went wrong");
+      const msg = err?.message || "Something went wrong";
+      setError(msg);
+      message.error(msg);
     } finally {
       setLoading(false);
     }
@@ -184,6 +210,35 @@ const AuthPage = () => {
     e.preventDefault();
     setError("");
 
+    // Basic validations
+    if (!isNotEmpty(firstName) || !isNotEmpty(lastName)) {
+      setError("Vui lòng nhập họ và tên");
+      return;
+    }
+    if (!isNotEmpty(email)) {
+      setError("Vui lòng nhập email");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("Email không hợp lệ");
+      return;
+    }
+    if (!isNotEmpty(phoneNumber)) {
+      setError("Vui lòng nhập số điện thoại");
+      return;
+    }
+    if (!isValidPhoneVN(phoneNumber)) {
+      setError("Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0");
+      return;
+    }
+    if (!isNotEmpty(password)) {
+      setError("Vui lòng nhập mật khẩu");
+      return;
+    }
+    if (!isValidPassword(password)) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Mật khẩu không khớp!");
       return;
@@ -213,13 +268,20 @@ const AuthPage = () => {
         console.log("Register success:", res);
         console.log("Camping image:", campingImage);
         localStorage.setItem("registeredEmail", email);
+        message.success(
+          "Đăng ký thành công. Vui lòng kiểm tra email để xác thực OTP."
+        );
         navigate("/verify-otp");
       } else {
-        setError("Đăng ký thất bại. Vui lòng thử lại.");
+        const fallback = "Đăng ký thất bại. Vui lòng thử lại.";
+        setError(fallback);
+        message.error(fallback);
       }
     } catch (err) {
       console.error("Register error:", err);
-      setError(err.message || "Something went wrong");
+      const msg = err?.message || "Something went wrong";
+      setError(msg);
+      message.error(msg);
     } finally {
       setLoading(false);
     }
@@ -229,6 +291,38 @@ const AuthPage = () => {
     e.preventDefault();
     setError("");
 
+    // Basic validations for partner registration
+    if (!isNotEmpty(firstName) || !isNotEmpty(lastName)) {
+      const msg = "Vui lòng nhập họ và tên";
+      setError(msg);
+      message.error(msg);
+      return;
+    }
+
+    if (!isNotEmpty(email)) {
+      const msg = "Vui lòng nhập email";
+      setError(msg);
+      message.error(msg);
+      return;
+    }
+    if (!isValidEmail(email)) {
+      const msg = "Email không hợp lệ";
+      setError(msg);
+      message.error(msg);
+      return;
+    }
+    if (!isNotEmpty(phoneNumber) || !isValidPhoneVN(phoneNumber)) {
+      const msg = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0";
+      setError(msg);
+      message.error(msg);
+      return;
+    }
+    if (!isNotEmpty(nameCamping)) {
+      const msg = "Vui lòng nhập tên khu camping";
+      setError(msg);
+      message.error(msg);
+      return;
+    }
     if (campingImage.length === 0) {
       setError("Vui lòng tải lên ít nhất 1 ảnh khu camping!");
       return;
@@ -256,10 +350,16 @@ const AuthPage = () => {
 
       const res = await registerPartner(partnerData);
       console.log("Register partner success:", res);
+      const msg =
+        "Đăng ký đối tác thành công. Vui lòng chờ xét duyệt hoặc đăng nhập.";
+      setSuccess(msg);
+      message.success(msg);
       navigate("/login");
     } catch (err) {
       console.error("Register partner failed:", err);
-      setError(err.message || "Đăng ký đối tác thất bại, vui lòng thử lại!");
+      const msg = err?.message || "Đăng ký đối tác thất bại, vui lòng thử lại!";
+      setError(msg);
+      message.error(msg);
     } finally {
       setLoading(false);
     }

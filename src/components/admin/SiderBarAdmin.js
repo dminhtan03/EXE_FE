@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { message } from "antd";
 const Sidebar = ({ activeSection, setActiveSection }) => {
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -118,6 +119,7 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
             localStorage.removeItem("user");
             setProfile(null);
             setShowDropdown(false);
+            message.success("Đăng xuất thành công");
           }}
         >
           <span>🚪</span>

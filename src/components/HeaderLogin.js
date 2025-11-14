@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { message } from "antd";
 
 const Header = () => {
   const location = useLocation();
@@ -22,6 +23,7 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     setShowDropdown(false);
+    message.success("Đăng xuất thành công");
     navigate("/");
   };
 

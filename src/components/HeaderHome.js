@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { message } from "antd";
 import { getProfile } from "../api/authService";
 import UserProfileModal from "./UserProfileModal";
 import ChangePasswordModal from "./ChangePasswordModal";
@@ -305,6 +306,7 @@ const HeaderHome = () => {
                                   setProfile(null);
                                   setUserRole("GUEST"); // 👈 reset lại role
                                   setShowDropdown(false);
+                                  message.success("Đăng xuất thành công");
                                   navigate("/"); // 👈 quay về trang chủ
                                 }}
                               >
