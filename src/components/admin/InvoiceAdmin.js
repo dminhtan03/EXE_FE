@@ -237,25 +237,19 @@ export default function InvoiceAdmin() {
             <th>Ngày đặt</th>
             <th>Trạng thái</th>
             <th>Tổng tiền</th>
-            <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {filteredInvoices.length > 0 ? (
             filteredInvoices.map((invoice) => (
               <tr key={invoice.invoiceId}>
-                <td
-                //   className="invoice-id clickable"
-                //   onClick={() => handleShowDetail(invoice.invoiceId)}
-                >
-                  {invoice.invoiceId}
-                </td>
+                <td>{invoice.invoiceId}</td>
                 <td>{invoice.customerName}</td>
                 <td>{invoice.customerEmail}</td>
                 <td>{invoice.customerPhone}</td>
                 <td>
                   {invoice.campingSite
-                    ? `${invoice.campingSite.name} (${invoice.campingSite.location})`
+                    ? `(${invoice.campingSite.location})`
                     : "Chưa chọn"}
                 </td>
                 <td>{formatDate(invoice.createdAt)}</td>
@@ -276,42 +270,6 @@ export default function InvoiceAdmin() {
                 </td>
                 <td>
                   {Number(invoice.totalPrice || 0).toLocaleString("vi-VN")} ₫
-                </td>
-                <td className="action-buttons">
-                  <button
-                    onClick={() => handleShowDetail(invoice.id)}
-                    className="btn view"
-                  >
-                    Xem
-                  </button>
-                  {/* <button
-                                        onClick={() => handleUpdateStatus(invoice.id, 'CONFIRMED')}
-                                        className="btn confirmed"
-                                        title="Xác nhận"
-                                    >
-                                        Xác nhận
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(invoice.id, 'COMPLETED')}
-                                        className="btn complete"
-                                        title="Hoàn thành"
-                                    >
-                                        Hoàn thành
-                                    </button>
-                                    <button
-                                        onClick={() => handleUpdateStatus(invoice.id, 'CANCELLED')}
-                                        className="btn cancel"
-                                        title="Hủy"
-                                    >
-                                        Hủy
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(invoice.id)}
-                                        className="btn cancel"
-                                        title="Xóa hóa đơn"
-                                    >
-                                        Xóa
-                                    </button> */}
                 </td>
               </tr>
             ))

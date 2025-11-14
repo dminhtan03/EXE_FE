@@ -1,230 +1,151 @@
+/* ===========================
+   LAYOUT CHUNG
+=========================== */
 .invoice-admin {
   padding: 20px;
-  background: #f9fafb;
-  border-radius: 8px;
+  font-family: "Inter", Arial, sans-serif;
+  color: #2c3e50;
 }
 
-.title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #333;
+.invoice-admin h1 {
+  margin: 0;
 }
 
-.filter-section {
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.filter-select {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* Table */
+/* ===========================
+   BẢNG HÓA ĐƠN
+=========================== */
 .invoice-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  margin-top: 10px;
+  min-width: 950px;
 }
 
-.invoice-table th,
-.invoice-table td {
-  border: 1px solid #e0e0e0;
-  padding: 10px;
-  text-align: center;
+.invoice-table thead {
+  background: linear-gradient(90deg, #f8fafc, #eef2f6);
 }
 
 .invoice-table th {
-  background: #f0f2f5;
+  padding: 14px 12px;
   font-weight: 600;
+  font-size: 13px;
+  text-align: left;
+  color: #34495e;
+  border-bottom: 1px solid #e6e9ee;
+  white-space: nowrap;
 }
 
-.invoice-table tr:hover {
-  background: #f9f9f9;
+.invoice-table td {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #2d3a45;
+  border-bottom: 1px solid #f1f1f3;
+  vertical-align: middle;
 }
 
-/* Status badge */
+.invoice-table tbody tr {
+  transition: background 0.12s ease;
+}
+
+.invoice-table tbody tr:nth-child(even) {
+  background: #fafafb;
+}
+
+.invoice-table tbody tr:hover {
+  background: #f9fbff;
+}
+
+/* ===========================
+   TRẠNG THÁI BADGE
+=========================== */
 .status-badge {
-  padding: 5px 12px;
+  display: inline-block;
+  padding: 5px 10px;
   border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
+  font-size: 13px;
   color: white;
+  font-weight: 500;
 }
 
 .status-badge.completed {
-  background: #28a745;
+  background: #2ecc71;
 }
 
 .status-badge.confirmed {
-  background: #007bff;
+  background: #3498db;
 }
 
 .status-badge.cancelled {
-  background: #dc3545;
+  background: #e74c3c;
 }
 
 .status-badge.pending {
-  background: #ffc107;
-  color: #333;
+  background: #f1c40f;
+  color: #000;
 }
 
-/* Buttons */
-.action-buttons {
-  display: flex;
-  gap: 6px;
-  justify-content: center;
-}
-
-.btn {
+/* ===========================
+   ACTION BUTTONS
+=========================== */
+.action-buttons .btn {
   padding: 6px 12px;
-  border-radius: 6px;
+  margin-right: 6px;
   border: none;
+  border-radius: 6px;
   font-size: 13px;
   cursor: pointer;
-  transition: 0.2s;
+  font-weight: 600;
+  transition: 0.15s;
 }
 
 .btn.view {
-  background: #17a2b8;
+  background: #3498db;
   color: white;
 }
 
-.btn.complete {
-  background: #28a745;
-  color: white;
+.btn.view:hover {
+  background: #2d89c8;
 }
 
-.btn.cancel {
-  background: #dc3545;
-  color: white;
-}
-
-.btn:hover {
-  opacity: 0.85;
-}
-/* ID clickable */
-.invoice-id.clickable {
-  color: #007bff;
-  cursor: pointer;
-  font-weight: 500;
-}
-.invoice-id.clickable:hover {
-  text-decoration: underline;
-}
-
-/* Modal overlay */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+/* ===========================
+   PAGINATION
+=========================== */
+.pagination {
+  margin-top: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000;
+  gap: 14px;
 }
 
-/* Modal content */
-.modal-content {
-  background: #fff;
-  padding: 20px 30px;
-  border-radius: 10px;
-  width: 500px;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-}
-
-.modal-title {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
-  font-weight: bold;
-}
-
-.modal-subtitle {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.modal-close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.invoice-items {
-  list-style: disc;
-  padding-left: 20px;
-}
-
-
-/* Filter section container */
-.filter-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-/* Input tìm kiếm có icon kính lúp */
-.filter-input {
-  padding: 8px 12px 8px 32px; /* padding-left để chừa chỗ icon */
-  border: 1px solid #ccc;
+.pagination button {
+  padding: 8px 14px;
   border-radius: 6px;
-  font-size: 14px;
-  min-width: 220px;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="16" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27a6.471 6.471 0 001.48-5.34C15.01 5.01 12.51 2.5 9.5 2.5S4 5.01 4 8.5 6.51 14.5 9.5 14.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 13C7 13 5 11 5 8.5S7 4 9.5 4 14 6 14 8.5 12 13 9.5 13z"/></svg>');
-  background-repeat: no-repeat;
-  background-position: 8px center;
-  background-size: 16px;
-}
-
-/* Dropdown filter trạng thái và số item */
-.filter-select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #fff;
+  border: 1px solid #d1d7df;
+  background: white;
   cursor: pointer;
+  font-size: 14px;
+  transition: 0.15s;
 }
 
-/* Hover và focus */
-.filter-input:focus,
-.filter-select:focus {
-  outline: none;
-  border-color: #2575fc;
-  box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
+.pagination button:hover:not(:disabled) {
+  background: #f3f4f6;
 }
 
-/* Chọn số item hiển thị nằm ngoài cùng bên phải */
-.filter-section .filter-select:last-child {
-  margin-left: auto;
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Responsive: khi màn hình nhỏ, filter xếp dọc */
-@media (max-width: 600px) {
-  .filter-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-section .filter-select:last-child {
-    margin-left: 0;
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 900px) {
+  .invoice-table {
+    min-width: 820px;
   }
 }

@@ -4,8 +4,9 @@ import axios from "axios";
 import "./CreateCamping.css";
 import BannerHome from "../../components/BannerHome";
 
-const CLOUDINARY_CLOUD_NAME = "dex1n6s6f";
-const CLOUDINARY_UPLOAD_PRESET = "uploadCampverse";
+// ================== Cấu hình Cloudinary ==================
+const CLOUDINARY_CLOUD_NAME = "dex1n6s6f"; // Cloud name của bạn
+const CLOUDINARY_UPLOAD_PRESET = "uploadCampverse"; // Unsigned preset bạn tạo
 
 const CreateCamping = () => {
   const { campingId } = useParams();
@@ -15,6 +16,7 @@ const CreateCamping = () => {
   const storedUser = localStorage.getItem("user");
   const userId = storedUser ? JSON.parse(storedUser).id : "guest";
 
+  // ================== Load camping sites ==================
   useEffect(() => {
     const fetchCampingSites = async () => {
       try {
@@ -29,6 +31,7 @@ const CreateCamping = () => {
     fetchCampingSites();
   }, []);
 
+  // ================== Form state ==================
   const [formData, setFormData] = useState({
     userId,
     campingSiteId: "",
@@ -53,12 +56,14 @@ const CreateCamping = () => {
     thumbnail: "",
   });
 
+  // ================== Loading states cho upload ==================
   const [uploading, setUploading] = useState({
     thumbnail: false,
     gallery: false,
     tentThumbnail: false,
   });
 
+  // ================== Load services ==================
   useEffect(() => {
     const fetchServices = async () => {
       try {
@@ -71,6 +76,7 @@ const CreateCamping = () => {
     fetchServices();
   }, []);
 
+  // ================== Load camping khi cập nhật ==================
   useEffect(() => {
     if (!campingId) return;
 
@@ -101,65 +107,43 @@ const CreateCamping = () => {
     fetchCamping();
   }, [campingId]);
 
-  // ✅ CHỈ CHO PHÉP NHẬP SỐ DƯƠNG
+  // ================== Xử lý input ==================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
-    if (type === "number") {
-      const numValue = Number(value);
-      if (isNaN(numValue) || numValue <= 0) {
-        setFormData((prev) => ({ ...prev, [name]: "" }));
-        return;
-      }
-    }
-
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  // ================== Thêm/xóa Services ==================
   const handleAddService = () => {
     if (!newService.serviceName.trim()) return alert("Nhập tên dịch vụ mới!");
-    const price = parseFloat(newService.price);
-    if (isNaN(price) || price <= 0) {
-      return alert("Giá dịch vụ phải là số dương lớn hơn 0!");
-    }
-
     setFormData((prev) => ({
       ...prev,
       services: [
         ...prev.services,
         {
           customName: newService.serviceName,
-          price,
+          price: parseFloat(newService.price) || 0,
         },
       ],
     }));
     setNewService({ serviceName: "", price: "" });
   };
 
+  // ================== Thêm/xóa Tents ==================
   const handleAddTent = () => {
     if (!newTent.tentName.trim()) return alert("Nhập tên lều!");
-    const capacity = Number(newTent.capacity);
-    const pricePerNight = Number(newTent.pricePerNight);
-    const quantity = Number(newTent.quantity);
-
-    if ([capacity, pricePerNight, quantity].some((n) => isNaN(n) || n <= 0)) {
-      return alert(
-        "Các giá trị Sức chứa, Giá mỗi đêm và Số lượng phải lớn hơn 0!"
-      );
-    }
-
     setFormData((prev) => ({
       ...prev,
       tents: [
         ...prev.tents,
         {
           ...newTent,
-          capacity,
-          pricePerNight,
-          quantity,
+          capacity: +newTent.capacity,
+          pricePerNight: +newTent.pricePerNight,
+          quantity: +newTent.quantity,
         },
       ],
     }));
@@ -179,18 +163,22 @@ const CreateCamping = () => {
     }));
   };
 
+  // ================== Upload Cloudinary ==================
   const handleUploadImage = async (file) => {
+    // Validation file
     if (!file) {
       alert("Vui lòng chọn file ảnh!");
       return null;
     }
 
+    // Kiểm tra loại file
     if (!file.type.startsWith("image/")) {
-      alert("File phải là ảnh!");
+      alert("File phải là ảnh (JPG, PNG, GIF, etc.)!");
       return null;
     }
 
-    const maxSize = 10 * 1024 * 1024;
+    // Kiểm tra kích thước file (tối đa 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
       alert("Kích thước ảnh không được vượt quá 10MB!");
       return null;
@@ -203,12 +191,24 @@ const CreateCamping = () => {
     try {
       const res = await axios.post(
         `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        data
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
-      return res.data?.secure_url || null;
+
+      // Lấy secure_url từ Cloudinary response
+      const imageUrl = res.data?.secure_url;
+      if (!imageUrl) {
+        throw new Error("Không nhận được URL từ Cloudinary");
+      }
+
+      return imageUrl;
     } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Lỗi khi upload ảnh!");
+      console.error("Upload failed:", err.response?.data || err.message);
+      alert("Lỗi khi upload ảnh lên Cloudinary. Vui lòng thử lại!");
       return null;
     }
   };
@@ -216,13 +216,20 @@ const CreateCamping = () => {
   const handleThumbnailChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading((prev) => ({ ...prev, thumbnail: true }));
 
+    setUploading((prev) => ({ ...prev, thumbnail: true }));
     try {
+      // Upload ảnh lên Cloudinary
       const imageUrl = await handleUploadImage(file);
-      if (imageUrl) setFormData((prev) => ({ ...prev, thumbnail: imageUrl }));
+
+      if (imageUrl) {
+        // Lưu link ảnh từ Cloudinary vào formData
+        // Link này sẽ được lưu vào database khi submit form
+        setFormData((prev) => ({ ...prev, thumbnail: imageUrl }));
+      }
     } finally {
       setUploading((prev) => ({ ...prev, thumbnail: false }));
+      // Reset input để có thể chọn lại cùng file
       e.target.value = "";
     }
   };
@@ -230,10 +237,15 @@ const CreateCamping = () => {
   const handleGalleryChange = async (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    setUploading((prev) => ({ ...prev, gallery: true }));
 
+    setUploading((prev) => ({ ...prev, gallery: true }));
     try {
-      const imageUrls = await Promise.all(files.map(handleUploadImage));
+      // Upload tất cả ảnh lên Cloudinary
+      const uploadPromises = files.map((file) => handleUploadImage(file));
+      const imageUrls = await Promise.all(uploadPromises);
+
+      // Lọc các URL hợp lệ và lưu vào formData
+      // Các link này sẽ được lưu vào database khi submit form
       const validUrls = imageUrls.filter(Boolean);
       if (validUrls.length > 0) {
         setFormData((prev) => ({
@@ -246,6 +258,7 @@ const CreateCamping = () => {
       }
     } finally {
       setUploading((prev) => ({ ...prev, gallery: false }));
+      // Reset input để có thể chọn lại cùng file
       e.target.value = "";
     }
   };
@@ -253,17 +266,25 @@ const CreateCamping = () => {
   const handleTentThumbnailChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setUploading((prev) => ({ ...prev, tentThumbnail: true }));
 
+    setUploading((prev) => ({ ...prev, tentThumbnail: true }));
     try {
+      // Upload ảnh lên Cloudinary
       const imageUrl = await handleUploadImage(file);
-      if (imageUrl) setNewTent((prev) => ({ ...prev, thumbnail: imageUrl }));
+
+      if (imageUrl) {
+        // Lưu link ảnh từ Cloudinary vào newTent
+        // Link này sẽ được lưu vào database khi thêm tent
+        setNewTent((prev) => ({ ...prev, thumbnail: imageUrl }));
+      }
     } finally {
       setUploading((prev) => ({ ...prev, tentThumbnail: false }));
+      // Reset input để có thể chọn lại cùng file
       e.target.value = "";
     }
   };
 
+  // ================== Submit form ==================
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -276,7 +297,6 @@ const CreateCamping = () => {
 
       if (res.status === 200 || res.status === 201) {
         setMessage(campingId ? "Cập nhật thành công!" : "Tạo mới thành công!");
-        window.scrollTo({ top: 0, behavior: "smooth" });
         if (!campingId) {
           setFormData({
             userId,
@@ -284,8 +304,8 @@ const CreateCamping = () => {
             name: "",
             address: "",
             description: "",
-            basePrice: "100000",
-            capacity: "",
+            basePrice: "",
+            capacity: "1",
             thumbnail: "",
             active: true,
             services: [],
@@ -300,6 +320,7 @@ const CreateCamping = () => {
     }
   };
 
+  // ================== Render ==================
   return (
     <>
       <BannerHome />
@@ -311,6 +332,7 @@ const CreateCamping = () => {
         {message && <p>{message}</p>}
 
         <form onSubmit={handleSubmit}>
+          {/* Tên Camping */}
           <div className="form-section">
             <label>Tên Camping:</label>
             <input
@@ -321,6 +343,7 @@ const CreateCamping = () => {
             />
           </div>
 
+          {/* Chọn Camping Site */}
           <div className="form-section">
             <label>Chọn Camping Site:</label>
             <select
@@ -342,6 +365,7 @@ const CreateCamping = () => {
             </select>
           </div>
 
+          {/* Địa chỉ */}
           <div className="form-section">
             <label>Địa chỉ:</label>
             <input
@@ -352,16 +376,18 @@ const CreateCamping = () => {
             />
           </div>
 
+          {/* Mô tả */}
           <div className="form-section">
             <label>Mô tả:</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-            />
+            ></textarea>
           </div>
 
-          {/* <div className="form-row">
+          {/* Giá cơ bản, sức chứa, active */}
+          <div className="form-row">
             <div>
               <label>Giá cơ bản:</label>
               <input
@@ -369,12 +395,24 @@ const CreateCamping = () => {
                 name="basePrice"
                 value={formData.basePrice}
                 onChange={handleChange}
-                min="1"
-                required
               />
             </div>
-          </div> */}
+            {/* <div>
+              <label>Sức chứa:</label>
+              <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
+            </div> */}
+            <div>
+              <label>Kích hoạt:</label>
+              <input
+                type="hidden"
+                name="active"
+                checked={formData.active}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
 
+          {/* Thumbnail */}
           <div className="form-section">
             <label>Ảnh đại diện (Thumbnail):</label>
             <input
@@ -393,13 +431,88 @@ const CreateCamping = () => {
             )}
           </div>
 
+          {/* Tents */}
+          <div className="nested-section">
+            <h3>Danh sách lều (Tents)</h3>
+            {formData.tents.map((t, i) => (
+              <div key={i} className="nested-item">
+                <p>
+                  {t.tentName} - {t.capacity} người - {t.pricePerNight}$ / đêm x{" "}
+                  {t.quantity} lều
+                </p>
+                {t.thumbnail && (
+                  <img
+                    src={t.thumbnail}
+                    alt={t.tentName}
+                    className="preview-img"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem("tents", i)}
+                >
+                  Xóa
+                </button>
+              </div>
+            ))}
+            <div className="add-subform">
+              <input
+                placeholder="Tên lều"
+                value={newTent.tentName}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, tentName: e.target.value })
+                }
+              />
+              <input
+                placeholder="Sức chứa"
+                value={newTent.capacity}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, capacity: e.target.value })
+                }
+              />
+              <input
+                placeholder="Giá/đêm"
+                value={newTent.pricePerNight}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, pricePerNight: e.target.value })
+                }
+              />
+              <input
+                placeholder="Số lượng"
+                value={newTent.quantity}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, quantity: e.target.value })
+                }
+              />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleTentThumbnailChange}
+                disabled={uploading.tentThumbnail}
+              />
+              {uploading.tentThumbnail && (
+                <p>Đang upload ảnh lên Cloudinary...</p>
+              )}
+              {newTent.thumbnail && (
+                <img
+                  src={newTent.thumbnail}
+                  alt="Tent Thumbnail"
+                  className="preview-img"
+                />
+              )}
+              <button type="button" onClick={handleAddTent}>
+                + Thêm lều
+              </button>
+            </div>
+          </div>
+
+          {/* Services */}
           <div className="nested-section">
             <h3>Dịch vụ (Services)</h3>
             {formData.services.map((s, i) => (
               <div key={i} className="nested-item">
                 <p>
-                  {s.serviceName || s.serviceId} -{" "}
-                  {Number(s.price).toLocaleString("vi-VN")} VND
+                  {s.serviceName || s.serviceId} - {s.price}$
                 </p>
                 <button
                   type="button"
@@ -418,8 +531,6 @@ const CreateCamping = () => {
                 }
               />
               <input
-                type="number"
-                min="1"
                 placeholder="Giá"
                 value={newService.price}
                 onChange={(e) =>
@@ -429,6 +540,34 @@ const CreateCamping = () => {
               <button type="button" onClick={handleAddService}>
                 + Thêm dịch vụ
               </button>
+            </div>
+          </div>
+
+          {/* Gallery */}
+          <div className="nested-section">
+            <h3>Bộ sưu tập ảnh (Gallery)</h3>
+            <div className="gallery-preview">
+              {formData.galleries.map((g, i) => (
+                <div key={i} className="gallery-item">
+                  <img src={g.imageUrl} alt={`gallery-${i}`} />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveItem("galleries", i)}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="add-subform">
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleGalleryChange}
+                disabled={uploading.gallery}
+              />
+              {uploading.gallery && <p>Đang upload ảnh lên Cloudinary...</p>}
             </div>
           </div>
 
