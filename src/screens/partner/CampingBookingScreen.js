@@ -11,6 +11,7 @@ const CampingBookingScreen = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const [updatingBookingId, setUpdatingBookingId] = useState(null);
 
   // pagination
   const [page, setPage] = useState(0);
@@ -67,19 +68,28 @@ const CampingBookingScreen = () => {
 
   // ✅ Hàm cập nhật trạng thái booking theo đúng logic backend
   const handleUpdateStatus = async (bookingId, currentStatus, newStatus) => {
-    // Validation theo logic backend
-    if (newStatus === "CONFIRMED" && currentStatus !== "PENDING") {
-      alert("Chỉ có thể xác nhận booking ở trạng thái PENDING!");
+    // Tìm booking trong danh sách để lấy status thực tế
+    const booking = bookings.find(b => b.bookingId === bookingId);
+    const actualStatus = booking?.status || currentStatus;
+    
+    console.log(`[DEBUG] Attempting to update booking ${bookingId}:`);
+    console.log(`  - Current status from UI: ${currentStatus}`);
+    console.log(`  - Actual status from data: ${actualStatus}`);
+    console.log(`  - Target status: ${newStatus}`);
+    
+    // Validation theo logic backend - sử dụng actualStatus
+    if (newStatus === "CONFIRMED" && actualStatus !== "PENDING") {
+      alert(`Chỉ có thể xác nhận booking ở trạng thái PENDING! Trạng thái hiện tại: ${actualStatus}`);
       return;
     }
 
-    if (newStatus === "COMPLETED" && currentStatus !== "CONFIRMED") {
-      alert("Chỉ có thể hoàn tất booking ở trạng thái CONFIRMED!");
+    if (newStatus === "COMPLETED" && actualStatus !== "CONFIRMED") {
+      alert(`Chỉ có thể hoàn tất booking ở trạng thái CONFIRMED! Trạng thái hiện tại: ${actualStatus}`);
       return;
     }
 
-    if (newStatus === "CANCELLED" && currentStatus !== "PENDING" && currentStatus !== "CONFIRMED") {
-      alert("Chỉ có thể hủy booking ở trạng thái PENDING hoặc CONFIRMED!");
+    if (newStatus === "CANCELLED" && actualStatus !== "PENDING" && actualStatus !== "CONFIRMED") {
+      alert(`Chỉ có thể hủy booking ở trạng thái PENDING hoặc CONFIRMED! Trạng thái hiện tại: ${actualStatus}`);
       return;
     }
 
@@ -91,15 +101,19 @@ const CampingBookingScreen = () => {
 
     if (!window.confirm(statusMessages[newStatus] || "Xác nhận cập nhật trạng thái?")) return;
 
+    setUpdatingBookingId(bookingId);
+    
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Bạn cần đăng nhập để thực hiện thao tác này!");
+        setUpdatingBookingId(null);
         return;
       }
 
       if (!bookingId) {
         alert("Booking ID không hợp lệ!");
+        setUpdatingBookingId(null);
         return;
       }
 
@@ -107,7 +121,6 @@ const CampingBookingScreen = () => {
       let endpoint = "";
       switch (newStatus) {
         case "CONFIRMED":
-          // Endpoint đúng là /confirmed (theo controller)
           endpoint = `http://localhost:8080/api/v1/bookings/${bookingId}/confirmed`;
           break;
         case "COMPLETED":
@@ -118,11 +131,13 @@ const CampingBookingScreen = () => {
           break;
         default:
           alert("Trạng thái không hợp lệ!");
+          setUpdatingBookingId(null);
           return;
       }
 
-      console.log(`Calling PUT ${endpoint} for booking ${bookingId}`);
-
+      console.log(`[DEBUG] Calling PUT ${endpoint}`);
+      console.log(`[DEBUG] Booking ID: ${bookingId}, Current Status: ${actualStatus}, New Status: ${newStatus}`);
+      
       const response = await axios.put(
         endpoint, 
         null, // Không có body
@@ -134,20 +149,24 @@ const CampingBookingScreen = () => {
         }
       );
       
-      console.log("Response:", response.data);
+      console.log(`[DEBUG] Response status:`, response.status);
+      console.log(`[DEBUG] Response data:`, response.data);
       
       const successMessages = {
-        CONFIRMED: "Đã chuyển sang CONFIRMED thành công!",
-        COMPLETED: "Đã chuyển sang COMPLETED thành công!",
+        CONFIRMED: "Đã xác nhận booking thành công!",
+        COMPLETED: "Đã hoàn tất booking thành công!",
         CANCELLED: "Đã hủy booking thành công!",
       };
       
       alert(successMessages[newStatus] || "Cập nhật trạng thái thành công!");
-      setRefresh((r) => !r); // reload danh sách
+      
+      // Reload danh sách để đảm bảo dữ liệu đồng bộ với server
+      setRefresh((r) => !r);
     } catch (err) {
-      console.error("Lỗi khi cập nhật trạng thái:", err);
-      console.error("Error response:", err.response?.data);
-      console.error("Error status:", err.response?.status);
+      console.error("[ERROR] Lỗi khi cập nhật trạng thái:", err);
+      console.error("[ERROR] Error response:", err.response?.data);
+      console.error("[ERROR] Error status:", err.response?.status);
+      console.error("[ERROR] Error config:", err.config);
       
       let errorMessage = "Không thể cập nhật trạng thái.";
       
@@ -157,7 +176,22 @@ const CampingBookingScreen = () => {
         const data = err.response.data;
         
         if (status === 400) {
-          errorMessage = data?.message || "Yêu cầu không hợp lệ. Vui lòng kiểm tra lại trạng thái booking.";
+          // Lỗi 400 thường do validation - hiển thị message chi tiết từ server
+          const serverMessage = data?.message || data?.error || "Yêu cầu không hợp lệ.";
+          
+          // Tạo message rõ ràng hơn
+          let detailedMessage = serverMessage;
+          
+          // Thêm thông tin về trạng thái nếu message không rõ ràng
+          if (!serverMessage.includes("status") && !serverMessage.includes("trạng thái")) {
+            detailedMessage = `${serverMessage}\n\nTrạng thái hiện tại: ${actualStatus}\nTrạng thái mong muốn: ${newStatus}\n\nLưu ý: Vui lòng kiểm tra lại logic backend.`;
+          }
+          
+          errorMessage = detailedMessage;
+          
+          // Nếu là lỗi validation, reload lại danh sách để lấy status mới nhất
+          console.log("[DEBUG] Reloading bookings due to 400 error to get latest status");
+          setRefresh((r) => !r);
         } else if (status === 401) {
           errorMessage = "Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn.";
         } else if (status === 403) {
@@ -176,6 +210,8 @@ const CampingBookingScreen = () => {
       }
       
       alert(errorMessage);
+    } finally {
+      setUpdatingBookingId(null);
     }
   };
 
@@ -258,16 +294,18 @@ const CampingBookingScreen = () => {
                               <button
                                 className="btn btn-primary btn-sm"
                                 onClick={() => handleUpdateStatus(b.bookingId, b.status, "CONFIRMED")}
-                                title="Xác nhận booking (chỉ từ PENDING)"
+                                disabled={updatingBookingId === b.bookingId}
+                                title="Xác nhận booking"
                               >
-                                Xác nhận
+                                {updatingBookingId === b.bookingId ? "Đang xử lý..." : "Xác nhận"}
                               </button>
                               <button
                                 className="btn btn-danger btn-sm"
                                 onClick={() => handleUpdateStatus(b.bookingId, b.status, "CANCELLED")}
+                                disabled={updatingBookingId === b.bookingId}
                                 title="Hủy booking"
                               >
-                                Hủy
+                                {updatingBookingId === b.bookingId ? "Đang xử lý..." : "Hủy"}
                               </button>
                             </>
                           )}
@@ -276,24 +314,26 @@ const CampingBookingScreen = () => {
                               <button
                                 className="btn btn-success btn-sm"
                                 onClick={() => handleUpdateStatus(b.bookingId, b.status, "COMPLETED")}
-                                title="Hoàn tất booking (chỉ từ CONFIRMED)"
+                                disabled={updatingBookingId === b.bookingId}
+                                title="Hoàn tất booking"
                               >
-                                Hoàn tất
+                                {updatingBookingId === b.bookingId ? "Đang xử lý..." : "Hoàn tất"}
                               </button>
                               <button
                                 className="btn btn-danger btn-sm"
                                 onClick={() => handleUpdateStatus(b.bookingId, b.status, "CANCELLED")}
+                                disabled={updatingBookingId === b.bookingId}
                                 title="Hủy booking"
                               >
-                                Hủy
+                                {updatingBookingId === b.bookingId ? "Đang xử lý..." : "Hủy"}
                               </button>
                             </>
                           )}
                           {b.status === "COMPLETED" && (
-                            <span className="badge bg-success">Đã hoàn tất</span>
+                            <span className="badge bg-success">✅ Đã hoàn tất</span>
                           )}
                           {b.status === "CANCELLED" && (
-                            <span className="badge bg-secondary">Đã hủy</span>
+                            <span className="badge bg-secondary">❌ Đã hủy</span>
                           )}
                         </div>
                       </td>

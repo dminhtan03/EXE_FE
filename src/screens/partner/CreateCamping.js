@@ -110,7 +110,7 @@ const CreateCamping = () => {
   // ================== Xử lý input ==================
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Validation cho các trường số
     if (type === "number" && value !== "") {
       const numValue = Number(value);
@@ -119,7 +119,7 @@ const CreateCamping = () => {
         return;
       }
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -139,12 +139,13 @@ const CreateCamping = () => {
       alert("Giá dịch vụ phải là số dương lớn hơn 0!");
       return;
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       services: [
         ...prev.services,
         {
+          serviceName: newService.serviceName.trim(),
           customName: newService.serviceName.trim(),
           price: price,
         },
@@ -164,7 +165,7 @@ const CreateCamping = () => {
     const capacity = Number(newTent.capacity);
     const pricePerNight = Number(newTent.pricePerNight);
     const quantity = Number(newTent.quantity);
-    
+
     if (isNaN(capacity) || capacity <= 0) {
       alert("Sức chứa phải là số dương lớn hơn 0!");
       return;
@@ -179,7 +180,7 @@ const CreateCamping = () => {
       alert("Số lượng lều phải là số dương lớn hơn 0!");
       return;
     }
-    
+
     setFormData((prev) => ({
       ...prev,
       tents: [
@@ -203,6 +204,16 @@ const CreateCamping = () => {
   };
 
   const handleRemoveItem = (field, index) => {
+    // Kiểm tra nếu đang xóa service và service đó đã có ID (đã tồn tại trong DB)
+    if (field === "services") {
+      const service = formData.services[index];
+      // Nếu service có ID (đã tồn tại trong DB), không cho phép xóa vì có thể đã có booking
+      if (service && service.id) {
+        alert("Không thể xóa dịch vụ này vì đã có booking liên quan. Bạn chỉ có thể chỉnh sửa thông tin.");
+        return;
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
@@ -264,6 +275,7 @@ const CreateCamping = () => {
     if (!file) return;
 
     setUploading((prev) => ({ ...prev, thumbnail: true }));
+
     try {
       // Upload ảnh lên Cloudinary
       const imageUrl = await handleUploadImage(file);
@@ -312,54 +324,19 @@ const CreateCamping = () => {
   const handleTentThumbnailChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     setUploading((prev) => ({ ...prev, tentThumbnail: true }));
-    try {
-      // Upload ảnh lên Cloudinary
-      const imageUrl = await handleUploadImage(file);
 
-      if (imageUrl) {
-        // Lưu link ảnh từ Cloudinary vào newTent
-        // Link này sẽ được lưu vào database khi thêm tent
-        setNewTent((prev) => ({ ...prev, thumbnail: imageUrl }));
-      }
+    try {
+      const imageUrl = await handleUploadImage(file);
+      if (imageUrl) setNewTent((prev) => ({ ...prev, thumbnail: imageUrl }));
     } finally {
       setUploading((prev) => ({ ...prev, tentThumbnail: false }));
-      // Reset input để có thể chọn lại cùng file
       e.target.value = "";
     }
   };
 
-  // ================== Submit form ==================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validation trước khi submit
-    if (!formData.name.trim()) {
-      alert("Vui lòng nhập tên camping!");
-      return;
-    }
-    
-    if (!formData.campingSiteId) {
-      alert("Vui lòng chọn camping site!");
-      return;
-    }
-    
-    if (!formData.address.trim()) {
-      alert("Vui lòng nhập địa chỉ!");
-      return;
-    }
-    
-    if (formData.basePrice && (isNaN(Number(formData.basePrice)) || Number(formData.basePrice) < 0)) {
-      alert("Giá cơ bản phải là số dương!");
-      return;
-    }
-    
-    if (!formData.thumbnail) {
-      alert("Vui lòng upload ảnh đại diện!");
-      return;
-    }
-    
     try {
       const api = campingId
         ? `http://localhost:8080/api/v1/camping/update/${campingId}`
@@ -378,7 +355,7 @@ const CreateCamping = () => {
             name: "",
             address: "",
             description: "",
-            basePrice: "",
+            basePrice: "100000",
             capacity: "1",
             thumbnail: "",
             active: true,
@@ -391,11 +368,9 @@ const CreateCamping = () => {
     } catch (err) {
       console.error(err);
       setMessage("Lỗi khi lưu camping.");
-      alert(err.response?.data?.message || "Lỗi khi lưu camping. Vui lòng thử lại!");
     }
   };
 
-  // ================== Render ==================
   return (
     <>
       <BannerHome />
@@ -407,7 +382,6 @@ const CreateCamping = () => {
         {message && <p>{message}</p>}
 
         <form onSubmit={handleSubmit}>
-          {/* Tên Camping */}
           <div className="form-section">
             <label>Tên Camping:</label>
             <input
@@ -418,7 +392,6 @@ const CreateCamping = () => {
             />
           </div>
 
-          {/* Chọn Camping Site */}
           <div className="form-section">
             <label>Chọn Camping Site:</label>
             <select
@@ -440,7 +413,6 @@ const CreateCamping = () => {
             </select>
           </div>
 
-          {/* Địa chỉ */}
           <div className="form-section">
             <label>Địa chỉ:</label>
             <input
@@ -451,41 +423,40 @@ const CreateCamping = () => {
             />
           </div>
 
-          {/* Mô tả */}
           <div className="form-section">
             <label>Mô tả:</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
-            ></textarea>
+            />
           </div>
 
-          {/* Giá cơ bản, sức chứa, active */}
           <div className="form-row">
-            <div>
-              <label>Giá cơ bản (VND):</label>
+            <div >
+              {/* <label>Giá cơ bản (VND):</label> */}
               <input
-                type="number"
+                type="hidden"
                 name="basePrice"
-                min="0"
-                step="1000"
                 value={formData.basePrice}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (Number(value) >= 0)) {
-                    handleChange(e);
-                  }
-                }}
+                onChange={handleChange}
+                min="1"
                 placeholder="Nhập giá cơ bản"
               />
             </div>
-            {/* <div>
-              <label>Sức chứa:</label>
-              <input type="number" name="capacity" value={formData.capacity} onChange={handleChange} />
-            </div> */}
             <div>
-              <label>Kích hoạt:</label>
+              {/* <label>Sức chứa (người):</label> */}
+              <input
+                type="hidden"
+                name="capacity"
+                value={formData.capacity}
+                onChange={handleChange}
+                min="1"
+                placeholder="Nhập sức chứa"
+              />
+            </div>
+            <div>
+              {/* <label>Kích hoạt:</label> */}
               <input
                 type="hidden"
                 name="active"
@@ -495,7 +466,6 @@ const CreateCamping = () => {
             </div>
           </div>
 
-          {/* Thumbnail */}
           <div className="form-section">
             <label>Ảnh đại diện (Thumbnail):</label>
             <input
@@ -514,22 +484,79 @@ const CreateCamping = () => {
             )}
           </div>
 
-          {/* Tents */}
+          <div className="nested-section">
+            <h3>Dịch vụ (Services)</h3>
+            {formData.services.map((s, i) => (
+              <div key={i} className="nested-item">
+                <p>
+                  <strong>{s.serviceName || s.customName || s.serviceId || "Unknown"}</strong> - {Number(s.price).toLocaleString("vi-VN")} VND
+                  {s.id && campingId && (
+                    <span style={{ marginLeft: "10px", fontSize: "12px", color: "#666" }}>
+                      (Đã có booking - không thể xóa)
+                    </span>
+                  )}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveItem("services", i)}
+                  disabled={s.id && campingId}
+                  style={{
+                    opacity: s.id && campingId ? 0.5 : 1,
+                    cursor: s.id && campingId ? "not-allowed" : "pointer"
+                  }}
+                  title={s.id && campingId ? "Không thể xóa dịch vụ đã có booking" : "Xóa dịch vụ"}
+                >
+                  Xóa
+                </button>
+              </div>
+            ))}
+            <div className="add-subform">
+              <input
+                placeholder="Tên dịch vụ"
+                value={newService.serviceName}
+                onChange={(e) =>
+                  setNewService({ ...newService, serviceName: e.target.value })
+                }
+              />
+              <input
+                type="number"
+                min="1"
+                placeholder="Giá"
+                value={newService.price}
+                onChange={(e) =>
+                  setNewService({ ...newService, price: e.target.value })
+                }
+              />
+              <button type="button" onClick={handleAddService}>
+                + Thêm dịch vụ
+              </button>
+            </div>
+          </div>
+
+          {/* Phần thêm lều (Tents) */}
           <div className="nested-section">
             <h3>Danh sách lều (Tents)</h3>
             {formData.tents.map((t, i) => (
               <div key={i} className="nested-item">
-                <p>
-                  <strong>{t.tentName}</strong> - {t.capacity} người - {Number(t.pricePerNight).toLocaleString("vi-VN")} VND / đêm x{" "}
-                  {t.quantity} lều
-                </p>
-                {t.thumbnail && (
-                  <img
-                    src={t.thumbnail}
-                    alt={t.tentName}
-                    className="preview-img"
-                  />
-                )}
+                <div style={{ display: "flex", alignItems: "center", gap: "15px", flexWrap: "wrap" }}>
+                  {t.thumbnail && (
+                    <img
+                      src={t.thumbnail}
+                      alt={t.tentName}
+                      className="preview-img"
+                      style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                    />
+                  )}
+                  <div>
+                    <p>
+                      <strong>{t.tentName}</strong>
+                    </p>
+                    <p>
+                      Sức chứa: {t.capacity} người | Giá:{" "}
+                      {Number(t.pricePerNight).toLocaleString("vi-VN")} VND/đêm | Số lượng: {t.quantity} lều
+                    </p>
+                  </div>
+                </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveItem("tents", i)}
@@ -551,121 +578,59 @@ const CreateCamping = () => {
                 min="1"
                 placeholder="Sức chứa (người)"
                 value={newTent.capacity}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (Number(value) > 0 && Number.isInteger(Number(value)))) {
-                    setNewTent({ ...newTent, capacity: value });
-                  }
-                }}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, capacity: e.target.value })
+                }
               />
               <input
                 type="number"
-                min="0"
-                step="1000"
-                placeholder="Giá/đêm (VND)"
+                min="1"
+                placeholder="Giá mỗi đêm (VND)"
                 value={newTent.pricePerNight}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (Number(value) >= 0)) {
-                    setNewTent({ ...newTent, pricePerNight: value });
-                  }
-                }}
+                onChange={(e) =>
+                  setNewTent({ ...newTent, pricePerNight: e.target.value })
+                }
               />
               <input
                 type="number"
                 min="1"
                 placeholder="Số lượng lều"
                 value={newTent.quantity}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (Number(value) > 0 && Number.isInteger(Number(value)))) {
-                    setNewTent({ ...newTent, quantity: value });
-                  }
-                }}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleTentThumbnailChange}
-                disabled={uploading.tentThumbnail}
-              />
-              {uploading.tentThumbnail && (
-                <p>Đang upload ảnh lên Cloudinary...</p>
-              )}
-              {newTent.thumbnail && (
-                <img
-                  src={newTent.thumbnail}
-                  alt="Tent Thumbnail"
-                  className="preview-img"
-                />
-              )}
-              <button type="button" onClick={handleAddTent}>
-                + Thêm lều
-              </button>
-            </div>
-          </div>
-
-          {/* Services */}
-          <div className="nested-section">
-            <h3>Dịch vụ (Services)</h3>
-            {formData.services.map((s, i) => (
-              <div key={i} className="nested-item">
-                <p>
-                  <strong>{s.serviceName || s.serviceId}</strong> - {Number(s.price).toLocaleString("vi-VN")} VND
-                </p>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveItem("services", i)}
-                >
-                  Xóa
-                </button>
-              </div>
-            ))}
-            <div className="add-subform">
-              <select
-                value=""
-                onChange={(e) => {
-                  if (e.target.value) {
-                    const selectedService = services.find(s => s.serviceName === e.target.value);
-                    if (selectedService) {
-                      setNewService({ 
-                        serviceName: selectedService.serviceName, 
-                        price: selectedService.price || "" 
-                      });
-                    }
-                  }
-                }}
-                style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
-              >
-                <option value="">-- Chọn dịch vụ có sẵn --</option>
-                {services.map((service) => (
-                  <option key={service.id} value={service.serviceName}>
-                    {service.serviceName} - {Number(service.price || 0).toLocaleString("vi-VN")} VND
-                  </option>
-                ))}
-              </select>
-              <input
-                placeholder="Tên dịch vụ (hoặc chọn từ danh sách trên)"
-                value={newService.serviceName}
                 onChange={(e) =>
-                  setNewService({ ...newService, serviceName: e.target.value })
+                  setNewTent({ ...newTent, quantity: e.target.value })
                 }
               />
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                placeholder="Giá (VND)"
-                value={newService.price}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "" || (Number(value) >= 0)) {
-                    setNewService({ ...newService, price: value });
-                  }
-                }}
-              />
-              <button type="button" onClick={handleAddService}>
-                + Thêm dịch vụ
+              <div style={{ width: "100%" }}>
+                <label style={{ display: "block", marginBottom: "5px" }}>
+                  Ảnh lều (Thumbnail):
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleTentThumbnailChange}
+                  disabled={uploading.tentThumbnail}
+                />
+                {uploading.tentThumbnail && (
+                  <p style={{ fontSize: "12px", color: "#666" }}>
+                    Đang upload ảnh vui lòng đợi...
+                  </p>
+                )}
+                {newTent.thumbnail && (
+                  <img
+                    src={newTent.thumbnail}
+                    alt="Tent Thumbnail"
+                    className="preview-img"
+                    style={{
+                      marginTop: "10px",
+                      width: "150px",
+                      height: "150px",
+                      objectFit: "cover",
+                    }}
+                  />
+                )}
+              </div>
+              <button type="button" onClick={handleAddTent}>
+                + Thêm lều
               </button>
             </div>
           </div>
@@ -694,7 +659,9 @@ const CreateCamping = () => {
                 onChange={handleGalleryChange}
                 disabled={uploading.gallery}
               />
-              {uploading.gallery && <p>Đang upload ảnh lên Cloudinary...</p>}
+              {uploading.gallery && (
+                <p>Đang upload ảnh vui lòng đợi...</p>
+              )}
             </div>
           </div>
 
